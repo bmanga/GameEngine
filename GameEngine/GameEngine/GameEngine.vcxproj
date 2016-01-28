@@ -69,8 +69,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\kavan\Source\Repos\GameEngine\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\kavan\Source\Repos\GameEngine\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,5 +139,4 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
 </Project>
