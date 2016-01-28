@@ -8,8 +8,8 @@ int main(int argc, char* args[])
 {
 	SDL_Window* window = nullptr;
 
-	SDL_Surface* screen_surface = nullptr;
-
+	SDL_Surface* screen_surface = nullptr;  
+	 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		printf("SDL could not be initialized! SDL_Error: %s\n", SDL_GetError());
@@ -20,7 +20,7 @@ int main(int argc, char* args[])
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			SCREEN_WIDTH, SCREEN_HEIGHT,
 			SDL_WINDOW_SHOWN);
-		if (!window)
+		if (!window)  
 		{
 			printf("SDL window could not be created! SDL_Error: %s\n", SDL_GetError());
 		}
