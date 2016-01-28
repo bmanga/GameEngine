@@ -69,20 +69,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Bruno\Documents\GitHubVisualStudio\GameEngine\SDL\lib\win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\SDL\lib\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
