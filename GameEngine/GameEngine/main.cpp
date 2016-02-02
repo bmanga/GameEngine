@@ -1,5 +1,6 @@
 #include <SDL.h>
-#include <stdio.h>
+#include <iostream>
+
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -8,11 +9,11 @@ int main(int argc, char* args[])
 {
 	SDL_Window* window = nullptr;        
 
-	SDL_Surface* screen_surface = nullptr;  
+	SDL_Surface* screen_surface;  
 	 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)    
 	{
-		printf("SDL could not be initialized! SDL_Error: %s\n", SDL_GetError());
+		std::cerr << ("SDL could not be initialized! SDL_Error: %s\n", SDL_GetError());
 	}
 	else
 	{
@@ -28,7 +29,7 @@ int main(int argc, char* args[])
 		{
 			screen_surface = SDL_GetWindowSurface(window);
 
-			SDL_FillRect(screen_surface, NULL, SDL_MapRGB(screen_surface->format, 0xFF, 0xFF, 0xFF));
+			SDL_FillRect(screen_surface, nullptr, SDL_MapRGB(screen_surface->format, 0xFF, 0xFF, 0xFF));
 
 			SDL_UpdateWindowSurface(window);
 
