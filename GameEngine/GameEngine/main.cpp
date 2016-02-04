@@ -11,8 +11,12 @@
 #include "math.h"
 #include "Camera.h"
 
+#include "TaskExecutor.h"
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+
+bool g_run = true;
 
 bool init();
 bool initGL();
@@ -40,8 +44,16 @@ Lemur::Camera g_camera;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
+void run()
+{
+	while (g_run)
+		printf("hello!\n");
+}
+
 int main(int argc, char* args[])
 {
+	TaskExecutor ts;
+	auto m = ts.schedule(run);
 	init();
 	// Enable text input
 	SDL_StartTextInput();

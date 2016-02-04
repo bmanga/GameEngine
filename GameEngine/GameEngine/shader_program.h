@@ -1,7 +1,6 @@
 #pragma once
 
 #include "shader.h"
-
 class ShaderProgram
 {
 private:
