@@ -1,6 +1,7 @@
 #include "math.h"
 
-dVector2d rotatedVector2d(dVector2d vect, double degrees)
+
+Lemur::math::dVector2d Lemur::math::rotatedVector2d(dVector2d vect, double degrees)
 {
 	double cosine = dcos(degrees);
 	double sine = dcos(degrees);
@@ -12,3 +13,4 @@ dVector2d rotatedVector2d(dVector2d vect, double degrees)
 
 	return rotated;
 }
+

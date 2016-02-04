@@ -9,51 +9,85 @@
 
 using namespace Lemur;
 
-inline void Camera::setOrigin(double x, double y, double z)
+Camera::Camera() 
+	
 {
-	m_eye = { x, y, z };
+	m_perspective = (glm::perspective(m_fov, (float)800 / (float)600, 1.0f, 10.0f));
 }
 
-inline void Camera::setTarget(double x, double y, double z)
+void Camera::rotateLocalX(float degrees)
 {
-	m_target = { x, y, z };
+	auto x_vect = glm::cross(m_direction, m_up);
+
+	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
+	glm::quat B = { 0, x_vect.x, x_vect.y, x_vect.z };
+	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
+	
+	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };
+
+	auto res = q * A * glm::inverse(q);
+
+	m_direction = { res.x, res.y, res.z };
+	
+	m_up = glm::normalize(glm::cross(x_vect, m_direction));
+	
 }
 
-void Camera::rotateLocalX(double degrees)
+void Camera::rotateLocalY(float degrees)
 {
-	auto targInCamSpace = getdVector3dInCameraSpace(*this, m_target);
-	auto rotated = rotatedVector2d({targInCamSpace.y, targInCamSpace.z}, degrees);
+	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
+	glm::quat B = { 0, m_up.x, m_up.y, m_up.z };
+	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
 
-	m_target = getdVector3dInWorldSpace(*this, {targInCamSpace.x, rotated.x, rotated.y});
+	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };
+
+	auto res = q * A * glm::inverse(q);
+
+	m_direction = { res.x, res.y, res.z };
+	float test = glm::dot(m_direction, m_up);
 }
 
-void Camera::rotateLocalY(double degrees)
+void Camera::rotateLocalZ(float degrees)
 {
-	auto targInCamSpace = getdVector3dInCameraSpace(*this, m_target);
-	auto rotated = rotatedVector2d({ targInCamSpace.x, targInCamSpace.z }, degrees);
+	glm::quat A = { 0, m_up.x, m_up.y, m_up.z };
+	glm::quat B = { 0, m_direction.x, m_direction.y, m_direction.z };
 
-	m_target = getdVector3dInWorldSpace(*this, { rotated.x, targInCamSpace.y, rotated.y });
+	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
+
+	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };
+
+	auto res = q * A * glm::inverse(q);
+
+	m_up = { res.x, res.y, res.z };
 }
 
-void Camera::rotateLocalZ(double degrees)
+void Camera::rotateRelativeX(float degrees)
 {
-	auto targInCamSpace = getdVector3dInCameraSpace(*this, m_target);
-	auto rotated = rotatedVector2d({ targInCamSpace.x, targInCamSpace.y }, degrees);
+	auto x_vect = glm::cross(m_direction, {0.0, 0.0, 1.0});
 
-	m_target = getdVector3dInWorldSpace(*this, { rotated.x, rotated.y, targInCamSpace.z });
+	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
+	glm::quat B = { 0, x_vect.x, x_vect.y, x_vect.z };
+	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
+
+	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };
+
+	auto res = q * A * glm::inverse(q);
+
+	m_direction = { res.x, res.y, res.z };
+
+	m_up = glm::normalize(glm::cross(x_vect, m_direction));
 }
 
-void Camera::update()
+void Camera::rotateRelativeY(float degrees)
 {
-	gluLookAt(m_eye.x, m_eye.y, m_eye.z, m_target.x, m_target.y, m_target.z, m_up.x, m_up.y, m_up.z);
-}
+	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
+	glm::quat B = { 0, 0.0, 0.0, 1.0 };
+	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
 
-dVector3d Lemur::getdVector3dInCameraSpace(Camera& camera, dVector3d vector)
-{
-	return vector - camera.m_eye;
-}
+	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };
 
-dVector3d Lemur::getdVector3dInWorldSpace(Camera& camera, dVector3d vector)
-{
-	return vector + camera.m_eye;
+	auto res = q * A * glm::inverse(q);
+
+	m_direction = { res.x, res.y, res.z };
+	float test = glm::dot(m_direction, m_up);
 }

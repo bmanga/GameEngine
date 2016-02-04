@@ -1,6 +1,15 @@
 #pragma once
 
 #include <cmath>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+namespace Lemur { namespace math {
+
+
+using namespace glm;
+
 
 inline double dtan(double angle)
 {
@@ -17,12 +26,12 @@ inline double dcos(double degrees)
 	return std::cos(degrees * 3.14 / 180);
 }
 
-inline double distance3d (double firstx, double firsty, double firstz,
+inline double distance3d(double firstx, double firsty, double firstz,
 	double secondx, double secondy, double secondz)
 {
 	return std::sqrt(
-		std::pow(secondx - firstx, 2) + 
-		std::pow(secondy - firsty, 2) + 
+		std::pow(secondx - firstx, 2) +
+		std::pow(secondy - firsty, 2) +
 		std::pow(secondz - firstz, 2));
 }
 
@@ -49,3 +58,6 @@ inline dVector3d operator+ (const dVector3d& a, const dVector3d& b)
 }
 
 dVector2d rotatedVector2d(dVector2d vect, double degrees);
+
+}//namespace math
+}//namespace Lemur
