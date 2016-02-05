@@ -154,6 +154,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="render_system.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="ShaderProgram_v2.cpp" />
     <ClCompile Include="shader_program.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="opengl_master.h" />
     <ClInclude Include="priority_queue_threadsafe.h" />
     <ClInclude Include="RenderSystem.h" />
+    <ClInclude Include="render_system.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="ShaderProgram_v2.h" />
     <ClInclude Include="shader_program.h" />
