@@ -393,7 +393,7 @@ void render()
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
 	int view_pos_uniform = global_program->getUniformLocation("view_pos");
-	glUniform3f(view_pos_uniform, g_camera.getEye().x, g_camera.getEye().y, g_camera.getEye().z);
+	glUniform3f(view_pos_uniform, g_camera.getCenter().x, g_camera.getCenter().y, g_camera.getCenter().z);
 
 	int mat_ambient_uniform = global_program->getUniformLocation("material.ambient");
 	int mat_diffuse_uniform = global_program->getUniformLocation("material.diffuse");
