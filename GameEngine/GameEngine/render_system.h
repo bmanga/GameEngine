@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "math.h"
+#include "ShaderProgram_v2.h"
 
 namespace lm = Lemur::math;
 
@@ -17,7 +18,7 @@ class RenderSystem
 private:
 	Lemur::math::mat4 model;
 
-	ShaderProgram* active_program = nullptr;
+	Lemur::ShaderProgram_v2 active_program;
 	GLuint global_vao = 0;
 	GLuint global_vbo = 0;
 	GLuint global_ibo = 0;
