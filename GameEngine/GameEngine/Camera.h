@@ -16,6 +16,18 @@ public:
 		return m_perspective * glm::lookAt(m_eye, m_eye + m_direction, m_up);
 	}
 
+	// sorry bruno
+	mat4 Camera::getView() const
+	{
+		return glm::lookAt(m_eye, m_eye + m_direction, m_up);
+	}
+
+	// sorry bruno pt 2
+	mat4 Camera::getProjection() const
+	{
+		return m_perspective;
+	}
+
 	void translateLocalX(float step)
 	{
 		auto x_vect = glm::cross(m_direction, m_up);

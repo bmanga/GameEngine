@@ -1,13 +1,25 @@
 #include "texture.h"
 
+#include <stdio.h>
+
 Texture::Texture(const char* path)
 {
 	glGenTextures(1, &id);
 	bind();
 
 	unsigned char* pixels = loadPixels(path);
+	if (!pixels)
+	{
+		printf("%s is not a valid texture file!", path);
+	}
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 	freePixels(pixels);
+}
+
+Texture::~Texture()
+{
+	glDeleteTextures(1, &id);
 }
 
 void Texture::setWrapType(TextureWrapType s_type, TextureWrapType t_type)

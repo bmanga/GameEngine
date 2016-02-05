@@ -10,8 +10,11 @@ ShaderProgram::ShaderProgram(Shader& vertex_shader, Shader& fragment_shader)
 	glAttachShader(id, vertex_shader.getId());
 	glAttachShader(id, fragment_shader.getId());
 
-	glBindFragDataLocation(id, 0, "out_color");
+	link();
+}
 
+void ShaderProgram::link()
+{
 	glLinkProgram(id);
 
 	//Check for errors

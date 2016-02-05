@@ -8,6 +8,8 @@ private:
 
 	static unsigned int using_id;
 
+	void link();
+
 	void printLog();
 
 public:

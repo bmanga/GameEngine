@@ -28,14 +28,18 @@ void render();
 SDL_Window* global_window = nullptr;
 SDL_GLContext global_context;
 
+//////////////////////// KAVAN'S STUFF ////////////////////////
 // Graphics program
 ShaderProgram* global_program = nullptr;
+GLuint global_vao = 0;
 GLuint global_vbo = 0;
 GLuint global_ibo = 0;
 
 Texture* global_texture = nullptr;
 
-GLfloat global_camera_x = 0.0f, global_camera_y = 0.0f;
+glm::vec3 light_pos(-10.0f, 10.0f, 0.0f);
+glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+//////////////////////// KAVAN'S STUFF ////////////////////////
 
 Lemur::math::mat4 model;
 
@@ -53,7 +57,7 @@ void run()
 int main(int argc, char* args[])
 {
 	TaskExecutor ts;
-	auto m = ts.schedule(run);
+	//auto m = ts.schedule(run);
 	init();
 	// Enable text input
 	SDL_StartTextInput();
@@ -174,27 +178,60 @@ bool initGL()
 		"in vec3 position;\n"
 		"in vec3 in_color;\n"
 		"in vec2 in_texcoord;\n"
+		"in vec3 in_normal;\n"
+
 		"out vec3 color;\n"
 		"out vec2 texcoord;\n"
-		//"uniform mat4 model;\n"
-		//"uniform mat4 view;\n"
-		//"uniform mat4 proj;\n"
-		"uniform mat4 matrix;\n"
+		"out vec3 normal;\n"
+
+		"out vec3 frag_pos;\n"
+
+		"uniform mat4 model;\n"
+		"uniform mat4 view;\n"
+		"uniform mat4 proj;\n"
+
 		"void main() {\n"
+
 		"	color = in_color;\n"
 		"	texcoord = in_texcoord;\n"
-		//"	gl_Position = proj * view * model * vec4(position, 1);\n"
-		"	gl_Position = matrix * vec4(position, 1);\n"
+		"	normal = mat3(transpose(inverse(model))) * in_normal;\n"
+
+		"	frag_pos = vec3(model * vec4(position, 1.0f));\n"
+		"	gl_Position = proj * view * model * vec4(position, 1.0f);\n"
 		"}"
 		));
 	std::unique_ptr<Shader> fragment_shader(new Shader(GL_FRAGMENT_SHADER,
 		"#version 140\n"
 		"in vec3 color;\n"
 		"in vec2 texcoord;\n"
+		"in vec3 normal;\n"
+		"in vec3 frag_pos;\n"
+
 		"out vec4 out_color;\n"
+
 		"uniform sampler2D tex;\n"
+		"uniform vec3 light_pos;\n"
+		"uniform vec3 light_color;\n"
+		"uniform vec3 view_pos;\n"
+
 		"void main() {\n"
-		"	out_color = texture(tex, texcoord) * vec4(color, 1.0);\n"
+
+		"	float ambient_strength = 0.1f;\n"
+		"	vec3 ambient = ambient_strength * light_color;\n"
+
+		"	vec3 norm = normalize(normal);\n"
+		"	vec3 light_dir = normalize(light_pos - frag_pos);\n"
+		"	float diff = max(dot(norm, light_dir), 0.0);\n"
+		"	vec3 diffuse = diff * light_color;\n"
+
+		"	float specular_strength = 0.5f;\n"
+		"	vec3 view_dir = normalize(view_pos - frag_pos);\n"
+		"	vec3 reflect_dir = reflect(-light_dir, norm);\n"
+		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);\n"
+		"	vec3 specular = specular_strength * spec * light_color;\n"
+
+		"	vec3 result = (ambient + diffuse + specular) * color;\n"
+		"	out_color = texture(tex, texcoord) * vec4(result, 1.0f);\n"
 		"}"
 		));
 
@@ -208,51 +245,55 @@ bool initGL()
 
 	// VBO data
 	GLfloat vertex_data[] = {
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
 
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,  0.0f
 	};
 
 	// IBO data
 	GLuint index_data[] = { 0, 1, 2, 2, 3, 0 };
+
+	// Create VAO
+	glGenVertexArrays(1, &global_vao);
+	glBindVertexArray(global_vao);
 
 	// Create VBO
 	glGenBuffers(1, &global_vbo);
@@ -265,7 +306,7 @@ bool initGL()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
 
 	// Sorry about the hard-coded path :(
-	global_texture = new Texture("C:\\Users\\Bruno\\Desktop\\crate.bmp");
+	global_texture = new Texture("C:\\Users\\kavan\\Desktop\\crate.bmp");
 	global_texture->bind();
 	global_texture->setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
 	global_texture->setInterpolation(LINEAR, LINEAR);
@@ -280,13 +321,11 @@ void handleKeys(unsigned char key, int x, int y)
 	case 'w':
 	{
 		g_camera.translateLocalZ(0.1f);
-		global_camera_y -= 16.0f;
 		break;
 	}
 	case 's':
 	{
 		g_camera.translateLocalZ(-0.1f);
-		global_camera_y += 16.0f;
 		break;
 	}
 	case 'a':
@@ -313,6 +352,8 @@ void update()
 	// No update per frame needed...
 }
 
+float count = 0;
+
 void render()
 {
 	// Clear color buffer
@@ -327,24 +368,34 @@ void render()
 	//	lm::vec3(0.0f, 0.0f, 0.0f),
 	//	lm::vec3(0.0f, 0.0f, 1.0f)
 	//	);
-	//GLint view_uniform = global_program->getUniformLocation("view");
-	//glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+
+	lm::mat4 view = g_camera.getView();
+	GLint view_uniform = global_program->getUniformLocation("view");
+	glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
 
 	// Create the perspective projection matrix
-
+	lm::mat4 proj = g_camera.getProjection();
 	//lm::mat4 proj = lm::perspective(lm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 1.0f, 10.0f);
-
-	//GLint proj_uniform = global_program->getUniformLocation("proj");
-	//glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+	GLint proj_uniform = global_program->getUniformLocation("proj");
+	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
 	// Apply the model transformation
 	model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
-	//int model_uniform = global_program->getUniformLocation("model");
-	//glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+	int model_uniform = global_program->getUniformLocation("model");
+	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-	lm::mat4 matrix = g_camera.getViewProjection() * model;
+	/*lm::mat4 matrix = g_camera.getViewProjection() * model;
 	int matrix_uniform = global_program->getUniformLocation("matrix");
-	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));
+	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));*/
+
+	int light_pos_uniform = global_program->getUniformLocation("light_pos");
+	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
+
+	int light_color_uniform = global_program->getUniformLocation("light_color");
+	glUniform3f(light_color_uniform, light_color.r, light_color.g, light_color.b);
+
+	int view_pos_uniform = global_program->getUniformLocation("view_pos");
+	glUniform3f(view_pos_uniform, 0, 0, 0);
 
 	// Set vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
@@ -352,15 +403,19 @@ void render()
 	// Enable vertex position
 	int pos_attrib = global_program->getAttribLocation("position");
 	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), 0);
 
 	int col_attrib = global_program->getAttribLocation("in_color");
 	glEnableVertexAttribArray(col_attrib);
-	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(col_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
 	int tex_attrib = global_program->getAttribLocation("in_texcoord");
 	glEnableVertexAttribArray(tex_attrib);
-	glVertexAttribPointer(tex_attrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(tex_attrib, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+
+	int norm_attrib = global_program->getAttribLocation("in_normal");
+	glEnableVertexAttribArray(norm_attrib);
+	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(8 * sizeof(GLfloat)));
 
 	// Set index data and render
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
@@ -371,6 +426,7 @@ void render()
 	glDisableVertexAttribArray(pos_attrib);
 	glDisableVertexAttribArray(col_attrib);
 	glDisableVertexAttribArray(tex_attrib);
+	glDisableVertexAttribArray(norm_attrib);
 
 	// Unbind program
 	glUseProgram(NULL);

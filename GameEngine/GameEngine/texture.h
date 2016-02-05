@@ -33,6 +33,7 @@ private:
 
 public:
 	Texture(const char* path);
+	~Texture();
 
 	void setWrapType(TextureWrapType s_type, TextureWrapType t_type);
 	void setInterpolation(TextureInterpolationType min_type, TextureInterpolationType mag_type);
