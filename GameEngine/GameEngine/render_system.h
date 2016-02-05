@@ -24,6 +24,7 @@ private:
 	GLuint global_ibo = 0;
 
 	Texture* active_texture = nullptr;
+	Texture* specular_texture = nullptr;
 
 	lm::vec3 light_pos = lm::vec3(0.0f, 3.0f, 0.0f);
 
