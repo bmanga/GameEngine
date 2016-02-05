@@ -12,6 +12,7 @@
 #include "Camera.h"
 
 #include "TaskExecutor.h"
+#include "Importer.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -52,8 +53,11 @@ void run()
 
 int main(int argc, char* args[])
 {
+	load_obj(R"(C:\Users\Bruno\Desktop\monkey.obj)");
 	TaskExecutor ts;
 	auto m = ts.schedule(run);
+	//m.then([]() {std::cout << "bye"; });
+
 	init();
 	// Enable text input
 	SDL_StartTextInput();
@@ -95,7 +99,7 @@ int main(int argc, char* args[])
 
 	// Disable text input
 	SDL_StopTextInput();
-
+	g_run = false;
 	return 0;
 }
 
