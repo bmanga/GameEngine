@@ -26,7 +26,7 @@ namespace Lemur
 
 		bool isActive();
 		void use();
-		bool compileShaders();
+		bool compileProgram();
 		void link() const;
 
 		void printLog();

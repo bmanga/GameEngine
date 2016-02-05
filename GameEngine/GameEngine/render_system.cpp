@@ -14,53 +14,9 @@ bool RenderSystem::initGL()
 {
 	bool success = true;
 
-
-
-
-		"uniform mat4 model;\n"
-		"uniform mat4 view;\n"
-		"uniform mat4 proj;\n"
-
-		"void main() {\n"
-
-		"	color = in_color;\n"
-		"	texcoord = in_texcoord;\n"
-		"	normal = mat3(transpose(inverse(model))) * in_normal;\n"
-
-		"	frag_pos = vec3(model * vec4(position, 1.0f));\n"
-		"	gl_Position = proj * view * model * vec4(position, 1.0f);\n"
-		"}"
-		));
-	std::unique_ptr<Shader> fragment_shader(new Shader(GL_FRAGMENT_SHADER,
-		"#version 140\n"
-		"struct Material {\n"
-		"	vec3 ambient;\n"
-		"	vec3 diffuse;\n"
-		"	vec3 specular;\n"
-		"	float shininess;\n"
-		"};\n"
-
-		"struct Light {\n"
-		"	vec3 position;\n"
-		"	vec3 ambient;\n"
-		"	vec3 diffuse;\n"
-		"	vec3 specular;\n"
-		"};\n"
-
-		"in vec3 color;\n"
-		"in vec2 texcoord;\n"
-		"in vec3 normal;\n"
-		"in vec3 frag_pos;\n"
-
-		"out vec4 out_color;\n"
-
-		"uniform sampler2D tex;\n"
-		"uniform vec3 view_pos;\n"
-		"uniform Material material;\n"
-		"uniform Light light;\n"
-
-		"void main() {\n"
-
+	active_program.compileShaders("testvert.vert", "testfrag.frag");
+	active_program.compileProgram();
+	active_program.link();
 	// Initialize clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 

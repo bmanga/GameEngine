@@ -37,7 +37,7 @@ Lemur::u32 Lemur::ShaderProgram_v2::getFragID() const
 	return frag_id;
 }
 
-bool Lemur::ShaderProgram_v2::compileShaders()
+bool Lemur::ShaderProgram_v2::compileProgram()
 {
 	if (!(vert_id && frag_id)) return false;
 	if(!program_id)
@@ -69,7 +69,7 @@ void Lemur::ShaderProgram_v2::compileShader(u32 id, const char* source)
 	std::string file = DEFAULT_LOC + source;
 	ifstream shader_code(file);
 	
-	if (!shader_code) printf("shader not found");
+	if (!shader_code) printf(("shader '" + file + "' not found").c_str());
 	//get file size
 	shader_code.seekg(0, ios::end);
 	u32 length = static_cast<u32>(shader_code.tellg());
