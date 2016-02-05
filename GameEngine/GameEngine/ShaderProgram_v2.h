@@ -20,7 +20,7 @@ namespace Lemur
 		void unLink();
 
 	private:
-		void compilerShader(u32 type, const char* source);
+		void compileShader(u32 id, const char* source);
 
 
 	private:

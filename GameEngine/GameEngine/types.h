@@ -6,8 +6,7 @@
 #include <string>
 #include "math.h"
 
-//Move somewhere else
-#define LEMUR_ASSERT
+
 namespace Lemur
 {
 using std::vector;
