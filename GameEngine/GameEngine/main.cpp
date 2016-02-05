@@ -37,8 +37,7 @@ GLuint global_ibo = 0;
 
 Texture* global_texture = nullptr;
 
-glm::vec3 light_pos(-10.0f, 10.0f, 0.0f);
-glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+glm::vec3 light_pos(0.0f, 3.0f, 0.0f);
 //////////////////////// KAVAN'S STUFF ////////////////////////
 
 Lemur::math::mat4 model;
@@ -176,11 +175,9 @@ bool initGL()
 	std::unique_ptr<Shader> vertex_shader(new Shader(GL_VERTEX_SHADER,
 		"#version 140\n"
 		"in vec3 position;\n"
-		"in vec3 in_color;\n"
 		"in vec2 in_texcoord;\n"
 		"in vec3 in_normal;\n"
 
-		"out vec3 color;\n"
 		"out vec2 texcoord;\n"
 		"out vec3 normal;\n"
 
@@ -192,7 +189,6 @@ bool initGL()
 
 		"void main() {\n"
 
-		"	color = in_color;\n"
 		"	texcoord = in_texcoord;\n"
 		"	normal = mat3(transpose(inverse(model))) * in_normal;\n"
 
@@ -202,6 +198,20 @@ bool initGL()
 		));
 	std::unique_ptr<Shader> fragment_shader(new Shader(GL_FRAGMENT_SHADER,
 		"#version 140\n"
+		"struct Material {\n"
+		"	vec3 ambient;\n"
+		"	vec3 diffuse;\n"
+		"	vec3 specular;\n"
+		"	float shininess;\n"
+		"};\n"
+
+		"struct Light {\n"
+		"	vec3 position;\n"
+		"	vec3 ambient;\n"
+		"	vec3 diffuse;\n"
+		"	vec3 specular;\n"
+		"};\n"
+
 		"in vec3 color;\n"
 		"in vec2 texcoord;\n"
 		"in vec3 normal;\n"
@@ -210,27 +220,25 @@ bool initGL()
 		"out vec4 out_color;\n"
 
 		"uniform sampler2D tex;\n"
-		"uniform vec3 light_pos;\n"
-		"uniform vec3 light_color;\n"
 		"uniform vec3 view_pos;\n"
+		"uniform Material material;\n"
+		"uniform Light light;\n"
 
 		"void main() {\n"
 
-		"	float ambient_strength = 0.1f;\n"
-		"	vec3 ambient = ambient_strength * light_color;\n"
+		"	vec3 ambient = light.ambient * material.ambient;\n"
 
 		"	vec3 norm = normalize(normal);\n"
-		"	vec3 light_dir = normalize(light_pos - frag_pos);\n"
+		"	vec3 light_dir = normalize(light.position - frag_pos);\n"
 		"	float diff = max(dot(norm, light_dir), 0.0);\n"
-		"	vec3 diffuse = diff * light_color;\n"
+		"	vec3 diffuse = light.diffuse * (diff * material.diffuse);\n"
 
-		"	float specular_strength = 0.5f;\n"
 		"	vec3 view_dir = normalize(view_pos - frag_pos);\n"
 		"	vec3 reflect_dir = reflect(-light_dir, norm);\n"
-		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);\n"
-		"	vec3 specular = specular_strength * spec * light_color;\n"
+		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);\n"
+		"	vec3 specular = light.specular * (spec * material.specular);\n"
 
-		"	vec3 result = (ambient + diffuse + specular) * color;\n"
+		"	vec3 result = ambient + diffuse + specular;\n"
 		"	out_color = texture(tex, texcoord) * vec4(result, 1.0f);\n"
 		"}"
 		));
@@ -380,22 +388,32 @@ void render()
 	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
 	// Apply the model transformation
-	model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
+	model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
 	int model_uniform = global_program->getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-	/*lm::mat4 matrix = g_camera.getViewProjection() * model;
-	int matrix_uniform = global_program->getUniformLocation("matrix");
-	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));*/
-
-	int light_pos_uniform = global_program->getUniformLocation("light_pos");
-	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
-
-	int light_color_uniform = global_program->getUniformLocation("light_color");
-	glUniform3f(light_color_uniform, light_color.r, light_color.g, light_color.b);
-
 	int view_pos_uniform = global_program->getUniformLocation("view_pos");
-	glUniform3f(view_pos_uniform, 0, 0, 0);
+	glUniform3f(view_pos_uniform, g_camera.getEye().x, g_camera.getEye().y, g_camera.getEye().z);
+
+	int mat_ambient_uniform = global_program->getUniformLocation("material.ambient");
+	int mat_diffuse_uniform = global_program->getUniformLocation("material.diffuse");
+	int mat_specular_uniform = global_program->getUniformLocation("material.specular");
+	int mat_shininess_uniform = global_program->getUniformLocation("material.shininess");
+
+	glUniform3f(mat_ambient_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(mat_diffuse_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(mat_specular_uniform, 0.5f, 0.5f, 0.5f);
+	glUniform1f(mat_shininess_uniform, 32.0f);
+
+	int light_pos_uniform = global_program->getUniformLocation("light.position");
+	int light_ambient_uniform = global_program->getUniformLocation("light.ambient");
+	int light_diffuse_uniform = global_program->getUniformLocation("light.diffuse");
+	int light_specular_uniform = global_program->getUniformLocation("light.specular");
+
+	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
+	glUniform3f(light_ambient_uniform, 0.2f, 0.2f, 0.2f);
+	glUniform3f(light_diffuse_uniform, 0.5f, 0.5f, 0.5f);
+	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
 
 	// Set vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
