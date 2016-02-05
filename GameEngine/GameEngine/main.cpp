@@ -10,13 +10,14 @@
 #include "texture.h"
 #include "math.h"
 #include "Camera.h"
+#include "Importer.h"
 
 #include "TaskExecutor.h"
+#include "Mesh.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-bool g_run = true;
 
 bool init();
 bool initGL();
@@ -36,6 +37,7 @@ GLuint global_vbo = 0;
 GLuint global_ibo = 0;
 
 Texture* global_texture = nullptr;
+Mesh g_mesh;
 
 glm::vec3 light_pos(-10.0f, 10.0f, 0.0f);
 glm::vec3 light_color(1.0f, 1.0f, 1.0f);
@@ -48,16 +50,9 @@ Lemur::Camera g_camera;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
-void run()
-{
-	while (g_run)
-		printf("hello!\n");
-}
 
 int main(int argc, char* args[])
 {
-	TaskExecutor ts;
-	//auto m = ts.schedule(run);
 	init();
 	// Enable text input
 	SDL_StartTextInput();
@@ -173,6 +168,7 @@ bool initGL()
 {
 	bool success = true;
 
+	g_mesh.setMeshData(load_obj(R"(../assets/mesh/monkey.obj)"));
 	std::unique_ptr<Shader> vertex_shader(new Shader(GL_VERTEX_SHADER,
 		"#version 140\n"
 		"in vec3 position;\n"
@@ -230,7 +226,7 @@ bool initGL()
 		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);\n"
 		"	vec3 specular = specular_strength * spec * light_color;\n"
 
-		"	vec3 result = (ambient + diffuse + specular) * color;\n"
+		"	vec3 result = (ambient + specular) * color;\n"
 		"	out_color = texture(tex, texcoord) * vec4(result, 1.0f);\n"
 		"}"
 		));
@@ -306,7 +302,7 @@ bool initGL()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
 
 	// Sorry about the hard-coded path :(
-	global_texture = new Texture("C:\\Users\\kavan\\Desktop\\crate.bmp");
+	global_texture = new Texture(R"(../assets/textures/crate.bmp)");
 	global_texture->bind();
 	global_texture->setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
 	global_texture->setInterpolation(LINEAR, LINEAR);
@@ -375,18 +371,15 @@ void render()
 
 	// Create the perspective projection matrix
 	lm::mat4 proj = g_camera.getProjection();
-	//lm::mat4 proj = lm::perspective(lm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 1.0f, 10.0f);
+
 	GLint proj_uniform = global_program->getUniformLocation("proj");
 	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
 	// Apply the model transformation
-	model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
+	//model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
 	int model_uniform = global_program->getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-	/*lm::mat4 matrix = g_camera.getViewProjection() * model;
-	int matrix_uniform = global_program->getUniformLocation("matrix");
-	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));*/
 
 	int light_pos_uniform = global_program->getUniformLocation("light_pos");
 	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
@@ -395,7 +388,7 @@ void render()
 	glUniform3f(light_color_uniform, light_color.r, light_color.g, light_color.b);
 
 	int view_pos_uniform = global_program->getUniformLocation("view_pos");
-	glUniform3f(view_pos_uniform, 0, 0, 0);
+	glUniform3f(view_pos_uniform, g_camera.getCenter().x, g_camera.getCenter().y, g_camera.getCenter().z);
 
 	// Set vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);

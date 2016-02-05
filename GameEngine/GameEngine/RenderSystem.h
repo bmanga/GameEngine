@@ -6,7 +6,7 @@ class RenderSystem
 public:
 	using Engine = RenderEngine;
 
-	void Render (Mesh* mesh)
+	void Render (struct Mesh* mesh)
 	{
 		Engine::render(mesh);
 	}

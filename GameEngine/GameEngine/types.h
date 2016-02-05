@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <tuple>
+#include <vector>
+#include "math.h"
 
 namespace Lemur
 {

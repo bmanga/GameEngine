@@ -29,7 +29,7 @@ public:
 	}
 
 	// sorry bruno pt 3 (but this should have already been here)
-	vec3 Camera::getEye() const
+	vec3 Camera::getCenter() const
 	{
 		return m_eye;
 	}

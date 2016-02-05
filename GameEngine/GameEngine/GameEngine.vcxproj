@@ -155,6 +155,7 @@
     <ClCompile Include="math.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="ShaderProgram_v2.cpp" />
     <ClCompile Include="shader_program.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="priority_queue_threadsafe.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="ShaderProgram_v2.h" />
     <ClInclude Include="shader_program.h" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="TaskExecutor.h" />
