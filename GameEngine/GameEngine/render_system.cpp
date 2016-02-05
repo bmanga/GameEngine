@@ -44,9 +44,8 @@ bool RenderSystem::initGL()
 	std::unique_ptr<Shader> fragment_shader(new Shader(GL_FRAGMENT_SHADER,
 		"#version 140\n"
 		"struct Material {\n"
-		"	vec3 ambient;\n"
-		"	vec3 diffuse;\n"
-		"	vec3 specular;\n"
+		"	sampler2D diffuse;\n"
+		"	sampler2D specular;\n"
 		"	float shininess;\n"
 		"};\n"
 
@@ -71,17 +70,17 @@ bool RenderSystem::initGL()
 
 		"void main() {\n"
 
-		"	vec3 ambient = light.ambient * material.ambient;\n"
+		"	vec3 ambient = light.ambient * vec3(texture(material.diffuse, texcoord));\n"
 
 		"	vec3 norm = normalize(normal);\n"
 		"	vec3 light_dir = normalize(light.position - frag_pos);\n"
 		"	float diff = max(dot(norm, light_dir), 0.0);\n"
-		"	vec3 diffuse = light.diffuse * (diff * material.diffuse);\n"
+		"	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, texcoord));\n"
 
 		"	vec3 view_dir = normalize(view_pos - frag_pos);\n"
 		"	vec3 reflect_dir = reflect(-light_dir, norm);\n"
 		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);\n"
-		"	vec3 specular = light.specular * (spec * material.specular);\n"
+		"	vec3 specular = light.specular * spec * vec3(texture(material.specular, texcoord));\n"
 
 		"	vec3 result = (ambient + diffuse + specular) * color;\n"
 		"	out_color = texture(tex, texcoord) * vec4(result, 1.0f);\n"
@@ -91,7 +90,7 @@ bool RenderSystem::initGL()
 	active_program = new ShaderProgram(*vertex_shader, *fragment_shader);
 
 	// Initialize clear color
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -158,11 +157,20 @@ bool RenderSystem::initGL()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
 
+	glActiveTexture(GL_TEXTURE0);
+
 	// Sorry about the hard-coded path :(
-	active_texture = new Texture("C:\\Users\\kavan\\Desktop\\crate.bmp");
+	active_texture = new Texture("..\\assets\\textures\\crate.png");
 	active_texture->bind();
 	active_texture->setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
 	active_texture->setInterpolation(LINEAR, LINEAR);
+
+	glActiveTexture(GL_TEXTURE1);
+
+	specular_texture = new Texture("..\\assets\\textures\\crate_specular.png");
+	specular_texture->bind();
+	specular_texture->setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
+	specular_texture->setInterpolation(LINEAR, LINEAR);
 
 	return success;
 }
@@ -200,15 +208,13 @@ void RenderSystem::render(Lemur::Camera camera)
 	int view_pos_uniform = active_program->getUniformLocation("view_pos");
 	glUniform3f(view_pos_uniform, camera.getCenter().x, camera.getCenter().y, camera.getCenter().z);
 
-	int mat_ambient_uniform = active_program->getUniformLocation("material.ambient");
 	int mat_diffuse_uniform = active_program->getUniformLocation("material.diffuse");
 	int mat_specular_uniform = active_program->getUniformLocation("material.specular");
 	int mat_shininess_uniform = active_program->getUniformLocation("material.shininess");
 
-	glUniform3f(mat_ambient_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(mat_diffuse_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(mat_specular_uniform, 0.5f, 0.5f, 0.5f);
-	glUniform1f(mat_shininess_uniform, 32.0f);
+	glUniform1i(mat_diffuse_uniform, 0);	// TODO: Find out why this is GL_TEXTURE0 (0) instead of getId()
+	glUniform1i(mat_specular_uniform, 1);
+	glUniform1f(mat_shininess_uniform, 64.0f);
 
 	int light_pos_uniform = active_program->getUniformLocation("light.position");
 	int light_ambient_uniform = active_program->getUniformLocation("light.ambient");

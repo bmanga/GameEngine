@@ -10,7 +10,7 @@ Texture::Texture(const char* path)
 	unsigned char* pixels = loadPixels(path);
 	if (!pixels)
 	{
-		printf("%s is not a valid texture file!", path);
+		printf("%s is not a valid texture file!\n", path);
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
