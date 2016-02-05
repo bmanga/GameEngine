@@ -3,10 +3,15 @@
 #include <cstdint>
 #include <tuple>
 #include <vector>
+#include <string>
 #include "math.h"
 
+//Move somewhere else
+#define LEMUR_ASSERT
 namespace Lemur
 {
+using std::vector;
+using std::string;
 	using  i8 = int8_t;
 	using i16 = int16_t;
 	using i32 = int32_t;

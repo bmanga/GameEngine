@@ -10,13 +10,14 @@
 #include "texture.h"
 #include "math.h"
 #include "Camera.h"
+#include "Importer.h"
 
 #include "TaskExecutor.h"
+#include "Mesh.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
-bool g_run = true;
 
 bool init();
 bool initGL();
@@ -36,6 +37,7 @@ GLuint global_vbo = 0;
 GLuint global_ibo = 0;
 
 Texture* global_texture = nullptr;
+Mesh g_mesh;
 
 glm::vec3 light_pos(0.0f, 3.0f, 0.0f);
 //////////////////////// KAVAN'S STUFF ////////////////////////
@@ -47,16 +49,9 @@ Lemur::Camera g_camera;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
-void run()
-{
-	while (g_run)
-		printf("hello!\n");
-}
 
 int main(int argc, char* args[])
 {
-	TaskExecutor ts;
-	//auto m = ts.schedule(run);
 	init();
 	// Enable text input
 	SDL_StartTextInput();
@@ -172,6 +167,7 @@ bool initGL()
 {
 	bool success = true;
 
+	g_mesh.setMeshData(load_obj(R"(../assets/mesh/monkey.obj)"));
 	std::unique_ptr<Shader> vertex_shader(new Shader(GL_VERTEX_SHADER,
 		"#version 140\n"
 		"in vec3 position;\n"
@@ -238,7 +234,7 @@ bool initGL()
 		"	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);\n"
 		"	vec3 specular = light.specular * (spec * material.specular);\n"
 
-		"	vec3 result = ambient + diffuse + specular;\n"
+		"	vec3 result = (ambient + diffuse + specular) * color;\n"
 		"	out_color = texture(tex, texcoord) * vec4(result, 1.0f);\n"
 		"}"
 		));
@@ -314,7 +310,7 @@ bool initGL()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
 
 	// Sorry about the hard-coded path :(
-	global_texture = new Texture("C:\\Users\\kavan\\Desktop\\crate.bmp");
+	global_texture = new Texture(R"(../assets/textures/crate.bmp)");
 	global_texture->bind();
 	global_texture->setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
 	global_texture->setInterpolation(LINEAR, LINEAR);
@@ -383,22 +379,18 @@ void render()
 
 	// Create the perspective projection matrix
 	lm::mat4 proj = g_camera.getProjection();
-	//lm::mat4 proj = lm::perspective(lm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 1.0f, 10.0f);
+
 	GLint proj_uniform = global_program->getUniformLocation("proj");
 	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
 	// Apply the model transformation
-	model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+	model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
 	int model_uniform = global_program->getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-	int view_pos_uniform = global_program->getUniformLocation("view_pos");
-	glUniform3f(view_pos_uniform, g_camera.getEye().x, g_camera.getEye().y, g_camera.getEye().z);
-
-	int mat_ambient_uniform = global_program->getUniformLocation("material.ambient");
-	int mat_diffuse_uniform = global_program->getUniformLocation("material.diffuse");
-	int mat_specular_uniform = global_program->getUniformLocation("material.specular");
-	int mat_shininess_uniform = global_program->getUniformLocation("material.shininess");
+	/*lm::mat4 matrix = g_camera.getViewProjection() * model;
+	int matrix_uniform = global_program->getUniformLocation("matrix");
+	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));*/
 
 	glUniform3f(mat_ambient_uniform, 1.0f, 1.0f, 1.0f);
 	glUniform3f(mat_diffuse_uniform, 1.0f, 1.0f, 1.0f);
@@ -410,10 +402,8 @@ void render()
 	int light_diffuse_uniform = global_program->getUniformLocation("light.diffuse");
 	int light_specular_uniform = global_program->getUniformLocation("light.specular");
 
-	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
-	glUniform3f(light_ambient_uniform, 0.2f, 0.2f, 0.2f);
-	glUniform3f(light_diffuse_uniform, 0.5f, 0.5f, 0.5f);
-	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
+	int view_pos_uniform = global_program->getUniformLocation("view_pos");
+	glUniform3f(view_pos_uniform, 0, 0, 0);
 
 	// Set vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
