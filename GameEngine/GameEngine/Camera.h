@@ -28,6 +28,12 @@ public:
 		return m_perspective;
 	}
 
+	// sorry bruno pt 3 (but this should have already been here)
+	vec3 Camera::getEye() const
+	{
+		return m_eye;
+	}
+
 	void translateLocalX(float step)
 	{
 		auto x_vect = glm::cross(m_direction, m_up);
