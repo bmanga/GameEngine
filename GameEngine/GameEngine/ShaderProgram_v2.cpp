@@ -15,6 +15,6 @@ void Lemur::ShaderProgram_v2::compilerShader(u32 type, const char* source)
 {
 	using namespace std;
 
-	ifstream shader_code(std::string(DEFAULT_LOC) + source);
+	ifstream shader_code(DEFAULT_LOC + source);
 	
 }

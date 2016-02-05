@@ -27,9 +27,9 @@ namespace Lemur
 		u32 vert_id;
 		u32 frag_id;
 
-		static const char* DEFAULT_LOC;
+		static string DEFAULT_LOC;
 	};
 
-	const char* ShaderProgram_v2::DEFAULT_LOC = "../assets/shaders";
+	string ShaderProgram_v2::DEFAULT_LOC ("../assets/shaders");
 }
 
