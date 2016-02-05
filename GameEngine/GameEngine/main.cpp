@@ -13,12 +13,13 @@
 
 #include "TaskExecutor.h"
 #include "Importer.h"
+#include "Mesh.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
 bool g_run = true;
-
+Mesh mesh;
 bool init();
 bool initGL();
 void handleKeys(unsigned char key, int x, int y);
@@ -31,8 +32,8 @@ SDL_GLContext global_context;
 
 // Graphics program
 ShaderProgram* global_program = nullptr;
-GLuint global_vbo = 0;
-GLuint global_ibo = 0;
+GLuint vertices_bo = 0;
+GLuint indices_bo = 0;
 
 Texture* global_texture = nullptr;
 
@@ -53,9 +54,9 @@ void run()
 
 int main(int argc, char* args[])
 {
-	load_obj(R"(C:\Users\Bruno\Desktop\monkey.obj)");
+	
 	TaskExecutor ts;
-	auto m = ts.schedule(run);
+	//auto m = ts.schedule(run);
 	//m.then([]() {std::cout << "bye"; });
 
 	init();
@@ -171,6 +172,10 @@ bool init()
 
 bool initGL()
 {
+	using namespace std;
+	
+	mesh.setMeshData(load_obj(R"(C:\Users\Bruno\Desktop\monkey.obj)"));
+	
 	bool success = true;
 
 	std::unique_ptr<Shader> vertex_shader(new Shader(GL_VERTEX_SHADER,
@@ -198,7 +203,7 @@ bool initGL()
 		"out vec4 out_color;\n"
 		"uniform sampler2D tex;\n"
 		"void main() {\n"
-		"	out_color = texture(tex, texcoord) * vec4(color, 1.0);\n"
+		"	out_color = /*texture(tex, texcoord) */ vec4(1, 1, 1, 1.0);\n"
 		"}"
 		));
 
@@ -210,63 +215,16 @@ bool initGL()
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// VBO data
-	GLfloat vertex_data[] = {
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
-	};
-
-	// IBO data
-	GLuint index_data[] = { 0, 1, 2, 2, 3, 0 };
 
 	// Create VBO
-	glGenBuffers(1, &global_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+	glGenBuffers(1, &vertices_bo);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_bo);
+	glBufferData(GL_ARRAY_BUFFER, mesh.vertexBufferSize(), mesh.vertexBuffer(), GL_STATIC_DRAW);
 
 	// Create IBO
-	glGenBuffers(1, &global_ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
+	glGenBuffers(1, &indices_bo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_bo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.vertexIndexBufferSize(), mesh.vertexIndexBuffer(), GL_STATIC_DRAW);
 
 	// Sorry about the hard-coded path :(
 	global_texture = new Texture("C:\\Users\\Bruno\\Desktop\\crate.bmp");
@@ -325,38 +283,21 @@ void render()
 	// Bind program
 	global_program->use();
 
-	// Create the view transformation
-	//lm::mat4 view = lm::lookAt(
-	//	lm::vec3(1.5f, 1.5f, 1.5f),
-	//	lm::vec3(0.0f, 0.0f, 0.0f),
-	//	lm::vec3(0.0f, 0.0f, 1.0f)
-	//	);
-	//GLint view_uniform = global_program->getUniformLocation("view");
-	//glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
 
-	// Create the perspective projection matrix
-
-	//lm::mat4 proj = lm::perspective(lm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 1.0f, 10.0f);
-
-	//GLint proj_uniform = global_program->getUniformLocation("proj");
-	//glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
-
-	// Apply the model transformation
 	model = lm::rotate(model, lm::radians(1.0f), lm::vec3(0.0f, 0.0f, 1.0f));
-	//int model_uniform = global_program->getUniformLocation("model");
-	//glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+
 
 	lm::mat4 matrix = g_camera.getViewProjection() * model;
 	int matrix_uniform = global_program->getUniformLocation("matrix");
 	glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, lm::value_ptr(matrix));
 
 	// Set vertex data
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_bo);
 
 	// Enable vertex position
 	int pos_attrib = global_program->getAttribLocation("position");
 	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 
 	int col_attrib = global_program->getAttribLocation("in_color");
 	glEnableVertexAttribArray(col_attrib);
@@ -366,13 +307,14 @@ void render()
 	glEnableVertexAttribArray(tex_attrib);
 	glVertexAttribPointer(tex_attrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 
+	glEnable(GL_VERTEX_ARRAY);
 	// Set index data and render
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
-	//glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, NULL);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_bo);
+	glDrawElements(GL_POINTS, mesh.vertexIndexCount(), GL_UNSIGNED_INT, mesh.vertexIndexBuffer());
+	//glDrawArrays(GL_TRIANGLES, 0, std::get<3>(model_data).size());
 
 	// Disable vertex position
-	glDisableVertexAttribArray(pos_attrib);
+            	glDisableVertexAttribArray(pos_attrib);
 	glDisableVertexAttribArray(col_attrib);
 	glDisableVertexAttribArray(tex_attrib);
 

@@ -38,20 +38,15 @@ ObjFaceElements get_index_elements(const std::string& str);
 
 void parse_face_indices(ObjFaceElements elements, std::vector<Lemur::u32>& vertexi, std::vector<Lemur::u32>& texturei, std::vector<Lemur::u32>& normali, std::istringstream& data);
 
-void load_obj(const char* path,
-              std::vector<vec3>& vertex_data,
-			  std::vector<vec2>& texture_data,
-			  std::vector<vec3>& normal_data,
-			  std::vector<Lemur::u32>& vertex_indices,
-			  std::vector<Lemur::u32>& texture_indices,
-			  std::vector<Lemur::u32>& normal_indices
-	)
+MeshData load_obj(const char* path)
 {
 
 	using namespace std;
 
 	ObjFaceElements face_elems = UNKNOWN;
-
+	vector<vec3> vertex_data, normal_data;
+	vector<vec2> texture_data;
+	vector<Lemur::u32> vertex_indices, normal_indices, texture_indices;
 
 	ifstream file(path);
 
@@ -89,6 +84,8 @@ void load_obj(const char* path,
 		//if (header == "mtlib") parse_material_lib();
 	}
 
+	return MeshData { vertex_data, texture_data, normal_data,
+		vertex_indices, texture_indices, normal_indices };
 }
 
 
@@ -128,8 +125,8 @@ void parse_face_indices(ObjFaceElements elements, std::vector<Lemur::u32>& verte
 		if (elements == VERTEX_NORMAL)
 		{
 			sscanf_s(vdata.c_str(), "%d//%d", &v, &n);
-			vertexi.push_back(v);
-			normali.push_back(n);
+			vertexi.push_back(v - 1);
+			normali.push_back(n - 1);
 		}
 	}
 }
