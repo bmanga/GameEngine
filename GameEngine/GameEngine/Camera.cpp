@@ -12,7 +12,7 @@ using namespace Lemur;
 Camera::Camera() 
 	
 {
-	m_perspective = (glm::perspective(m_fov, (float)800 / (float)600, 1.0f, 10.0f));
+	m_perspective = (glm::perspective(m_fov, 800.0f / 600.0f, 1.0f, 10.0f));
 }
 
 void Camera::rotateLocalX(float degrees)
@@ -44,7 +44,6 @@ void Camera::rotateLocalY(float degrees)
 	auto res = q * A * glm::inverse(q);
 
 	m_direction = { res.x, res.y, res.z };
-	float test = glm::dot(m_direction, m_up);
 }
 
 void Camera::rotateLocalZ(float degrees)
@@ -75,7 +74,8 @@ void Camera::rotateRelativeX(float degrees)
 
 	m_direction = { res.x, res.y, res.z };
 
-	m_up = glm::normalize(glm::cross(x_vect, m_direction));
+	//TODO: may have to work more on this
+	//m_up = glm::normalize(glm::cross(x_vect, m_direction));
 }
 
 void Camera::rotateRelativeY(float degrees)
@@ -89,5 +89,4 @@ void Camera::rotateRelativeY(float degrees)
 	auto res = q * A * glm::inverse(q);
 
 	m_direction = { res.x, res.y, res.z };
-	float test = glm::dot(m_direction, m_up);
 }

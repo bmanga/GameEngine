@@ -67,18 +67,19 @@ void Lemur::ShaderProgram_v2::compileShader(u32 id, const char* source)
 	using namespace std;
 
 	std::string file = DEFAULT_LOC + source;
-	ifstream shader_code(file);
+	ifstream shader_code(file, ios::in | ios::binary);
 	
 	if (!shader_code) printf(("shader '" + file + "' not found").c_str());
 	//get file size
 	shader_code.seekg(0, ios::end);
-	u32 length = static_cast<u32>(shader_code.tellg());
+	i32 length = static_cast<u32>(shader_code.tellg());
 	shader_code.seekg(0, ios::beg);
 
 	char* buffer = new char[length];
 	shader_code.read(buffer, length);
+	shader_code.close();
 	const char* ptr = buffer;
-	glShaderSource(id, 1, &ptr, nullptr);
+	glShaderSource(id, 1, &ptr, &length);
 	glCompileShader(id);
 
 #if !defined(DEBUG)
