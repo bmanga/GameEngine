@@ -17,6 +17,7 @@ bool RenderSystem::initGL()
 	active_program.compileShaders("testvert.vert", "testfrag.frag");
 	active_program.compileProgram();
 	active_program.link();
+
 	// Initialize clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
