@@ -28,6 +28,8 @@ public:
 	u32 vertexIndexCount() const;
 
 	size_t vertexIndexBufferSize() const;
+
+	void* normalBuffer();
 private:
 	vector<vec3> m_vertex_data;
 	vector<vec2> m_texture_data;

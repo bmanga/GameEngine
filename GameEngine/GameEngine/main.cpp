@@ -42,7 +42,9 @@ void run()
 int main(int argc, char* args[])
 {
 	mesh.setMeshData(load_obj("monkey.obj"));
-	renderer = RenderSystem();
+
+	//@kavan useless line, just so u know
+	//renderer = RenderSystem();
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);

@@ -49,3 +49,8 @@ size_t Mesh::vertexIndexBufferSize() const
 	return vertexIndexCount() *
 		sizeof(typename decltype(m_vertex_indices)::value_type);
 }
+
+void* Mesh::normalBuffer()
+{
+	return m_normal_data.data();
+}
