@@ -21,27 +21,13 @@ public:
 
 	u32 vertexCount() const;
 
-	size_t vertexBufferSize() const
-	{
-		return vertexCount() * 
-			sizeof(typename decltype(m_vertex_data)::value_type);
-	}
+	size_t vertexBufferSize() const;
 
-	void* vertexIndexBuffer()
-	{
-		return m_vertex_indices.data();
-	}
+	void* vertexIndexBuffer();
 
-	u32 vertexIndexCount() const
-	{
-		return (u32)m_vertex_indices.size();
-	}
+	u32 vertexIndexCount() const;
 
-	size_t vertexIndexBufferSize() const
-	{
-		return vertexIndexCount() *
-			sizeof(typename decltype(m_vertex_indices)::value_type);
-	}
+	size_t vertexIndexBufferSize() const;
 private:
 	vector<vec3> m_vertex_data;
 	vector<vec2> m_texture_data;

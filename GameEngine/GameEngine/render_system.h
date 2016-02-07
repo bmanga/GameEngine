@@ -11,11 +11,14 @@
 #include "math.h"
 #include "ShaderProgram_v2.h"
 
+#include "Mesh.h"
+
 namespace lm = Lemur::math;
 
 class RenderSystem
 {
 private:
+	Mesh cube;
 	Lemur::math::mat4 model;
 
 	Lemur::ShaderProgram_v2 active_program;

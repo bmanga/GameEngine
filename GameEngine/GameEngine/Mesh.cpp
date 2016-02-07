@@ -27,3 +27,25 @@ u32 Mesh::vertexCount() const
 {
 	return (u32)m_vertex_data.size();
 }
+
+size_t Mesh::vertexBufferSize() const
+{
+	return vertexCount() * 
+		sizeof(typename decltype(m_vertex_data)::value_type);
+}
+
+void* Mesh::vertexIndexBuffer()
+{
+	return m_vertex_indices.data();
+}
+
+u32 Mesh::vertexIndexCount() const
+{
+	return (u32)m_vertex_indices.size();
+}
+
+size_t Mesh::vertexIndexBufferSize() const
+{
+	return vertexIndexCount() *
+		sizeof(typename decltype(m_vertex_indices)::value_type);
+}

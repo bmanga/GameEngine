@@ -1,4 +1,5 @@
 #include "render_system.h"
+#include "Importer.h"
 
 RenderSystem::RenderSystem()
 {
@@ -12,6 +13,7 @@ RenderSystem::~RenderSystem()
 
 bool RenderSystem::initGL()
 {
+#ifdef KAVANS_CRAP
 	bool success = true;
 
 	active_program.compileShaders("testvert.vert", "testfrag.frag");
@@ -101,10 +103,36 @@ bool RenderSystem::initGL()
 	specular_texture->setInterpolation(LINEAR, LINEAR);
 
 	return success;
+
+
+#else //COOL STUFF
+	active_program.compileShaders("testvert.vert", "testfrag.frag");
+	active_program.compileProgram();
+	active_program.link();
+
+	//Load and initialize the mesh
+	cube.setMeshData(load_obj("monkeyhard.obj"));
+	// Initialize clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	glGenBuffers(1, &global_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
+	glBufferData(GL_ARRAY_BUFFER, cube.vertexBufferSize(), cube.vertexBuffer(), GL_DYNAMIC_DRAW);
+
+	glGenBuffers(1, &global_ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube.vertexIndexBufferSize(), cube.vertexIndexBuffer(), GL_DYNAMIC_DRAW);
+
+	return true;
+#endif
 }
 
 void RenderSystem::render(Lemur::Camera camera)
 {
+
 	// Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -136,7 +164,6 @@ void RenderSystem::render(Lemur::Camera camera)
 	int view_pos_uniform = active_program.getUniformLocation("view_pos");
 	glUniform3f(view_pos_uniform, camera.getCenter().x, camera.getCenter().y, camera.getCenter().z);
 
-
 	int mat_diffuse_uniform = active_program.getUniformLocation("material.diffuse");
 	int mat_specular_uniform = active_program.getUniformLocation("material.specular");
 	int mat_shininess_uniform = active_program.getUniformLocation("material.shininess");
@@ -157,11 +184,10 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	// Set vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
-
 	// Enable vertex position
 	int pos_attrib = active_program.getAttribLocation("position");
 	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), 0);
 
 	int col_attrib = active_program.getAttribLocation("in_color");
 	glEnableVertexAttribArray(col_attrib);
@@ -173,11 +199,12 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	int norm_attrib = active_program.getAttribLocation("in_normal");
 	glEnableVertexAttribArray(norm_attrib);
-	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(8 * sizeof(GLfloat)));
+	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (void*)(8 * sizeof(GLfloat)));
 
 	// Set index data and render
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
 	//glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, NULL);
+#ifdef KAVANS_CRAP
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// Disable vertex position
@@ -188,4 +215,17 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	// Unbind program
 	glUseProgram(NULL);
+#else
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
+
+	glDrawElements(
+		GL_TRIANGLES,
+		cube.vertexIndexCount(),
+		GL_UNSIGNED_INT,
+		(void*)0);
+	glDisableClientState(GL_VERTEX_ARRAY);
+#endif
 }

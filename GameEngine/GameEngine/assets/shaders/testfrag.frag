@@ -20,15 +20,15 @@ uniform vec3 view_pos;
 uniform Material material;
 uniform Light light;
 void main() {
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse, texcoord));
+	vec3 ambient = light.ambient * 1.0f;//vec3(texture(material.diffuse, texcoord));
 	vec3 norm = normalize(normal);
 	vec3 light_dir = normalize(light.position - frag_pos);
 	float diff = max(dot(norm, light_dir), 0.0);
-	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, texcoord));
+	vec3 diffuse = light.diffuse * diff * 1.0f;//vec3(texture(material.diffuse, texcoord));
 	vec3 view_dir = normalize(view_pos - frag_pos);
 	vec3 reflect_dir = reflect(-light_dir, norm);
-	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-	vec3 specular = light.specular * spec * vec3(texture(material.specular, texcoord));
-	vec3 result = (ambient + diffuse + specular) * color;
-	out_color = texture(tex, texcoord) * vec4(result, 1.0f);
+	float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0f);//material.shininess);
+	vec3 specular = light.specular * spec * 1.0f;//vec3(texture(material.specular, texcoord));
+	vec3 result = (ambient + diffuse + specular) * 1.0f;//color;
+	out_color = /*texture(tex, texcoord) */ vec4(result, 1.0f);
 }
