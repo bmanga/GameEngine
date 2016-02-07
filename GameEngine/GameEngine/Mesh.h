@@ -30,6 +30,10 @@ public:
 	size_t vertexIndexBufferSize() const;
 
 	void* normalBuffer();
+
+	u32 normalCount() const;
+
+	size_t normalBufferSize() const;
 private:
 	vector<vec3> m_vertex_data;
 	vector<vec2> m_texture_data;

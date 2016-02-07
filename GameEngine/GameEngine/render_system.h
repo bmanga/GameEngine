@@ -105,6 +105,7 @@ private:
 	Mesh* mesh = nullptr;
 	VertexBufferObject* mesh_vbo = nullptr;
 	IndexBufferObject* mesh_ibo = nullptr;
+	VertexBufferObject* mesh_normal_bo = nullptr;
 
 	lm::vec3 light_pos = lm::vec3(0.0f, 3.0f, 0.0f);
 

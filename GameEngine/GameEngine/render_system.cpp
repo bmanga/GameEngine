@@ -225,12 +225,19 @@ void RenderSystem::renderMesh(Lemur::Camera camera)
 	glEnableVertexAttribArray(pos_attrib);
 	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+	mesh_normal_bo->bind();
+
+	int norm_attrib = active_program.getAttribLocation("in_normal");
+	glEnableVertexAttribArray(norm_attrib);
+	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 	// Set index data and render
 	mesh_ibo->bind();
 	glDrawElements(GL_TRIANGLES, mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
 
 	// Disable vertex position
 	glDisableVertexAttribArray(pos_attrib);
+	glDisableVertexAttribArray(norm_attrib);
 
 	// Unbind program
 	glUseProgram(NULL);
@@ -247,4 +254,8 @@ void RenderSystem::setMesh(Mesh* mesh)
 	mesh_ibo = new IndexBufferObject();
 	mesh_ibo->bind();
 	mesh_ibo->bufferData(mesh->vertexIndexBufferSize(), (unsigned int*)mesh->vertexIndexBuffer(), STATIC_DRAW);
+
+	mesh_normal_bo = new VertexBufferObject();
+	mesh_normal_bo->bind();
+	mesh_normal_bo->bufferData(mesh->normalBufferSize(), (float*)mesh->normalBuffer(), STATIC_DRAW);
 }
