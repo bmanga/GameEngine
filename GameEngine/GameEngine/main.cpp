@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <string>
 #include <memory>
-
+#include <iostream>
 #include "Camera.h"
-
+#include <typeinfo>
 #include "render_system.h"
-
+#include "Logger.h"
 #include "TaskExecutor.h"
 #include "Importer.h"
 
@@ -41,8 +41,10 @@ void run()
 
 int main(int argc, char* args[])
 {
+	using tt = int;
+	std::vector<tt> vi;
 	mesh.setMeshData(load_obj("monkey.objm"));
-
+	std::cout << demangle(typeid(vi).name()) << std::endl;
 	//@kavan useless line, just so u know
 	//renderer = RenderSystem();
 
