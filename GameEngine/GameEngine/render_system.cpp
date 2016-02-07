@@ -1,4 +1,5 @@
 #include "render_system.h"
+#include "ConsoleLogger.h"
 
 GLuint VertexBufferObject::bound_id = 0;
 GLuint IndexBufferObject::bound_id = 0;
@@ -15,6 +16,8 @@ RenderSystem::~RenderSystem()
 
 bool RenderSystem::initGL()
 {
+	bool x = false;
+	ASSERT_CLERROR(x == true, CLASS_NAME, "kavans a cunt");
 	bool success = true;
 
 	active_program.compileShaders("testvert.vert", "testfrag.frag");
