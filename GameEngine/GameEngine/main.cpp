@@ -41,7 +41,7 @@ void run()
 
 int main(int argc, char* args[])
 {
-	mesh.setMeshData(load_obj("monkey.obj"));
+	mesh.setMeshData(load_obj("monkey.objm"));
 
 	//@kavan useless line, just so u know
 	//renderer = RenderSystem();
