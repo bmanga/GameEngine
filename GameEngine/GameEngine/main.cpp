@@ -11,6 +11,7 @@
 #include "render_system.h"
 
 #include "TaskExecutor.h"
+#include "Importer.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -28,6 +29,7 @@ RenderSystem renderer;
 
 Lemur::Camera g_camera;
 
+Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
@@ -39,6 +41,7 @@ void run()
 
 int main(int argc, char* args[])
 {
+	mesh.setMeshData(load_obj("monkey.obj"));
 	renderer = RenderSystem();
 
 	TaskExecutor ts;
@@ -76,7 +79,7 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
-		renderer.render(g_camera);
+		renderer.renderMesh(g_camera);
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -147,6 +150,8 @@ bool init()
 					printf("Unable to initialize OpenGL!\n");
 					success = false;
 				}
+
+				renderer.setMesh(&mesh);
 			}
 		}
 	}
