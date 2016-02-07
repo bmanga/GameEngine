@@ -1,5 +1,7 @@
 #include "render_system.h"
-#include "Importer.h"
+
+GLuint VertexBufferObject::bound_id = 0;
+GLuint IndexBufferObject::bound_id = 0;
 
 RenderSystem::RenderSystem()
 {
@@ -13,12 +15,12 @@ RenderSystem::~RenderSystem()
 
 bool RenderSystem::initGL()
 {
-#ifdef KAVANS_CRAP
 	bool success = true;
 
 	active_program.compileShaders("testvert.vert", "testfrag.frag");
 	active_program.compileProgram();
 	active_program.link();
+
 	// Initialize clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
@@ -78,14 +80,14 @@ bool RenderSystem::initGL()
 	glBindVertexArray(global_vao);
 
 	// Create VBO
-	glGenBuffers(1, &global_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+	global_vbo = new VertexBufferObject();
+	global_vbo->bind();
+	global_vbo->bufferData(sizeof(vertex_data), vertex_data, STATIC_DRAW);
 
 	// Create IBO
-	glGenBuffers(1, &global_ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
+	global_ibo = new IndexBufferObject();
+	global_ibo->bind();
+	global_ibo->bufferData(sizeof(index_data), index_data, STATIC_DRAW);
 
 	glActiveTexture(GL_TEXTURE0);
 
@@ -103,36 +105,10 @@ bool RenderSystem::initGL()
 	specular_texture->setInterpolation(LINEAR, LINEAR);
 
 	return success;
-
-
-#else //COOL STUFF
-	active_program.compileShaders("testvert.vert", "testfrag.frag");
-	active_program.compileProgram();
-	active_program.link();
-
-	//Load and initialize the mesh
-	cube.setMeshData(load_obj("monkeyhard.obj"));
-	// Initialize clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
-	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
-
-	glGenBuffers(1, &global_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
-	glBufferData(GL_ARRAY_BUFFER, cube.vertexBufferSize(), cube.vertexBuffer(), GL_DYNAMIC_DRAW);
-
-	glGenBuffers(1, &global_ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube.vertexIndexBufferSize(), cube.vertexIndexBuffer(), GL_DYNAMIC_DRAW);
-
-	return true;
-#endif
 }
 
 void RenderSystem::render(Lemur::Camera camera)
 {
-
 	// Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -164,6 +140,7 @@ void RenderSystem::render(Lemur::Camera camera)
 	int view_pos_uniform = active_program.getUniformLocation("view_pos");
 	glUniform3f(view_pos_uniform, camera.getCenter().x, camera.getCenter().y, camera.getCenter().z);
 
+
 	int mat_diffuse_uniform = active_program.getUniformLocation("material.diffuse");
 	int mat_specular_uniform = active_program.getUniformLocation("material.specular");
 	int mat_shininess_uniform = active_program.getUniformLocation("material.shininess");
@@ -183,11 +160,12 @@ void RenderSystem::render(Lemur::Camera camera)
 	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
 
 	// Set vertex data
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
+	global_vbo->bind();
+
 	// Enable vertex position
 	int pos_attrib = active_program.getAttribLocation("position");
 	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), 0);
 
 	int col_attrib = active_program.getAttribLocation("in_color");
 	glEnableVertexAttribArray(col_attrib);
@@ -199,12 +177,12 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	int norm_attrib = active_program.getAttribLocation("in_normal");
 	glEnableVertexAttribArray(norm_attrib);
-	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (void*)(8 * sizeof(GLfloat)));
+	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(8 * sizeof(GLfloat)));
 
 	// Set index data and render
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
+	global_ibo->bind();
+
 	//glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, NULL);
-#ifdef KAVANS_CRAP
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// Disable vertex position
@@ -215,17 +193,58 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	// Unbind program
 	glUseProgram(NULL);
-#else
+}
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, global_vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global_ibo);
+void RenderSystem::renderMesh(Lemur::Camera camera)
+{
+	// Clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDrawElements(
-		GL_TRIANGLES,
-		cube.vertexIndexCount(),
-		GL_UNSIGNED_INT,
-		(void*)0);
-	glDisableClientState(GL_VERTEX_ARRAY);
-#endif
+	// Bind program
+	active_program.use();
+
+	lm::mat4 view = camera.getView();
+	GLint view_uniform = active_program.getUniformLocation("view");
+	glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+
+	// Create the perspective projection matrix
+	lm::mat4 proj = camera.getProjection();
+	GLint proj_uniform = active_program.getUniformLocation("proj");
+	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+
+	// Apply the model transformation
+	model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+	int model_uniform = active_program.getUniformLocation("model");
+	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+
+	// Set vertex data
+	mesh_vbo->bind();
+
+	// Enable vertex position
+	int pos_attrib = active_program.getAttribLocation("position");
+	glEnableVertexAttribArray(pos_attrib);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	// Set index data and render
+	mesh_ibo->bind();
+	glDrawElements(GL_TRIANGLES, mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
+
+	// Disable vertex position
+	glDisableVertexAttribArray(pos_attrib);
+
+	// Unbind program
+	glUseProgram(NULL);
+}
+
+void RenderSystem::setMesh(Mesh* mesh)
+{
+	this->mesh = mesh;
+
+	mesh_vbo = new VertexBufferObject();
+	mesh_vbo->bind();
+	mesh_vbo->bufferData(mesh->vertexBufferSize(), (float*)mesh->vertexBuffer(), STATIC_DRAW);
+
+	mesh_ibo = new IndexBufferObject();
+	mesh_ibo->bind();
+	mesh_ibo->bufferData(mesh->vertexIndexBufferSize(), (unsigned int*)mesh->vertexIndexBuffer(), STATIC_DRAW);
 }
