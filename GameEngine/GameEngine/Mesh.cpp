@@ -54,3 +54,14 @@ void* Mesh::normalBuffer()
 {
 	return m_normal_data.data();
 }
+
+u32 Mesh::normalCount() const
+{
+	return (u32)m_normal_data.size();
+}
+
+size_t Mesh::normalBufferSize() const
+{
+	return normalCount() *
+		sizeof(typename decltype(m_normal_indices)::value_type);
+}
