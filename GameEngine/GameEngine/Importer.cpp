@@ -44,6 +44,10 @@ ObjFaceElements get_index_elements(const std::string& str);
 
 void parse_face_indices(ObjFaceElements elements, Lemur::vector<Lemur::u32>& vertexi, Lemur::vector<Lemur::u32>& texturei, Lemur::vector<Lemur::u32>& normali, std::istringstream& data);
 
+void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
+	const Lemur::vector<Lemur::u32>& v_index,
+	const Lemur::vector<Lemur::u32>& n_index);
+
 MeshData load_obj(const char* path)
 {
 	ObjFaceElements face_elems = UNKNOWN;
@@ -91,14 +95,21 @@ MeshData load_obj(const char* path)
 
 	//We need as many vertices as normals
 	if (face_elems == VERTEX_TEXTURE_NORMAL || face_elems == VERTEX_NORMAL)
+	{
 		if (vertex_data.size() != normal_data.size())
+
+		{
 			equalize_vertices_to_normals(
 				vertex_data,
 				normal_data,
 				vertex_indices,
 				normal_indices
-				);
+			);
 
+			
+		}
+		sort_normal_data_by_vertex_index(normal_data, vertex_indices, normal_indices);
+	}
 	return MeshData { vertex_data, texture_data, normal_data,
 		vertex_indices, texture_indices, normal_indices };
 }
@@ -179,6 +190,23 @@ void parse_face_indices(ObjFaceElements elements,
 			normali.push_back(n - 1);
 		}
 	}
+}
+
+void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals, 
+	const Lemur::vector<Lemur::u32>& v_indices, 
+	const Lemur::vector<Lemur::u32>& n_indices)
+{
+	auto vi_it = v_indices.begin();
+	auto ni_it = n_indices.begin();
+
+	Lemur::vector<vec3> sorted_vector(normals);
+
+	for (; vi_it != v_indices.end() && ni_it != n_indices.end(); ++vi_it, ++ni_it)
+	{		
+		sorted_vector[*ni_it] = normals[*vi_it];
+	}
+
+	normals = sorted_vector;
 }
 
 ObjFaceElements get_index_elements(const std::string& str)
