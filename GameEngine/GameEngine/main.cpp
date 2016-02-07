@@ -43,10 +43,7 @@ int main(int argc, char* args[])
 {
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("monkey.objm"));
-	std::cout << demangle(typeid(vi).name()) << std::endl;
-	//@kavan useless line, just so u know
-	//renderer = RenderSystem();
+	mesh.setMeshData(load_obj("home.objm"));
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);

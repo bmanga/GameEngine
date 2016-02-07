@@ -217,6 +217,16 @@ void RenderSystem::renderMesh(Lemur::Camera camera)
 	int model_uniform = active_program.getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
+	int light_pos_uniform = active_program.getUniformLocation("light.position");
+	int light_ambient_uniform = active_program.getUniformLocation("light.ambient");
+	int light_diffuse_uniform = active_program.getUniformLocation("light.diffuse");
+	int light_specular_uniform = active_program.getUniformLocation("light.specular");
+
+	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
+	glUniform3f(light_ambient_uniform, 0.2f, 0.2f, 0.2f);
+	glUniform3f(light_diffuse_uniform, 0.5f, 0.5f, 0.5f);
+	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
+
 	// Set vertex data
 	mesh_vbo->bind();
 
