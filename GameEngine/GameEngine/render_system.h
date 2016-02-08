@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "math.h"
-#include "ShaderProgram_v2.h"
 
 #include "Mesh.h"
 
@@ -106,7 +105,8 @@ private:
 	IndexBufferObject* mesh_ibo = nullptr;
 	VertexBufferObject* mesh_normal_bo = nullptr;
 
-	lm::vec3 light_pos = lm::vec3(0.0f, 3.0f, 0.0f);
+	//lm::vec3 light_pos = lm::vec3(0.0f, 3.0f, 0.0f);
+	//lm::vec3 light_pos = lm::vec3(1.2f, 1.0f, 2.0f);
 
 public:
 	RenderSystem();

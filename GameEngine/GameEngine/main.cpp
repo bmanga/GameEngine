@@ -33,7 +33,7 @@ Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
-#define MODEL_MODE 1
+//#define MODEL_MODE
 
 void run()
 {
@@ -217,7 +217,7 @@ void handleMouse(int x, int y)
 	prev_x = x;
 	prev_y = y;
 
-	g_camera.rotateRelativeX(-dy / 10.f);
-	g_camera.rotateRelativeY(-dx / 10.f);
+	g_camera.rotateRelativeX(-dy / 2.f);
+	g_camera.rotateRelativeY(-dx / 2.f);
 
 }
