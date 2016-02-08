@@ -55,10 +55,11 @@ bool Texture::isBound()
 
 void Texture::bind()
 {
-	glBindTexture(GL_TEXTURE_2D, id);
-	bound_id = id;
-
-	// TODO: Don't forget about unbinding!!!
+	if (!isBound())
+	{
+		glBindTexture(GL_TEXTURE_2D, id);
+		bound_id = id;
+	}
 }
 
 unsigned char* Texture::loadPixels(const char* path)

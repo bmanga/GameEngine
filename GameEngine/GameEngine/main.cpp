@@ -1,16 +1,17 @@
 #include "opengl_master.h"
+
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include <cstdio>
+#include <stdio.h>
 #include <string>
 #include <memory>
-
-
+#include <iostream>
 #include "Camera.h"
-
+#include <typeinfo>
 #include "render_system.h"
-
+#include "ConsoleLogger.h"
 #include "TaskExecutor.h"
+#include "Importer.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -28,8 +29,11 @@ RenderSystem renderer;
 
 Lemur::Camera g_camera;
 
+Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
+
+#define MODEL_MODE 1
 
 void run()
 {
@@ -39,7 +43,10 @@ void run()
 
 int main(int argc, char* args[])
 {
-	renderer = RenderSystem();
+	using tt = int;
+	std::vector<tt> vi;
+	mesh.setMeshData(load_obj("monkey.objm"));
+	Lemur::ConsoleLogger::Debug("me", "sup");
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);
@@ -76,7 +83,11 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
+#ifdef MODEL_MODE
+		renderer.renderMesh(g_camera);
+#else
 		renderer.render(g_camera);
+#endif
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -147,6 +158,10 @@ bool init()
 					printf("Unable to initialize OpenGL!\n");
 					success = false;
 				}
+
+#ifdef MODEL_MODE
+				renderer.setMesh(&mesh);
+#endif
 			}
 		}
 	}

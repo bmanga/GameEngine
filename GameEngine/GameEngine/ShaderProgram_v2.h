@@ -5,6 +5,8 @@
 
 namespace Lemur
 {
+
+class UniformProxy;
 	class ShaderProgram_v2
 	{
 	
@@ -44,6 +46,7 @@ namespace Lemur
 
 		static string DEFAULT_LOC;
 	};
+
 
 	
 }
