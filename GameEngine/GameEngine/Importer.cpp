@@ -144,23 +144,32 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 	Lemur::vector<Lemur::u32>& v_indices, Lemur::vector<Lemur::u32>& n_indices)
 {
 	std::map<Lemur::u32, Lemur::u32> vertex_to_normal;
+	
+	//indices of the indices (iterators may become invalid)
+
+	
 	auto vi_it = v_indices.begin();
 	auto ni_it = n_indices.begin();
 
-	for (; vi_it != v_indices.end() && ni_it != n_indices.end(); ++vi_it, ++ni_it)
+	for (size_t vi_index = 0, ni_index = 0;
+		 vi_index < vertices.size() && ni_index < normals.size();
+		++vi_index, ++ni_index)
 	{
-		auto&& pos_it = vertex_to_normal.find(*vi_it);
+		auto&& pos_it = vertex_to_normal.find(v_indices[vi_index]);
+
 		if (pos_it != vertex_to_normal.end())
 		{
 			Lemur::u32 size = vertices.size();
-			auto copy = vertices[*vi_it];
+			auto copy = vertices[v_indices[vi_index]];
 			vertices.push_back(copy);
-			vertex_to_normal.erase(pos_it);
-			vertex_to_normal[size] = *ni_it;
+			
+			vertex_to_normal[size] = n_indices[ni_index];
 
 		}
-		vertex_to_normal.insert(std::make_pair(*vi_it, *ni_it));
-
+		else 
+		{
+			vertex_to_normal.insert(std::make_pair(v_indices[vi_index], n_indices[ni_index]));
+		}
 	}
 }
 
