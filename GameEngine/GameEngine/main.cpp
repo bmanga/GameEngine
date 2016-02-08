@@ -9,7 +9,7 @@
 #include "Camera.h"
 #include <typeinfo>
 #include "render_system.h"
-#include "Logger.h"
+#include "ConsoleLogger.h"
 #include "TaskExecutor.h"
 #include "Importer.h"
 
@@ -43,7 +43,10 @@ int main(int argc, char* args[])
 {
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("home.objm"));
+	mesh.setMeshData(load_obj("monkey.objm"));
+	Lemur::ConsoleLogger::Debug("me", "sup");
+	//@kavan useless line, just so u know
+	//renderer = RenderSystem();
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);

@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <fstream>
 #include "types.h"
-
+#include "ConsoleLogger.h"
 using Lemur::i32;
 static Lemur::u32 active_prog_id = 0;
 std::string Lemur::ShaderProgram_v2::DEFAULT_LOC("../assets/shaders/");
@@ -69,6 +69,7 @@ void Lemur::ShaderProgram_v2::compileShader(u32 id, const char* source)
 	std::string file = DEFAULT_LOC + source;
 	ifstream shader_code(file, ios::in | ios::binary);
 	
+
 	if (!shader_code) printf(("shader '" + file + "' not found").c_str());
 	//get file size
 	shader_code.seekg(0, ios::end);
@@ -85,6 +86,8 @@ void Lemur::ShaderProgram_v2::compileShader(u32 id, const char* source)
 #if !defined(DEBUG)
 	i32 success = false;
 	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+	
+	ASSERT_CLERROR(success, "ShaderProgram", "Unable to compile vertex shader")
 	if(!success)
 	{
 		printf("Unabl to compile vertex shader %d\n", id);

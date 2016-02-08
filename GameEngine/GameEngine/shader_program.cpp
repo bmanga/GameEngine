@@ -13,6 +13,19 @@ ShaderProgram::ShaderProgram(Shader& vertex_shader, Shader& fragment_shader)
 	link();
 }
 
+ShaderProgram::ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path)
+{
+	id = glCreateProgram();
+
+	vertex_shader = new Shader(VERTEX, vertex_shader_path);
+	fragment_shader = new Shader(FRAGMENT, fragment_shader_path);
+
+	glAttachShader(id, vertex_shader->getId());
+	glAttachShader(id, fragment_shader->getId());
+
+	link();
+}
+
 void ShaderProgram::link()
 {
 	glLinkProgram(id);
@@ -22,7 +35,7 @@ void ShaderProgram::link()
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE)
 	{
-		printf("Error linking program %d!\n", id);
+		printf("Error linking shader program with \'%s\' and \'%s\' [ID: %d]:\n", vertex_shader->getPath(), fragment_shader->getPath(), id);
 		printLog();
 		success = false;
 	}

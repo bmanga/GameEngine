@@ -1,20 +1,45 @@
-#include <GL/glew.h>
-#include <stdio.h>
-
 #include "shader.h"
 
-Shader::Shader(int type, const char* source) : source(source)
+#include <stdio.h>
+#include <fstream>
+
+std::string Shader::DEFAULT_LOCATION("../assets/shaders/");
+
+Shader::Shader(ShaderType type, const char* path)
 {
 	this->type = type;
+	this->path = path;
 
 	create();
+	loadSource(path);
 	compile();
+}
+
+void Shader::loadSource(const char* path)
+{
+	using namespace std;
+
+	std::string file = DEFAULT_LOCATION + path;
+	ifstream shader_code(file, ios::in | ios::binary);
+
+	if (!shader_code) printf(("Shader '" + file + "' not found!").c_str());
+
+	// Get file size
+	shader_code.seekg(0, ios::end);
+	int32_t length = static_cast<uint32_t>(shader_code.tellg());
+	shader_code.seekg(0, ios::beg);
+
+	char* buffer = new char[length];
+	shader_code.read(buffer, length);
+	shader_code.close();
+	const char* ptr = buffer;
+
+	glShaderSource(id, 1, &ptr, &length);
 }
 
 void Shader::create()
 {
 	id = glCreateShader(type);
-	glShaderSource(id, 1, &source, nullptr);
 }
 
 bool Shader::compile()
@@ -27,7 +52,8 @@ bool Shader::compile()
 	glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
 	if (!compiled)
 	{
-		printf("Unable to compile vertex shader %d!\n", id);
+		if (type == VERTEX) printf("Unable to compile vertex shader \'%s\' [ID: %d]:\n", path, id);
+		else if (type == FRAGMENT) printf("Unable to compile fragment shader \'%s\' [ID: %d]:\n", path, id);
 		printLog();
 		success = false;
 	}
@@ -63,7 +89,7 @@ void Shader::printLog()
 	}
 	else
 	{
-		printf("Name %d is not a shader\n", id);
+		printf("Shader %d is not a shader!\n", id);
 	}
 }
 
@@ -75,4 +101,9 @@ int Shader::getType()
 unsigned int Shader::getId()
 {
 	return id;
+}
+
+const char* Shader::getPath()
+{
+	return path;
 }
