@@ -45,7 +45,7 @@ int main(int argc, char* args[])
 {
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("monkey.objm"));
+	mesh.setMeshData(load_obj("monkeyhard.objm"));
 	Lemur::ConsoleLogger::Debug("me", "sup");
 
 	TaskExecutor ts;
@@ -83,6 +83,7 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
+#define MODEL_MODE
 #ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
 #else

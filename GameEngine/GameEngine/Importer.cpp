@@ -147,10 +147,6 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 	
 	//indices of the indices (iterators may become invalid)
 
-	
-	auto vi_it = v_indices.begin();
-	auto ni_it = n_indices.begin();
-
 	for (size_t vi_index = 0, ni_index = 0;
 		 vi_index < vertices.size() && ni_index < normals.size();
 		++vi_index, ++ni_index)
@@ -165,6 +161,7 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 			
 			vertex_to_normal[size] = n_indices[ni_index];
 
+			v_indices[vi_index] = size;
 		}
 		else 
 		{

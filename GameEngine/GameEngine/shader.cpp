@@ -35,6 +35,10 @@ void Shader::loadSource(const char* path)
 	const char* ptr = buffer;
 
 	glShaderSource(id, 1, &ptr, &length);
+
+	//KAVAN URE LEAKING
+	//TODO: Can you delete the buffer before you compile? (probs not)
+	//delete[] buffer;
 }
 
 void Shader::create()
