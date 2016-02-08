@@ -212,6 +212,7 @@ void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
 
 	for (; vi_it != v_indices.end() && ni_it != n_indices.end(); ++vi_it, ++ni_it)
 	{		
+
 		sorted_vector[*ni_it] = normals[*vi_it];
 	}
 

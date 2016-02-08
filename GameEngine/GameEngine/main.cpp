@@ -33,6 +33,8 @@ Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
+//#define MODEL_MODE
+
 void run()
 {
 	while (g_run)
@@ -45,8 +47,6 @@ int main(int argc, char* args[])
 	std::vector<tt> vi;
 	mesh.setMeshData(load_obj("monkey.objm"));
 	Lemur::ConsoleLogger::Debug("me", "sup");
-	//@kavan useless line, just so u know
-	//renderer = RenderSystem();
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);
@@ -83,7 +83,11 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
+#ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
+#else
+		renderer.render(g_camera);
+#endif
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -155,7 +159,9 @@ bool init()
 					success = false;
 				}
 
+#ifdef MODEL_MODE
 				renderer.setMesh(&mesh);
+#endif
 			}
 		}
 	}
@@ -211,7 +217,7 @@ void handleMouse(int x, int y)
 	prev_x = x;
 	prev_y = y;
 
-	g_camera.rotateRelativeX(-dy / 10.f);
-	g_camera.rotateRelativeY(-dx / 10.f);
+	g_camera.rotateRelativeX(-dy / 2.f);
+	g_camera.rotateRelativeY(-dx / 2.f);
 
 }

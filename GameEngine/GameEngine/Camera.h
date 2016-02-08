@@ -34,6 +34,12 @@ public:
 		return m_eye;
 	}
 
+	// sorry bruno pt 4 (the glsl mistress is a woman with many needs)
+	vec3 Camera::getDirection() const
+	{
+		return m_direction;
+	}
+
 	void translateLocalX(float step)
 	{
 		auto x_vect = glm::cross(m_direction, m_up);
@@ -62,7 +68,7 @@ public:
 
 private:
 	mat4 m_perspective;
-	vec3 m_eye {0, 3, 0};
+	vec3 m_eye {0, 6, 0};
 	vec3 m_direction {0, -1, 0.0};
 	vec3 m_up{ 0.0, 0.0, 1.0 };
 
