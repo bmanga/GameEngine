@@ -91,6 +91,44 @@ void Lemur::ConsoleLogger::Error(const char* origin, const char* message)
 
 }
 
+Lemur::ConsoleLogger::~ConsoleLogger()
+{
+}
+
+#ifdef _WIN32
+#include <windows.h>
+void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color color)
+{
+	using namespace std;
+	// Set the color
+	WORD ccolor = FOREGROUND_INTENSITY;
+	if (color == CL_RED) ccolor |= FOREGROUND_RED;
+	else if (color == CL_GREEN) ccolor |= FOREGROUND_GREEN;
+	else if (color == CL_BLUE) ccolor |= FOREGROUND_BLUE;
+	else if (color == CL_CYAN) ccolor |= (FOREGROUND_BLUE | FOREGROUND_GREEN);
+	else if (color == CL_YELLOW) ccolor |= (FOREGROUND_GREEN | FOREGROUND_RED);
+	//else white
+	else ccolor |= (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
+	
+	// Get handle to standard output
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  
+	//save the current console info
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hConsole, &csbi);
+
+	//set console output to the supplied color
+	SetConsoleTextAttribute(hConsole, ccolor);
+	cout << std::left
+		<< setw(8) << type
+		<< setw(22) << return_current_time_and_date()
+		<< setw(20) << origin
+		<< setw(30) << message
+		<< std::endl << std::right;
+
+	//restore the console settings
+	SetConsoleTextAttribute(hConsole, csbi.wAttributes);
+}
+#else
 void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color color)
 {
 	using namespace std;
@@ -101,7 +139,4 @@ void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const ch
 		<< setw(30) << message
 		<< "\033[0m\n" << std::right;
 }
-
-Lemur::ConsoleLogger::~ConsoleLogger()
-{
-}
+#endif
