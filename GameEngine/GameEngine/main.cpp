@@ -1,10 +1,10 @@
 #include "opengl_master.h"
-
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <memory>
+
 
 #include "Camera.h"
 
