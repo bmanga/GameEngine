@@ -45,8 +45,13 @@ int main(int argc, char* args[])
 {
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("monkeyhard.objm"));
-	Lemur::ConsoleLogger::Debug("me", "sup");
+	mesh.setMeshData(load_obj("cube.obj"));
+	Lemur::ConsoleLogger::Warning("me", "sufsdgsfgp");
+	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
+	Lemur::ConsoleLogger::Warning("mgde", "sup");
+	Lemur::ConsoleLogger::Info("mdswe", "suffsdap");
+	Lemur::ConsoleLogger::Debug("msdfse", "ssdsup");
+	Lemur::ConsoleLogger::Warning("mfste", "susdgfdsp");
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);
@@ -83,6 +88,7 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
+#define MODEL_MODE
 #ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
 #else
