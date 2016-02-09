@@ -26,6 +26,8 @@ glm::vec3 point_light_positions[] = {
 	glm::vec3(0.0f,  0.0f, -3.0f)
 };
 
+glm::vec3 mesh_light_pos(0.0f, 3.0f, 0.0f);
+
 RenderSystem::RenderSystem()
 {
 	
@@ -369,15 +371,15 @@ void RenderSystem::renderMesh(Lemur::Camera camera)
 	glUniform3f(mat_specular_uniform, 0.628281f, 0.555802f, 0.366065f);
 	glUniform1f(mat_shininess_uniform, 0.4f);
 
-	/*int light_pos_uniform = active_program->getUniformLocation("light.position");
+	int light_pos_uniform = active_program->getUniformLocation("light.position");
 	int light_ambient_uniform = active_program->getUniformLocation("light.ambient");
 	int light_diffuse_uniform = active_program->getUniformLocation("light.diffuse");
 	int light_specular_uniform = active_program->getUniformLocation("light.specular");
 
-	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
+	glUniform3f(light_pos_uniform, mesh_light_pos.x, mesh_light_pos.y, mesh_light_pos.z);
 	glUniform3f(light_ambient_uniform, 1.0f, 1.0f, 1.0f);
 	glUniform3f(light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);*/
+	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
 
 	// Set vertex data
 	mesh_vbo->bind();
