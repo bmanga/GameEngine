@@ -62,37 +62,35 @@ std::string Lemur::demangle(const char* abiName)
 	}
 	return demangled;
 }
+
+std::string Lemur::filter_filename_location(std::string file)
+{
+	auto pos = file.find_last_of("\\/");
+	return file.substr(pos + 1, std::string::npos);
+}
 #else
 #error "could not identify compiler"
 #endif
 
-Lemur::ConsoleLogger::ConsoleLogger()
-{
-}
-
 void Lemur::ConsoleLogger::Debug(const char* origin, const char* message)
 {
-	Log(origin, message, "DEBUG", CL_CYAN);
+	Log(origin, message, "DEBUG", Color::CYAN);
 }
 
 void Lemur::ConsoleLogger::Info(const char* origin, const char* message)
 {
-	Log(origin, message, "INFO", CL_WHITE);
+	Log(origin, message, "INFO", Color::WHITE);
 }
 
 void Lemur::ConsoleLogger::Warning(const char* origin, const char* message)
 {
-	Log(origin, message, "WARNING" ,CL_YELLOW);
+	Log(origin, message, "WARNING" ,Color::YELLOW);
 }
 
 void Lemur::ConsoleLogger::Error(const char* origin, const char* message)
 {
-	Log(origin, message, "ERROR", CL_RED);
+	Log(origin, message, "ERROR", Color::RED);
 
-}
-
-Lemur::ConsoleLogger::~ConsoleLogger()
-{
 }
 
 #ifdef _WIN32
@@ -100,15 +98,6 @@ Lemur::ConsoleLogger::~ConsoleLogger()
 void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color color)
 {
 	using namespace std;
-	// Set the color
-	WORD ccolor = FOREGROUND_INTENSITY;
-	if (color == CL_RED) ccolor |= FOREGROUND_RED;
-	else if (color == CL_GREEN) ccolor |= FOREGROUND_GREEN;
-	else if (color == CL_BLUE) ccolor |= FOREGROUND_BLUE;
-	else if (color == CL_CYAN) ccolor |= (FOREGROUND_BLUE | FOREGROUND_GREEN);
-	else if (color == CL_YELLOW) ccolor |= (FOREGROUND_GREEN | FOREGROUND_RED);
-	//else white
-	else ccolor |= (FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
 	
 	// Get handle to standard output
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  
@@ -117,7 +106,7 @@ void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const ch
 	GetConsoleScreenBufferInfo(hConsole, &csbi);
 
 	//set console output to the supplied color
-	SetConsoleTextAttribute(hConsole, ccolor);
+	SetConsoleTextAttribute(hConsole, static_cast<WORD>(color));
 	cout << std::left
 		<< setw(8) << type
 		<< setw(22) << return_current_time_and_date()
@@ -129,9 +118,27 @@ void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const ch
 	SetConsoleTextAttribute(hConsole, csbi.wAttributes);
 }
 #else
-void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color color)
+void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color col)
 {
 	using namespace std;
+
+	const char* color;
+	switch (col)
+	{
+	case Color::RED : 
+		color = "91"; break;
+	case Color::GREEN :
+		color = "92"; break;
+	case Color::YELLOW :
+		color = "93"; break;
+	case Color::BLUE :
+		color = "94"; break;
+	case Color::CYAN :
+		color = "96"; break;
+	default:
+		color = "97";
+
+	}
 	cout << std::left
 		<< setw(15) << string("\033[1;")+ color +"m" + type
 		<< setw(22) << return_current_time_and_date()

@@ -3,6 +3,7 @@
 #include <fstream>
 #include "types.h"
 #include "ConsoleLogger.h"
+#include "Lemur.h"
 using Lemur::i32;
 static Lemur::u32 active_prog_id = 0;
 std::string Lemur::ShaderProgram_v2::DEFAULT_LOC("../assets/shaders/");

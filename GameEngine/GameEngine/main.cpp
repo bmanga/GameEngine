@@ -12,6 +12,7 @@
 #include "ConsoleLogger.h"
 #include "TaskExecutor.h"
 #include "Importer.h"
+#include "Lemur.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -43,10 +44,13 @@ void run()
 
 int main(int argc, char* args[])
 {
+	using namespace std::string_literals;
+	double x = 2.3;
+	int y = 1;
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("cube.obj"));
-	Lemur::ConsoleLogger::Warning("me", "sufsdgsfgp");
+	mesh.setMeshData(load_obj("monkeyhard.objm"));
+	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");
 	Lemur::ConsoleLogger::Info("mdswe", "suffsdap");

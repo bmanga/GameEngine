@@ -113,5 +113,8 @@
     <ClInclude Include="ConsoleLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Lemur.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

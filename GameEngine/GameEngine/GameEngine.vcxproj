@@ -99,7 +99,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BrowseInformation>true</BrowseInformation>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ENABLE_ASSERT_CL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -116,7 +116,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ENABLE_ASSERT_CL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
@@ -178,6 +178,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="ConsoleLogger.h" />
+    <ClInclude Include="Lemur.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshManager.h" />
