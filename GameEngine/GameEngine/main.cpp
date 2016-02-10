@@ -12,7 +12,6 @@
 #include "ConsoleLogger.h"
 #include "TaskExecutor.h"
 #include "Importer.h"
-#include "Lemur.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -34,7 +33,7 @@ Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
-//#define MODEL_MODE
+#define MODEL_MODE
 
 void run()
 {
@@ -50,7 +49,6 @@ int main(int argc, char* args[])
 	using tt = int;
 	std::vector<tt> vi;
 	mesh.setMeshData(load_obj("monkeyhard.objm"));
-	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");
 	Lemur::ConsoleLogger::Info("mdswe", "suffsdap");
@@ -92,7 +90,6 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
-#define MODEL_MODE
 #ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
 #else
