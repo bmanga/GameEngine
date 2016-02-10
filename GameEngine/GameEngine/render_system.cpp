@@ -159,26 +159,6 @@ void RenderSystem::render(Lemur::Camera camera)
 	glUniform1i(mat_specular_uniform, 1);
 	glUniform1f(mat_shininess_uniform, 64.0f);
 
-	/*int light_pos_uniform = active_program->getUniformLocation("light.position");
-	int light_ambient_uniform = active_program->getUniformLocation("light.ambient");
-	int light_diffuse_uniform = active_program->getUniformLocation("light.diffuse");
-	int light_specular_uniform = active_program->getUniformLocation("light.specular");
-
-	glUniform3f(light_pos_uniform, light_pos.x, light_pos.y, light_pos.z);
-	glUniform3f(light_ambient_uniform, 0.2f, 0.2f, 0.2f);
-	glUniform3f(light_diffuse_uniform, 0.5f, 0.5f, 0.5f);
-	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
-
-	int light_direction_uniform = active_program->getUniformLocation("light.direction");
-	int light_constant_uniform = active_program->getUniformLocation("light.constant");
-	int light_linear_uniform = active_program->getUniformLocation("light.linear");
-	int light_quadratic_uniform = active_program->getUniformLocation("light.quadratic");
-
-	glUniform3f(light_direction_uniform, -0.2f, -1.0f, -0.3f);
-	glUniform1f(light_constant_uniform, 1.0f);
-	glUniform1f(light_linear_uniform, 0.09f);
-	glUniform1f(light_quadratic_uniform, 0.032f);*/
-
 	int dir_light_direction_uniform = active_program->getUniformLocation("dir_light.direction");
 	int dir_light_ambient_uniform = active_program->getUniformLocation("dir_light.ambient");
 	int dir_light_diffuse_uniform = active_program->getUniformLocation("dir_light.diffuse");
@@ -272,8 +252,8 @@ void RenderSystem::render(Lemur::Camera camera)
 	glUniform1f(spot_light_linear_uniform, 0.09f);
 	glUniform1f(spot_light_quadratic_uniform, 0.032f);
 	glUniform3f(spot_light_ambient_uniform, 0.0f, 0.0f, 0.0f);
-	glUniform3f(spot_light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(spot_light_specular_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(spot_light_diffuse_uniform, 1.0f, 0.0f, 1.0f);
+	glUniform3f(spot_light_specular_uniform, 1.0f, 0.0f, 1.0f);
 
 	// Set vertex data
 	global_vbo->bind();

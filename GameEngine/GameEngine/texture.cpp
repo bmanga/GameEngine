@@ -13,7 +13,31 @@ Texture::Texture(const char* path)
 		printf("%s is not a valid texture file!\n", path);
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);
+	freePixels(pixels);
+}
+
+Texture::Texture(unsigned char* pixels, unsigned int width, unsigned int height)
+{
+	glGenTextures(1, &id);
+	bind();
+
+	this->width = width;
+	this->height = height;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);
+	freePixels(pixels);
+}
+
+Texture::Texture(unsigned char* pixels, unsigned int width, unsigned int height, TextureFormat format, TextureFormat internal_format)
+{
+	glGenTextures(1, &id);
+	bind();
+
+	this->width = width;
+	this->height = height;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, pixels);
 	freePixels(pixels);
 }
 
