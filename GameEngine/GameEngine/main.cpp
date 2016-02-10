@@ -49,7 +49,7 @@ int main(int argc, char* args[])
 	int y = 1;
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("monkeyhard.objm"));
+	mesh.setMeshData(load_obj("monkeydetailsane.obj"));
 	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");

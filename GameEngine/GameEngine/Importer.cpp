@@ -47,8 +47,8 @@ ObjFaceElements get_index_elements(const std::string& str);
 void parse_face_indices(ObjFaceElements elements, Lemur::vector<Lemur::u32>& vertexi, Lemur::vector<Lemur::u32>& texturei, Lemur::vector<Lemur::u32>& normali, std::istringstream& data);
 
 void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
-	const Lemur::vector<Lemur::u32>& v_index,
-	const Lemur::vector<Lemur::u32>& n_index);
+	Lemur::vector<Lemur::u32>& v_index,
+	Lemur::vector<Lemur::u32>& n_index);
 
 MeshData load_obj(const char* path)
 {
@@ -146,20 +146,24 @@ void parse_vertex_normals(std::vector<vec3>& normalData, std::istringstream& dat
 void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<vec3>& normals,
 	Lemur::vector<Lemur::u32>& v_indices, Lemur::vector<Lemur::u32>& n_indices)
 {
-	std::set<std::pair<Lemur::u32, Lemur::u32>> vi_ni_pairs;
+	using u32Pair = std::pair<Lemur::u32, Lemur::u32>;
 
-	ASSERT_CLERROR(v_indices.size() == n_indices.size(), CODE_LOCATION, "")
-	for (auto index = 0u; index < v_indices.size(); ++index)
+	Lemur::vector<u32Pair> unique_pairs;
+	unique_pairs.reserve(v_indices.size());
+
+	for (size_t index = 0u; index < v_indices.size(); ++index)
 	{
-		std::pair<Lemur::u32, Lemur::u32> vi_ni(v_indices[index], n_indices[index]);
-		auto it = vi_ni_pairs.find(vi_ni);
+		u32Pair vi_ni(v_indices[index], n_indices[index]);
 
-		if(it != vi_ni_pairs.end())
-		{
-			// The pair already exists
-			if(it->first == vi_ni.first)
-			{
-				//They share the same vertex. Create a new one
+		auto it = std::find(unique_pairs.begin(), unique_pairs.end(), vi_ni);
+
+
+		if (it == unique_pairs.end())
+		{ //The pair shares either of the values or neither (not both)
+
+			if (it->first == vi_ni.first)
+			{//They share the same vertex. Create a new one
+
 				auto copy = vertices[it->first];
 				Lemur::u32 new_index = vertices.size();
 				vertices.push_back(std::move(copy));
@@ -168,9 +172,9 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 				vi_ni.first = new_index;
 			}
 
-			if(it->second == vi_ni.second)
-			{
-				//they share the same normal. Create a new one
+			else if (it->second == vi_ni.second)
+			{//they share the same normal. Create a new one
+
 				auto copy = normals[it->second];
 				Lemur::u32 new_index = normals.size();
 				normals.push_back(std::move(copy));
@@ -178,11 +182,18 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 				//update vi_ni
 				vi_ni.second = new_index;
 			}
+
+			//Add the newly created pair
+			unique_pairs.push_back(vi_ni);
+
+			//Update the indices
+			v_indices[index] = vi_ni.first;
+			n_indices[index] = vi_ni.second;
 		}
-
-
-		vi_ni_pairs.insert(vi_ni);
-		
+		else
+		{
+			//This pair already exists. Do nothing
+		}
 	}
 }
 
@@ -214,10 +225,28 @@ void parse_face_indices(ObjFaceElements elements,
 	}
 }
 
-void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals, 
-	const Lemur::vector<Lemur::u32>& v_indices, 
-	const Lemur::vector<Lemur::u32>& n_indices)
+void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
+	Lemur::vector<Lemur::u32>& v_indices,
+	Lemur::vector<Lemur::u32>& n_indices)
 {
+#if 1
+	Lemur::vector<Lemur::u32> unique_v_indices(v_indices);
+	std::sort(unique_v_indices.begin(), unique_v_indices.end());
+	unique_v_indices.erase(std::unique(unique_v_indices.begin(), unique_v_indices.end()), unique_v_indices.end());
+	ASSERT_CLERROR(unique_v_indices.size() == normals.size(), CODE_LOCATION, "something is very wrong")
+
+
+	struct tmp_pair
+	{
+		vec3 normal;
+		Lemur::u32 index;
+	};
+
+	Lemur::vector<tmp_pair> pairs(normals.size());
+
+	
+}
+#else
 
 	auto index = 0u;
 	auto vi_it = v_indices.begin();
@@ -229,11 +258,12 @@ void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
 	{		
 
 		sorted_vector[n_indices[index]] = normals[v_indices[index]];
+		n_indices[index] = v_indices[index];
 	}
 
 	normals = sorted_vector;
 }
-
+#endif
 ObjFaceElements get_index_elements(const std::string& str)
 {
 	using namespace std;
