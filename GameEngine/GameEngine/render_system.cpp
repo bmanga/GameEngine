@@ -44,6 +44,9 @@ bool RenderSystem::initGL()
 
 	active_program = new ShaderProgram("mapped_material_vertex.vert", "mapped_material_fragment.frag");
 
+
+	//DEBUG
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// Initialize clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
