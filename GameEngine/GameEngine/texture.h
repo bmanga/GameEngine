@@ -2,6 +2,12 @@
 
 #include "opengl_master.h"
 
+enum TextureFormat
+{
+	RGB = GL_RGB,
+	RED = GL_RED
+};
+
 enum TextureWrapType
 {
 	REPEAT = GL_REPEAT,
@@ -33,6 +39,8 @@ private:
 
 public:
 	Texture(const char* path);
+	Texture(unsigned char* pixels, unsigned int width, unsigned int height);
+	Texture(unsigned char* pixels, unsigned int width, unsigned int height, TextureFormat format, TextureFormat internal_format);
 	~Texture();
 
 	void setWrapType(TextureWrapType s_type, TextureWrapType t_type);
@@ -42,4 +50,9 @@ public:
 
 	bool isBound();
 	void bind();
+
+	unsigned int getId()
+	{
+		return id;
+	}
 };
