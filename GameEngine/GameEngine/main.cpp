@@ -14,6 +14,8 @@
 #include "Importer.h"
 #include "Lemur.h"
 
+#include "linear_allocator.h"
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -34,6 +36,9 @@ Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
+#define MEM_SIZE (1024 * 1024 * 1000) // 1 GB
+LinearAllocator* linear_allocator = nullptr;
+
 //#define MODEL_MODE
 
 void run()
@@ -49,13 +54,24 @@ int main(int argc, char* args[])
 	int y = 1;
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("monkeydetailsane.obj"));
+	mesh.setMeshData(load_obj("testcube.objm"));
 	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");
 	Lemur::ConsoleLogger::Info("mdswe", "suffsdap");
 	Lemur::ConsoleLogger::Debug("msdfse", "ssdsup");
 	Lemur::ConsoleLogger::Warning("mfste", "susdgfdsp");
+
+	// vvv LINEAR ALLOCATOR vvv
+	void* mem = malloc(MEM_SIZE);
+	linear_allocator = new LinearAllocator(MEM_SIZE, mem);
+
+	std::string* s = new(linear_allocator->allocate(sizeof(std::string), 4)) std::string();
+	*s = "foo";
+
+	std::string* s2 = new(linear_allocator->allocate(sizeof(std::string), 4)) std::string();
+	*s2 = "bar";
+	// ^^^ LINEAR ALLOCATOR ^^^
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);
@@ -92,7 +108,6 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
-#define MODEL_MODE
 #ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
 #else

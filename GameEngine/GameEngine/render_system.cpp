@@ -1,5 +1,12 @@
 #include "render_system.h"
 
+/*
+THE GRAPHICS PIPELINE:
+
+https://old.cg.tuwien.ac.at/research/publications/2007/bauchinger-2007-mre/bauchinger-2007-mre-Thesis.pdf
+Page 48: Starts covering the graphics pipeline of the YARE game engine.
+*/
+
 GLuint VertexBufferObject::bound_id = 0;
 GLuint IndexBufferObject::bound_id = 0;
 

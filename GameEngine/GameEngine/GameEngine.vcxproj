@@ -161,6 +161,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="ConsoleLogger.cpp" />
+    <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -179,7 +180,9 @@
     <ClInclude Include="Importer.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
+    <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="allocator.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="opengl_master.h" />

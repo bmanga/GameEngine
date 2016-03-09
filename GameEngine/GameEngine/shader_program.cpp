@@ -118,4 +118,9 @@ void ShaderProgram::printLog()
 	}
 }
 
+std::string* ShaderProgram::getParameters()
+{
+	return RESERVED;
+}
+
 unsigned int ShaderProgram::using_id = 0;
