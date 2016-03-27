@@ -2,15 +2,16 @@
 
 #include "types.h"
 #include "Mesh.h"
-#include <map>
+#include <unordered_map>
+#include "BufferObject.h"
 
 namespace Lemur{
 
 struct IndexedMesh
 {
-	i32 vbo;
-	i32 offset;
-	i32 ibo;
+	VertexBufferObject vbo;
+	u32 offset;
+	IndexBufferObject ibo;
 };
 class MeshManager
 {
@@ -18,12 +19,12 @@ public:
 	MeshManager();
 	~MeshManager();
 
-	IndexedMesh indexMesh(Mesh&& mesh)
-	{
-		
-	}
+	IndexedMesh indexMesh(Mesh&& mesh);
 
-	//std::map<string, IndexedMesh>
+
+	IndexedMesh loadMesh(const char* name);
+
+	std::unordered_map<string, IndexedMesh> m_meshes;
 };
 
 

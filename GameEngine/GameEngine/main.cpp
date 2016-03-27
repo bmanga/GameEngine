@@ -16,6 +16,8 @@
 
 #include "linear_allocator.h"
 
+
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -39,7 +41,7 @@ void handleMouse(int x, int y);
 #define MEM_SIZE (1024 * 1024 * 1000) // 1 GB
 LinearAllocator* linear_allocator = nullptr;
 
-//#define MODEL_MODE
+#define MODEL_MODE
 
 void run()
 {
@@ -55,6 +57,7 @@ int main(int argc, char* args[])
 	using tt = int;
 	std::vector<tt> vi;
 	mesh.setMeshData(load_obj("testcube.objm"));
+	mesh.dumpToFile("tests\\testcube.lbm");
 	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");
@@ -72,6 +75,9 @@ int main(int argc, char* args[])
 	std::string* s2 = new(linear_allocator->allocate(sizeof(std::string), 4)) std::string();
 	*s2 = "bar";
 	// ^^^ LINEAR ALLOCATOR ^^^
+
+	std::vector<int> v2;
+	v2.push_back(11);
 
 	TaskExecutor ts;
 	//auto m = ts.schedule(run);

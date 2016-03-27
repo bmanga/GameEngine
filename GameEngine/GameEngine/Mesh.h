@@ -15,6 +15,8 @@ public:
 	Mesh();
 	~Mesh();
 
+	void dumpToFile(const std::string& str);
+
 	void setMeshData(MeshData&& data);
 
 	void* vertexBuffer();

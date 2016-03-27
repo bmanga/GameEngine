@@ -1,6 +1,6 @@
 #include "Mesh.h"
 #include <tuple>
-
+#include <fstream>
 
 Mesh::Mesh()
 {
@@ -9,6 +9,39 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
+}
+
+void Mesh::dumpToFile(const std::string& str)
+{
+	struct BuffersInfo
+	{
+		u32 vertex_count;
+		u32 normal_count;
+		u32 textcoords_count;
+		u32 index_count : 30;
+		u32 index_underlying_type : 2;
+
+	};
+
+	using namespace std;
+	m_vertex_data.shrink_to_fit();
+	m_texture_data.shrink_to_fit();
+	m_normal_data.shrink_to_fit();
+	m_vertex_indices.shrink_to_fit();
+
+	fstream binOut(str, ios::out | ios::binary);
+	BuffersInfo info{
+		vertexCount(),
+		normalCount(),
+		m_texture_data.size(),
+		vertexIndexCount(),
+		2u
+	};
+	binOut.write((char*)&info, sizeof(BuffersInfo));
+	binOut.write((char*)vertexBuffer(), vertexBufferSize());
+	binOut.write((char*)normalBuffer(), normalBufferSize());
+	binOut.write((char*)m_texture_data.data(), m_texture_data.size() * sizeof(vec2));
+	binOut.write((char*)vertexIndexBuffer(), vertexIndexBufferSize());
 }
 
 void Mesh::setMeshData(MeshData&& data)

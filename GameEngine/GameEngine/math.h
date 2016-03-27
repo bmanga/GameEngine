@@ -10,6 +10,7 @@ namespace Lemur { namespace math {
 
 using namespace glm;
 
+static_assert(sizeof(vec3) == 4 * 3, "");
 
 inline double dtan(double angle)
 {

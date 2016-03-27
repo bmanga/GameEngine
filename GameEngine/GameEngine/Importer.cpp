@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <set>
 #include "Lemur.h"
+#include <assimp\Importer.hpp>
 
 std::string DEFAULT_LOC = R"(../assets/mesh/)";
 using namespace Lemur;
@@ -155,12 +156,22 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 	{
 		u32Pair vi_ni(v_indices[index], n_indices[index]);
 
-		auto it = std::find(unique_pairs.begin(), unique_pairs.end(), vi_ni);
+		auto it = std::find_if(unique_pairs.begin(), unique_pairs.end(), [&vi_ni](const u32Pair& p)
+		{
+			bool a = p.first == vi_ni.first;
+			bool b = p.second == vi_ni.second;
+			return (!a && b) || a;
+		});
 
 
-		if (it == unique_pairs.end())
+		while (it != unique_pairs.end())
 		{ //The pair shares either of the values or neither (not both)
-
+			it = std::find_if(unique_pairs.begin(), unique_pairs.end(), [&vi_ni](const u32Pair& p)
+			{
+				bool a = p.first == vi_ni.first;
+				bool b = p.second == vi_ni.second;
+				return (!a && b) || a;
+			});
 			if (it->first == vi_ni.first)
 			{//They share the same vertex. Create a new one
 
@@ -172,7 +183,13 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 				vi_ni.first = new_index;
 			}
 
-			else if (it->second == vi_ni.second)
+			it = std::find_if(unique_pairs.begin(), unique_pairs.end(), [&vi_ni](const u32Pair& p)
+			{
+				bool a = p.first == vi_ni.first;
+				bool b = p.second == vi_ni.second;
+				return (!a && b) || a;
+			});
+			if (it->second == vi_ni.second)
 			{//they share the same normal. Create a new one
 
 				auto copy = normals[it->second];
@@ -183,17 +200,16 @@ void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<v
 				vi_ni.second = new_index;
 			}
 
-			//Add the newly created pair
-			unique_pairs.push_back(vi_ni);
 
-			//Update the indices
-			v_indices[index] = vi_ni.first;
-			n_indices[index] = vi_ni.second;
 		}
-		else
-		{
-			//This pair already exists. Do nothing
-		}
+
+
+		//Add the pair
+		unique_pairs.push_back(vi_ni);
+
+		//Update the indices
+		v_indices[index] = vi_ni.first;
+		n_indices[index] = vi_ni.second;
 	}
 }
 
@@ -229,7 +245,7 @@ void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
 	Lemur::vector<Lemur::u32>& v_indices,
 	Lemur::vector<Lemur::u32>& n_indices)
 {
-#if 1
+#if 0
 	Lemur::vector<Lemur::u32> unique_v_indices(v_indices);
 	std::sort(unique_v_indices.begin(), unique_v_indices.end());
 	unique_v_indices.erase(std::unique(unique_v_indices.begin(), unique_v_indices.end()), unique_v_indices.end());
