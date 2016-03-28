@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include <unordered_map>
 #include "BufferObject.h"
+#include <string>
 
 namespace Lemur{
 
@@ -24,7 +25,7 @@ public:
 
 	IndexedMesh loadMesh(const char* name);
 
-	std::unordered_map<string, IndexedMesh> m_meshes;
+	std::unordered_map<std::string, IndexedMesh> m_meshes;
 };
 
 
