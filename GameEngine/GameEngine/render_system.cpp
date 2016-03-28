@@ -2,6 +2,8 @@
 
 #include "Importer.h"
 
+
+
 /*
 THE GRAPHICS PIPELINE:
 
@@ -11,7 +13,7 @@ Page 48: Starts covering the graphics pipeline of the YARE game engine.
 
 GLuint VertexBufferObject::bound_id = 0;
 GLuint IndexBufferObject::bound_id = 0;
-
+/*
 // Positions all containers
 glm::vec3 cube_positions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
@@ -331,7 +333,6 @@ void RenderSystem::render(Lemur::Camera camera)
 	glUseProgram(NULL);
 }
 
-/*
 void RenderSystem::renderMesh(Lemur::Camera camera)
 {
 	// Clear color buffer
@@ -418,7 +419,6 @@ void RenderSystem::setMesh(Mesh* mesh)
 	mesh_normal_bo->bind();
 	mesh_normal_bo->bufferData(mesh->normalBufferSize(), (float*)mesh->normalBuffer(), STATIC_DRAW);
 }
-*/
 
 VertexBufferObject* component_vbo = nullptr;
 IndexBufferObject* component_ibo = nullptr;
@@ -502,6 +502,100 @@ void RenderSystem::renderComponent(Lemur::Camera camera)
 
 	component_ibo->bind();
 	glDrawElements(GL_TRIANGLES, component->mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
+
+	// Disable vertex position
+	glDisableVertexAttribArray(pos_attrib);
+	glDisableVertexAttribArray(norm_attrib);
+
+	// Unbind program
+	glUseProgram(NULL);
+}
+*/
+
+glm::vec3 mesh_light_pos(0.0f, 3.0f, 0.0f);
+bool bos_created = false;
+
+void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
+{
+	const RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
+
+	if (!bos_created) {
+		component_vbo = new VertexBufferObject();
+		component_vbo->bind();
+		component_vbo->bufferData(renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
+
+		component_ibo = new IndexBufferObject();
+		component_ibo->bind();
+		component_ibo->bufferData(renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
+
+		component_nbo = new VertexBufferObject();
+		component_nbo->bind();
+		component_nbo->bufferData(renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
+
+		bos_created = true;
+	}
+
+	// Initialize clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	// Clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Bind program
+	renderable.program->use();
+
+	lm::mat4 view = camera.getView();
+	GLint view_uniform = renderable.program->getUniformLocation("view");
+	glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+
+	// Create the perspective projection matrix
+	lm::mat4 proj = camera.getProjection();
+	GLint proj_uniform = renderable.program->getUniformLocation("proj");
+	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+
+	// Apply the model transformation
+	model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+	int model_uniform = renderable.program->getUniformLocation("model");
+	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+
+	int mat_ambient_uniform = renderable.program->getUniformLocation("material.ambient");
+	int mat_diffuse_uniform = renderable.program->getUniformLocation("material.diffuse");
+	int mat_specular_uniform = renderable.program->getUniformLocation("material.specular");
+	int mat_shininess_uniform = renderable.program->getUniformLocation("material.shininess");
+
+	glUniform3f(mat_ambient_uniform, 0.0215f, 0.1745f, 0.0215f);
+	glUniform3f(mat_diffuse_uniform, 0.07568f, 0.61424f, 0.07568f);
+	glUniform3f(mat_specular_uniform, 0.633f, 0.727811f, 0.633f);
+	glUniform1f(mat_shininess_uniform, 0.6f);
+
+	int light_pos_uniform = renderable.program->getUniformLocation("light.position");
+	int light_ambient_uniform = renderable.program->getUniformLocation("light.ambient");
+	int light_diffuse_uniform = renderable.program->getUniformLocation("light.diffuse");
+	int light_specular_uniform = renderable.program->getUniformLocation("light.specular");
+
+	glUniform3f(light_pos_uniform, mesh_light_pos.x, mesh_light_pos.y, mesh_light_pos.z);
+	glUniform3f(light_ambient_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
+
+	component_vbo->bind();
+
+	// Enable vertex position
+	int pos_attrib = renderable.program->getAttribLocation("position");
+	glEnableVertexAttribArray(pos_attrib);
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	component_nbo->bind();
+
+	int norm_attrib = renderable.program->getAttribLocation("in_normal");
+	glEnableVertexAttribArray(norm_attrib);
+	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	component_ibo->bind();
+	glDrawElements(GL_TRIANGLES, renderable.mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
 
 	// Disable vertex position
 	glDisableVertexAttribArray(pos_attrib);

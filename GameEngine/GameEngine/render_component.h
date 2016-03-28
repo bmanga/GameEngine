@@ -1,14 +1,17 @@
 #pragma once
 
+#include "ecs\component.h"
+
 #include "texture.h"
 #include "Mesh.h"
 #include "shader_program.h"
 
-class RenderComponent
+struct RenderComponent : public ecs::Component
 {
-public:
+	static constexpr ecs::ComponentType type = 1337;
+
 	int x, y, z;				// Make component
-	int rot_x, rot_y, rot_z;	// Make component?
+	int rot_x, rot_y, rot_z;	// Make component
 	ShaderProgram* program;
 	Texture* texture;
 	Mesh* mesh;

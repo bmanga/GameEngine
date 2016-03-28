@@ -30,11 +30,11 @@ class ComponentStore : public IComponentStore
 
 private:
 	std::unordered_map<Entity, C> store;
-	static const ComponentType type = C::type;
+	static constexpr ComponentType type = C::type;
 
 public:
-	ComponentStore();
-	~ComponentStore();
+	//ComponentStore()
+	//~ComponentStore();
 
 	/*
 		Add (move) a Component (of the same type as ComponentStore) associated to an Entity.

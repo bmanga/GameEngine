@@ -43,7 +43,7 @@ public:
 	{
 		static_assert(std::is_base_of<Component, C>::value, "C must be derived from the Component struct");
 		static_assert(C::type != _invalid_component_type, "C must define a valid non-zero type");
-		return component_store
+		return component_stores.insert(std::make_pair(C::type, IComponentStore::ptr(new ComponentStore<C>()))).second;
 	}
 
 	/*
@@ -88,12 +88,12 @@ public:
 	{
 		static_assert(std::is_base_of<Component, C>::value, "C must be derived from the Component struct");
 		static_assert(C::type != _invalid_component_type, "C must define a valid non-zero type");
-		auto entity = entities.find(entity);
-		if (entities.end() == entity)
+		auto e = entities.find(entity);
+		if (entities.end() == e)
 		{
 			throw std::runtime_error("The Entity does not exist");
 		}
-		(*entity).second.insert(C::type);
+		(*e).second.insert(C::type);
 		return getComponentStore<C>().add(entity, std::move(component));
 	}
 

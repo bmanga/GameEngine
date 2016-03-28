@@ -2,6 +2,12 @@
 
 #include "component_type.h"
 
+template <size_t N>
+struct ConstVal
+{
+	enum {value = N};
+};
+
 namespace ecs
 {
 
@@ -14,7 +20,8 @@ namespace ecs
 struct Component
 {
 	// Default invalid component type
-	static const ComponentType type = _invalid_component_type;
+	static constexpr ComponentType type = _invalid_component_type;
+
 };
 
 }

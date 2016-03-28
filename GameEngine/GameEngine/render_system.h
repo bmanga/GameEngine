@@ -14,6 +14,9 @@
 #include "Mesh.h"
 
 #include "render_component.h"
+#include "ecs\system.h"
+#include "ecs\manager.h"
+#include "ecs\component_type.h"
 
 namespace lm = Lemur::math;
 
@@ -89,6 +92,7 @@ public:
 	}
 };
 
+/*
 class RenderSystem
 {
 private:
@@ -120,4 +124,32 @@ public:
 	void setMesh(Mesh* mesh);
 
 	void renderComponent(Lemur::Camera camera);
+};
+*/
+
+class RenderSystem : public ecs::System
+{
+private:
+	Lemur::math::mat4 model;
+	Lemur::Camera camera;
+
+	VertexBufferObject* component_vbo = nullptr;
+	IndexBufferObject* component_ibo = nullptr;
+	VertexBufferObject* component_nbo = nullptr;
+
+public:
+	RenderSystem(ecs::Manager& manager) :
+		ecs::System(manager)
+	{
+		ecs::ComponentTypeSet required_components;
+		required_components.insert(RenderComponent::type);
+		setRequiredComponents(std::move(required_components));
+	}
+
+	void updateCamera(Lemur::Camera camera)
+	{
+		this->camera = camera;
+	}
+
+	void updateEntity(float elapsed_time, ecs::Entity entity) override;
 };

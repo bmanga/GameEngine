@@ -14,11 +14,12 @@ ShaderProgram::ShaderProgram(Shader& vertex_shader, Shader& fragment_shader)
 }
 
 ShaderProgram::ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path)
+	
 {
-	id = glCreateProgram();
-
+	
 	vertex_shader = new Shader(VERTEX, vertex_shader_path);
 	fragment_shader = new Shader(FRAGMENT, fragment_shader_path);
+	id = glCreateProgram();
 
 	glAttachShader(id, vertex_shader->getId());
 	glAttachShader(id, fragment_shader->getId());

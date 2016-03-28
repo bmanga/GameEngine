@@ -39,7 +39,7 @@ protected:
 	*/
 	inline void setRequiredComponents(ComponentTypeSet&& required_components)
 	{
-		required_components = std::move(required_components);
+		this->required_components = std::move(required_components);
 	}
 
 	/*

@@ -16,7 +16,9 @@
 
 #include "linear_allocator.h"
 
-
+#include "render_component.h"
+#include "ecs\manager.h"
+#include "ecs\entity.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -30,7 +32,8 @@ void update();
 SDL_Window* global_window = nullptr;
 SDL_GLContext global_context;
 
-RenderSystem renderer;
+ecs::Manager manager;
+RenderSystem* renderer = new RenderSystem(manager);
 
 Lemur::Camera g_camera;
 
@@ -85,6 +88,21 @@ int main(int argc, char* args[])
 	// Enable text input
 	SDL_StartTextInput();
 
+	//////////////////////////////////////
+	manager.createComponentStore<RenderComponent>();
+	manager.addSystem(ecs::System::ptr(renderer));
+
+	RenderComponent component;
+	component.mesh = new Mesh();
+	component.mesh->setMeshData(load_obj("testcube.objm"));
+	component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
+	component.texture = new Texture("..\\assets\\textures\\crate.png");
+
+	ecs::Entity entity = manager.createEntity();
+	manager.addComponent(entity, std::move(component));
+	manager.registerEntity(entity);
+	//////////////////////////////////////
+
 	SDL_Event e;
 	bool quit = false;
 	while (!quit)
@@ -118,7 +136,10 @@ int main(int argc, char* args[])
 		renderer.renderMesh(g_camera);
 #else
 		//renderer.render(g_camera);
-		renderer.renderComponent(g_camera);
+		//renderer.renderComponent(g_camera);
+		
+		renderer->updateCamera(g_camera);
+		manager.updateEntities(0.0f);
 #endif
 
 		// Update screen
@@ -185,11 +206,11 @@ bool init()
 				}
 
 				// Initialize OpenGL
-				if (!renderer.initGL())
+				/*if (!renderer.initGL())
 				{
 					printf("Unable to initialize OpenGL!\n");
 					success = false;
-				}
+				}*/
 
 #ifdef MODEL_MODE
 				renderer.setMesh(&mesh);
