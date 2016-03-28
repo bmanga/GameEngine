@@ -14,6 +14,7 @@ struct IndexedMesh
 	u32 offset;
 	IndexBufferObject ibo;
 };
+
 class MeshManager
 {
 public:
@@ -23,9 +24,9 @@ public:
 	IndexedMesh indexMesh(Mesh&& mesh);
 
 
-	IndexedMesh loadMesh(const char* name);
+	const Mesh* loadMesh(const char* name);
 
-	std::unordered_map<std::string, IndexedMesh> m_meshes;
+	std::unordered_map<std::string, Mesh> m_meshes;
 };
 
 

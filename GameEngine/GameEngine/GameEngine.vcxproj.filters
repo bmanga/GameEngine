@@ -70,10 +70,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ecs\manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ecs</Filter>
     </ClCompile>
     <ClCompile Include="ecs\system.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -153,22 +153,22 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ecs\component.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs\component_store.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs\component_type.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs\entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\manager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
     <ClInclude Include="ecs\system.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\manager.h">
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

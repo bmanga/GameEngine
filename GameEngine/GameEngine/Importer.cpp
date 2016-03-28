@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <set>
 #include "Lemur.h"
-#include <assimp\Importer.hpp>
+
 
 std::string DEFAULT_LOC = R"(../assets/mesh/)";
 using namespace Lemur;

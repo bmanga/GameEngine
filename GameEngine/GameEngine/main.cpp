@@ -13,7 +13,7 @@
 #include "TaskExecutor.h"
 #include "Importer.h"
 #include "Lemur.h"
-
+#include "Mesh_v2.h"
 #include "linear_allocator.h"
 
 #include "render_component.h"
@@ -54,13 +54,14 @@ void run()
 
 int main(int argc, char* args[])
 {
+	todo::Mesh mq;
+	mq.loadFromFile("testcube.lbm");
 	using namespace std::string_literals;
 	double x = 2.3;
 	int y = 1;
 	using tt = int;
 	std::vector<tt> vi;
-	mesh.setMeshData(load_obj("testcube.objm"));
-	mesh.dumpToFile("tests\\testcube.lbm");
+
 	ASSERT_CLERROR(false, CODE_LOCATION," error here");
 	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
 	Lemur::ConsoleLogger::Warning("mgde", "sup");

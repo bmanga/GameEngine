@@ -4,7 +4,7 @@
 
 
 using Lemur::u32;
-
+using Lemur::u8;
 
 namespace todo {
 
@@ -16,16 +16,18 @@ namespace impl
 
 class Mesh
 {
-	struct BuffersInfo
+	//TODO: maybe use bitfileds? Not sure if it is worth the time
+	struct MeshBufferHeader
 	{
 		u32 vertex_count;
-		u32 normal_count;
-		u32 textcoords_count;
-		u32 index_count : 30;
-		u32 index_underlying_type : 2;
+		u32 index_count;
+
+		bool has_normals;
+		bool has_texture_coords;
+		u8  index_underlying_type;
 
 	};
-	static_assert(sizeof(BuffersInfo) == 4 * 4, "");
+	static_assert(sizeof(MeshBufferHeader) == 4 * 3, "");
 	//TODO(bmanga): could use offsetof instead of forcing size. Maybe later
 	
 public:
@@ -56,7 +58,7 @@ public:
 
 	size_t normalBufferSize() const;
 private:
-	BuffersInfo m_buffers_info;
+	MeshBufferHeader m_buffers_info;
 
 	// Memory Layout of m_buffer is:
 	// -vertex buffer data (vbo)
