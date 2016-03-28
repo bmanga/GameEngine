@@ -161,6 +161,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ecs\manager.cpp" />
+    <ClCompile Include="ecs\system.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="ConsoleLogger.cpp" />
     <ClCompile Include="Importer_Assimp.cpp" />
@@ -182,8 +184,12 @@
   <ItemGroup>
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="component_type.h" />
-    <ClInclude Include="entity.h" />
+    <ClInclude Include="ecs\component.h" />
+    <ClInclude Include="ecs\component_store.h" />
+    <ClInclude Include="ecs\component_type.h" />
+    <ClInclude Include="ecs\entity.h" />
+    <ClInclude Include="ecs\manager.h" />
+    <ClInclude Include="ecs\system.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
