@@ -19,6 +19,9 @@
     <Filter Include="Header Files\ecs">
       <UniqueIdentifier>{f8dd4909-0dc0-4657-9f69-d60a7f5a5283}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ecs">
+      <UniqueIdentifier>{d5361ffd-3448-4389-ac02-d451db356936}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -64,6 +67,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh_v2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,11 +152,23 @@
     <ClInclude Include="render_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="entity.h">
-      <Filter>Header Files\ecs</Filter>
+    <ClInclude Include="ecs\component.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="component_type.h">
-      <Filter>Header Files\ecs</Filter>
+    <ClInclude Include="ecs\component_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\component_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\system.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
