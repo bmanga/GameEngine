@@ -1,18 +1,10 @@
 #pragma once
-#include <vector>
-#include <filesystem>
-#include "math.h"
+#include <memory>
 #include "types.h"
-#include <gl/glew.h>
-using std::vector;
-using Lemur::math::vec3;
-using Lemur::math::vec2;
-using Lemur::MeshData;
-using Lemur::u32;
-using Lemur::u8;
-using Lemur::i8;
 
-namespace fs = std::experimental::filesystem;
+
+using Lemur::u32;
+
 
 namespace todo {
 

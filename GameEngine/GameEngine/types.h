@@ -2,17 +2,16 @@
 
 #include <cstdint>
 #include <tuple>
-#include <vector>
-#include <string>
+#include <experimental/vector>
 #include "math.h"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
+namespace Lemur{
 
-namespace Lemur
-{
+using glm::vec3;
+using glm::vec2;
 
-template <class T>
-using vector = std::vector<T>;
-using std::string;
 using  i8 = int8_t;
 using i16 = int16_t;
 using i32 = int32_t;
@@ -30,6 +29,8 @@ using MeshData = std::tuple <
 	std::vector<Lemur::u32>,//vector indices
 	std::vector<Lemur::u32>,//texture indices
 	std::vector < Lemur::u32 >> ;//normal indices
-}
 
+
+
+} // namespace Lemur
 

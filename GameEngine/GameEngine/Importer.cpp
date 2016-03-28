@@ -30,9 +30,9 @@ void parse_texture_coords(std::vector<vec2>& normalData, std::istringstream& dat
 void parse_vertex_normals(std::vector<vec3>& normalData, std::istringstream& data);
 
 void equalize_vertices_to_normals(std::vector<vec3>& vertices,
-	Lemur::vector<vec3>& normals,
-	Lemur::vector<Lemur::u32>& v_indices,
-	Lemur::vector<Lemur::u32>& n_indices);
+	std::vector<vec3>& normals,
+	std::vector<Lemur::u32>& v_indices,
+	std::vector<Lemur::u32>& n_indices);
 
 enum ObjFaceElements
 {
@@ -45,18 +45,18 @@ enum ObjFaceElements
 
 ObjFaceElements get_index_elements(const std::string& str);
 
-void parse_face_indices(ObjFaceElements elements, Lemur::vector<Lemur::u32>& vertexi, Lemur::vector<Lemur::u32>& texturei, Lemur::vector<Lemur::u32>& normali, std::istringstream& data);
+void parse_face_indices(ObjFaceElements elements, std::vector<Lemur::u32>& vertexi, std::vector<Lemur::u32>& texturei, std::vector<Lemur::u32>& normali, std::istringstream& data);
 
-void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
-	Lemur::vector<Lemur::u32>& v_index,
-	Lemur::vector<Lemur::u32>& n_index);
+void sort_normal_data_by_vertex_index(std::vector<vec3>& normals,
+	std::vector<Lemur::u32>& v_index,
+	std::vector<Lemur::u32>& n_index);
 
 MeshData load_obj(const char* path)
 {
 	ObjFaceElements face_elems = UNKNOWN;
-	vector<vec3> vertex_data, normal_data;
-	vector<vec2> texture_data;
-	vector<Lemur::u32> vertex_indices, normal_indices, texture_indices;
+	std::vector<vec3> vertex_data, normal_data;
+	std::vector<vec2> texture_data;
+	std::vector<Lemur::u32> vertex_indices, normal_indices, texture_indices;
 
 	auto fpath = DEFAULT_LOC + path;
 	std::ifstream file(fpath);
@@ -64,13 +64,13 @@ MeshData load_obj(const char* path)
 	if (!file) printf("could not find file %s", fpath.c_str());
 	//TODO: implement if things go wrong
 
-	string data;
+	std::string data;
 
 	while(getline(file, data))
 	{
 		std::istringstream stream(data);
 
-		string header = *std::istream_iterator<string>(stream);
+		std::string header = *std::istream_iterator<std::string>(stream);
 		
 		//parse the basics
 		if (header == "v") parse_vertices(vertex_data, stream);
@@ -144,12 +144,12 @@ void parse_vertex_normals(std::vector<vec3>& normalData, std::istringstream& dat
 	normalData.push_back(math::normalize(vec3{x, y, z}));
 }
 
-void equalize_vertices_to_normals(Lemur::vector<vec3>& vertices, Lemur::vector<vec3>& normals,
-	Lemur::vector<Lemur::u32>& v_indices, Lemur::vector<Lemur::u32>& n_indices)
+void equalize_vertices_to_normals(std::vector<vec3>& vertices, std::vector<vec3>& normals,
+	std::vector<Lemur::u32>& v_indices, std::vector<Lemur::u32>& n_indices)
 {
 	using u32Pair = std::pair<Lemur::u32, Lemur::u32>;
 
-	Lemur::vector<u32Pair> unique_pairs;
+	std::vector<u32Pair> unique_pairs;
 	unique_pairs.reserve(v_indices.size());
 
 	for (size_t index = 0u; index < v_indices.size(); ++index)
@@ -241,9 +241,9 @@ void parse_face_indices(ObjFaceElements elements,
 	}
 }
 
-void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
-	Lemur::vector<Lemur::u32>& v_indices,
-	Lemur::vector<Lemur::u32>& n_indices)
+void sort_normal_data_by_vertex_index(std::vector<vec3>& normals,
+	std::vector<Lemur::u32>& v_indices,
+	std::vector<Lemur::u32>& n_indices)
 {
 #if 0
 	Lemur::vector<Lemur::u32> unique_v_indices(v_indices);
@@ -268,7 +268,7 @@ void sort_normal_data_by_vertex_index(Lemur::vector<vec3>& normals,
 	auto vi_it = v_indices.begin();
 	auto ni_it = n_indices.begin();
 
-	Lemur::vector<vec3> sorted_vector(normals);
+	std::vector<vec3> sorted_vector(normals);
 
 	for (; index != v_indices.size() && index != n_indices.size(); ++index)
 	{		

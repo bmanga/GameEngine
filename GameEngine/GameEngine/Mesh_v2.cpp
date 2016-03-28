@@ -1,9 +1,12 @@
 #include "Mesh_v2.h"
-#include <tuple>
 #include <fstream>
+#include <filesystem>
+#include "types.h"
+#include <GL/glew.h>
 
+using namespace Lemur;
 namespace todo {
-static const fs::path BASEPATH("/../assets/mesh");
+static const std::experimental::filesystem::path BASEPATH("/../assets/mesh");
 
 Mesh::Mesh()
 {
@@ -43,12 +46,12 @@ u32 Mesh::vertexCount() const
 
 size_t Mesh::vertexBufferSize() const
 {
-	return m_buffers_info.vertex_count * sizeof(vec3);
+	return m_buffers_info.vertex_count * sizeof(Lemur::vec3);
 }
 
 size_t Mesh::textcoordsBufferSize() const
 {
-	return m_buffers_info.normal_count * sizeof(vec2);
+	return m_buffers_info.normal_count * sizeof(Lemur::vec2);
 }
 
 	void* Mesh::vertexIndexBuffer() const

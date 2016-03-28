@@ -44,7 +44,8 @@ class UniformProxy;
 
 		u32 program_id = 0;
 
-		static string DEFAULT_LOC;
+		//TODO: move this int cpp file and use filesystem library
+		static std::string DEFAULT_LOC;
 	};
 
 
