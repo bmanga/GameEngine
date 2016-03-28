@@ -10,7 +10,7 @@ Lemur::MeshManager::~MeshManager()
 {
 }
 
-Lemur::IndexedMesh Lemur::MeshManager::loadMesh(const char* name)
+const Mesh* Lemur::MeshManager::loadMesh(const char* name)
 {
 	VertexBufferObject vbo;
 	vbo.bind();

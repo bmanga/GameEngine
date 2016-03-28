@@ -43,7 +43,7 @@ public:
 	{
 		static_assert(std::is_base_of<Component, C>::value, "C must be derived from the Component struct");
 		static_assert(C::type != _invalid_component_type, "C must define a valid non-zero type");
-		return component_store
+		return component_store;
 	}
 
 	/*

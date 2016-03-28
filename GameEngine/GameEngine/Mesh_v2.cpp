@@ -20,12 +20,16 @@ Mesh::~Mesh()
 void Mesh::loadFromFile(const char* filename)
 {
 	using namespace std;
-	fstream BinaryFile(BASEPATH / filename, ios::in | ios::binary);
+	fstream BinaryFile(filename, ios::in | ios::binary);
+	if (!BinaryFile)
+	{
+		return;
+	}
 	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info), sizeof(MeshBufferHeader));
 	
 	//Now that we know the sizes, create the buffer
-	size_t BufferSize = vertexBufferSize() + normalBufferSize() +
-		textcoordsBufferSize() + vertexIndexBufferSize();
+	u32 BufferSize;
+	BinaryFile.read(reinterpret_cast<char*>(&BufferSize), sizeof(u32));
 
 	
 	m_buffer = std::unique_ptr<char[]>(new char[BufferSize]);
@@ -36,7 +40,7 @@ void Mesh::loadFromFile(const char* filename)
 
 void* Mesh::vertexBuffer() const
 {
-	return m_buffer.get();
+	return m_buffer.get() + vertexIndexBufferSize();
 }
 
 u32 Mesh::vertexCount() const
@@ -58,7 +62,7 @@ size_t Mesh::textcoordsBufferSize() const
 
 	void* Mesh::vertexIndexBuffer() const
 {
-	return m_buffer.get() + vertexBufferSize() + normalBufferSize() + textcoordsBufferSize();
+	return m_buffer.get();
 }
 
 u32 Mesh::vertexIndexBufferUnderlyingType() const
@@ -85,7 +89,7 @@ size_t Mesh::vertexIndexBufferSize() const
 
 void* Mesh::normalBuffer() const
 {
-	return m_buffer.get() + vertexBufferSize();
+	return m_buffer.get() + vertexIndexBufferSize() + vertexBufferSize();
 }
 
 u32 Mesh::normalCount() const
