@@ -16,6 +16,9 @@
     <Filter Include="tasks and executors">
       <UniqueIdentifier>{2691e30a-6f58-44a8-826a-d3cd2cb33da4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ecs">
+      <UniqueIdentifier>{f8dd4909-0dc0-4657-9f69-d60a7f5a5283}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -136,6 +139,15 @@
     </ClInclude>
     <ClInclude Include="Mesh_v2.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entity.h">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="component_type.h">
+      <Filter>Header Files\ecs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -13,6 +13,8 @@
 
 #include "Mesh.h"
 
+#include "render_component.h"
+
 namespace lm = Lemur::math;
 
 enum BufferDrawType
@@ -105,6 +107,8 @@ private:
 	IndexBufferObject* mesh_ibo = nullptr;
 	VertexBufferObject* mesh_normal_bo = nullptr;
 
+	RenderComponent* component = nullptr;
+
 public:
 	RenderSystem();
 	~RenderSystem();
@@ -114,4 +118,6 @@ public:
 
 	void renderMesh(Lemur::Camera camera);
 	void setMesh(Mesh* mesh);
+
+	void renderComponent(Lemur::Camera camera);
 };

@@ -41,7 +41,7 @@ void handleMouse(int x, int y);
 #define MEM_SIZE (1024 * 1024 * 1000) // 1 GB
 LinearAllocator* linear_allocator = nullptr;
 
-#define MODEL_MODE
+//#define MODEL_MODE
 
 void run()
 {
@@ -117,7 +117,8 @@ int main(int argc, char* args[])
 #ifdef MODEL_MODE
 		renderer.renderMesh(g_camera);
 #else
-		renderer.render(g_camera);
+		//renderer.render(g_camera);
+		renderer.renderComponent(g_camera);
 #endif
 
 		// Update screen
