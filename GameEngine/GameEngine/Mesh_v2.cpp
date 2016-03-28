@@ -21,7 +21,7 @@ void Mesh::loadFromFile(const char* filename)
 {
 	using namespace std;
 	fstream BinaryFile(BASEPATH / filename, ios::in | ios::binary);
-	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info), sizeof(BuffersInfo));
+	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info), sizeof(MeshBufferHeader));
 	
 	//Now that we know the sizes, create the buffer
 	size_t BufferSize = vertexBufferSize() + normalBufferSize() +
@@ -51,7 +51,9 @@ size_t Mesh::vertexBufferSize() const
 
 size_t Mesh::textcoordsBufferSize() const
 {
-	return m_buffers_info.normal_count * sizeof(Lemur::vec2);
+	return m_buffers_info.has_normals
+		? vertexCount() * sizeof(Lemur::vec2)
+		: 0;
 }
 
 	void* Mesh::vertexIndexBuffer() const
@@ -88,11 +90,13 @@ void* Mesh::normalBuffer() const
 
 u32 Mesh::normalCount() const
 {
-	return m_buffers_info.normal_count;
+	return m_buffers_info.has_normals
+		? vertexCount() 
+		: 0;
 }
 
 size_t Mesh::normalBufferSize() const
 {
-	return m_buffers_info.normal_count * sizeof(vec3);
+	return normalCount() * sizeof(vec3);
 }
 }
