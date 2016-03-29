@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs\component.h"
-
+#include "Mesh_v2.h"
 #include "texture.h"
 #include "Mesh_v2.h"
 #include "shader_program.h"

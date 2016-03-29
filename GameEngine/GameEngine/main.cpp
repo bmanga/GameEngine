@@ -55,7 +55,13 @@ void run()
 int main(int argc, char* args[])
 {
 	todo::Mesh mq;
-	mq.loadFromFile("testcube.lbm");
+	mq.loadFromFile("monkey.lbm");
+	float* ptr = (float*) mq.vertexBuffer();
+	for (int j = 0; j < 9; j += 3)
+	{
+		printf("%f %f %f \n", ptr[j], ptr[j + 1], ptr[j + 2]);
+	}
+
 	using namespace std::string_literals;
 	double x = 2.3;
 	int y = 1;
@@ -95,7 +101,7 @@ int main(int argc, char* args[])
 
 	RenderComponent component;
 	component.mesh = new todo::Mesh();
-	component.mesh->loadFromFile("monkeycompiled.lbm");
+	component.mesh->loadFromFile("..\\assets\\mesh\\monkey.lbm");
 	component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
 	component.texture = new Texture("..\\assets\\textures\\crate.png");
 
