@@ -4,7 +4,9 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <filesystem>
 
+using namespace std::experimental;
 using u32 = uint32_t;
 using u8 = uint8_t;
 struct MeshBufferHeader
@@ -29,7 +31,7 @@ Mesh AssimpLoadMesh(const char* filename)
 {
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+	const aiScene* scene = importer.ReadFile( filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
 	if(!scene)
 	{
@@ -118,6 +120,7 @@ Mesh AssimpLoadMesh(const char* filename)
 
 void DumpMeshToFile(const Mesh& mesh, const char* filename)
 {
+	std::experimental::filesystem::path p = "(../assets/mesh)";
 	std::fstream binOut(filename, std::ios::out | std::ios::binary);
 
 	binOut.write((char*)&mesh.info, sizeof(MeshBufferHeader));
@@ -132,5 +135,10 @@ int main()
 	std::cin >> model >> result;
 	auto mesh = AssimpLoadMesh(model.c_str());
 	DumpMeshToFile(mesh, result.c_str());
-
+	if (!mesh.buffer_size)
+	{
+		std::cout << "warning, no model found\n";
+		std::string s;
+		std::cin >> s;
+	}
 }
