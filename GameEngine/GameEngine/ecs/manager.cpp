@@ -27,7 +27,7 @@ void Manager::addSystem(const System::ptr& system_ptr)
 	// Checks that the required Components are specified
 	if ((!system_ptr) || (system_ptr->getRequiredComponents().empty()))
 	{
-		throw std::runtime_error("System should specify required components");
+		Lemur::ConsoleLogger::Error("manager.cpp", "System should specify required Components");
 	}
 
 	// Simply copy the pointer (instead of moving it) to allow for multiple insertions of the same shared pointer
@@ -44,7 +44,7 @@ size_t Manager::registerEntity(const Entity entity)
 	auto e = entities.find(entity);
 	if (entities.end() == e)
 	{
-		throw std::runtime_error("The Entity does not exist");
+		Lemur::ConsoleLogger::Error("manager.cpp", "The Entity does not exist");
 	}
 	auto entity_components = (*e).second;
 
@@ -73,7 +73,7 @@ size_t Manager::unregisterEntity(const Entity entity)
 	auto e = entities.find(entity);
 	if (entities.end() == e)
 	{
-		throw std::runtime_error("The Entity does not exist");
+		Lemur::ConsoleLogger::Error("manager.cpp", "The Entity does not exist");
 	}
 	auto entity_components = (*e).second;
 

@@ -94,8 +94,8 @@ int main(int argc, char* args[])
 	manager.addSystem(ecs::System::ptr(renderer));
 
 	RenderComponent component;
-	component.mesh = new Mesh();
-	component.mesh->setMeshData(load_obj("testcube.objm"));
+	component.mesh = new todo::Mesh();
+	component.mesh->loadFromFile("monkeycompiled.lbm");
 	component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
 	component.texture = new Texture("..\\assets\\textures\\crate.png");
 

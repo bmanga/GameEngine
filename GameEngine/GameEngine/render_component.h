@@ -3,7 +3,7 @@
 #include "ecs\component.h"
 
 #include "texture.h"
-#include "Mesh.h"
+#include "Mesh_v2.h"
 #include "shader_program.h"
 
 struct RenderComponent : public ecs::Component
@@ -14,5 +14,5 @@ struct RenderComponent : public ecs::Component
 	int rot_x, rot_y, rot_z;	// Make component
 	ShaderProgram* program;
 	Texture* texture;
-	Mesh* mesh;
+	todo::Mesh* mesh;
 };

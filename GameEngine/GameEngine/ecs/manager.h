@@ -15,6 +15,8 @@
 #include <limits>
 #include <stdexcept>
 
+#include "..\ConsoleLogger.h"
+
 namespace ecs
 {
 
@@ -57,7 +59,7 @@ public:
 		auto component_store = component_stores.find(C::type);
 		if (component_stores.end() == component_store)
 		{
-			throw std::runtime_error("The ComponentStore does not exist");
+			Lemur::ConsoleLogger::Error("manager.h", "The ComponentStore does not exist");
 		}
 		return reinterpret_cast<ComponentStore<C>&>(*(component_store->second));
 	}
@@ -91,7 +93,7 @@ public:
 		auto e = entities.find(entity);
 		if (entities.end() == e)
 		{
-			throw std::runtime_error("The Entity does not exist");
+			Lemur::ConsoleLogger::Error("manager.h", "The Entity does not exist");
 		}
 		(*e).second.insert(C::type);
 		return getComponentStore<C>().add(entity, std::move(component));
