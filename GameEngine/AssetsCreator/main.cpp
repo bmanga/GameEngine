@@ -29,9 +29,10 @@ struct Mesh
 
 Mesh AssimpLoadMesh(const char* filename)
 {
+	std::experimental::filesystem::path p = "../assets/mesh/unprocessed";
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile( filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+	const aiScene* scene = importer.ReadFile((p/filename).generic_string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
 	if(!scene)
 	{
@@ -120,8 +121,10 @@ Mesh AssimpLoadMesh(const char* filename)
 
 void DumpMeshToFile(const Mesh& mesh, const char* filename)
 {
-	std::experimental::filesystem::path p = "(../assets/mesh)";
-	std::fstream binOut(filename, std::ios::out | std::ios::binary);
+	std::experimental::filesystem::path p = "../assets/mesh";
+	//if (p.has_filename()) std::cout << "hellooo\n";
+	std::cout << p.root_name();
+	std::fstream binOut(p/filename, std::ios::out | std::ios::binary);
 
 	binOut.write((char*)&mesh.info, sizeof(MeshBufferHeader));
 	binOut.write((char*)&mesh.buffer_size, sizeof(u32));
@@ -130,15 +133,17 @@ void DumpMeshToFile(const Mesh& mesh, const char* filename)
 }
 int main()
 {
+	std::cout << "Model to load must be located is 'assets/mesh/unprocessed'\n"
+		         "output model will be located in 'assets/mesh'\n";
 	std::cout << "[model to load] [output file]: ";
 	std::string model, result;
 	std::cin >> model >> result;
 	auto mesh = AssimpLoadMesh(model.c_str());
 	DumpMeshToFile(mesh, result.c_str());
-	if (!mesh.buffer_size)
+	
+	std::cout << "press q to quit: ";
+	do
 	{
-		std::cout << "warning, no model found\n";
-		std::string s;
-		std::cin >> s;
-	}
+		std::cin >> model;
+	} while (model != "q");
 }

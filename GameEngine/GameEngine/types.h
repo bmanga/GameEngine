@@ -31,6 +31,5 @@ using MeshData = std::tuple <
 	std::vector < Lemur::u32 >> ;//normal indices
 
 
-
 } // namespace Lemur
 
