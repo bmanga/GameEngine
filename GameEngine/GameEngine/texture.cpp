@@ -1,16 +1,21 @@
 #include "texture.h"
 
 #include <stdio.h>
+#include "ConsoleLogger.h"
+#include "Lemur.h"
+#include "file_paths.h"
+
+namespace Lemur {
 
 Texture::Texture(const char* path)
 {
 	glGenTextures(1, &id);
 	bind();
 
-	unsigned char* pixels = loadPixels(path);
+	unsigned char* pixels = loadPixels((TEXTURE_PATH/path).string().c_str());
 	if (!pixels)
 	{
-		printf("%s is not a valid texture file!\n", path);
+		ConsoleLogger::Error(CODE_LOCATION, CSTR2("texture ", path, " not found"));
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);
@@ -97,3 +102,5 @@ void Texture::freePixels(unsigned char* pixels)
 }
 
 unsigned int Texture::bound_id = 0;
+
+}

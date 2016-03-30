@@ -1,48 +1,62 @@
 #pragma once
-#include <vector>
-
-#include "math.h"
+#include <memory>
 #include "types.h"
 
-using std::vector;
-using Lemur::math::vec3;
-using Lemur::math::vec2;
-using Lemur::MeshData;
-using Lemur::u32;
+namespace Lemur {
+
 class Mesh
 {
+	
+	//TODO: maybe use bitfileds? Not sure if it is worth the time
+	struct MeshBufferHeader
+	{
+		u32 vertex_count;
+		u32 index_count;
+
+		bool has_normals;
+		bool has_texture_coords;
+		u8  index_underlying_type;
+
+	};
+	static_assert(sizeof(MeshBufferHeader) == 4 * 3, "");
+	//TODO(bmanga): could use offsetof instead of forcing size. Maybe later
+	
 public:
-	Mesh();
-	~Mesh();
 
-	void dumpToFile(const std::string& str);
-
-	void setMeshData(MeshData&& data);
-
-	void* vertexBuffer();
+	void* vertexBuffer() const;
 
 	u32 vertexCount() const;
 
 	size_t vertexBufferSize() const;
 
-	void* vertexIndexBuffer();
+	size_t textcoordsBufferSize() const;
+
+	void* vertexIndexBuffer() const;
+
+	u32 vertexIndexBufferUnderlyingType() const;
 
 	u32 vertexIndexCount() const;
 
 	size_t vertexIndexBufferSize() const;
 
-	void* normalBuffer();
+	void* normalBuffer() const;
 
 	u32 normalCount() const;
 
 	size_t normalBufferSize() const;
-private:
-	vector<vec3> m_vertex_data;
-	vector<vec2> m_texture_data;
-	vector<vec3> m_normal_data;
 
-	vector<u32> m_vertex_indices;
-	vector<u32> m_texture_indices;
-	vector<u32> m_normal_indices;
+	Mesh() {};
+	Mesh(const char* filename);
+private:
+	void loadFromFile(const char* filename);
+	MeshBufferHeader m_buffers_info;
+
+	// Memory Layout of m_buffer is:
+	// -index buffer data (ibo)
+	// -vertex buffer data (vbo)
+	// -normal buffer data
+	// -textcoords buffer data
+	std::unique_ptr<char[]> m_buffer;
 };
 
+}// namespace Lemur

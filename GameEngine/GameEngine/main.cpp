@@ -5,17 +5,14 @@
 #include <stdio.h>
 #include <string>
 #include <memory>
-#include <iostream>
 #include "Camera.h"
-#include <typeinfo>
 #include "render_system.h"
 #include "ConsoleLogger.h"
 #include "TaskExecutor.h"
-#include "Importer.h"
 #include "Lemur.h"
-#include "Mesh_v2.h"
+#include "Mesh.h"
+#include "Manager.h"
 #include "linear_allocator.h"
-
 #include "render_component.h"
 #include "ecs\manager.h"
 #include "ecs\entity.h"
@@ -37,7 +34,6 @@ RenderSystem* renderer = new RenderSystem(manager);
 
 Lemur::Camera g_camera;
 
-Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
@@ -54,7 +50,8 @@ void run()
 
 int main(int argc, char* args[])
 {
-
+	Lemur::MeshManager mm;
+	Lemur::TextureManager tm;
 	using namespace std::string_literals;
 	double x = 2.3;
 	int y = 1;
@@ -93,10 +90,10 @@ int main(int argc, char* args[])
 	manager.addSystem(ecs::System::ptr(renderer));
 
 	RenderComponent component;
-	component.mesh = new todo::Mesh();
-	component.mesh->loadFromFile("..\\assets\\mesh\\model.lbm");
+
+	component.mesh = mm.load("model.lbm");
 	component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-	component.texture = new Texture("..\\assets\\textures\\crate.png");
+	component.texture =tm.load("crate.png");
 
 	ecs::Entity entity = manager.createEntity();
 	manager.addComponent(entity, std::move(component));

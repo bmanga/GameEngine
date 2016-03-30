@@ -72,7 +72,7 @@ Mesh AssimpLoadMesh(const char* filename)
 	//fill in the buffer
 
 	//indices
-	for (int j = 0; j < mesh->mNumFaces; ++j)
+	for (unsigned j = 0; j < mesh->mNumFaces; ++j)
 	{
 		aiFace face = mesh->mFaces[j];
 		//force size to 4 bytes per index
@@ -84,14 +84,14 @@ Mesh AssimpLoadMesh(const char* filename)
 
 	auto deleteme = buffer.get();
 	//vertices
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		size_t index = sizeof(aiVector3D) * j + indexBufferSize;
 		memcpy(&buffer[index], &mesh->mVertices[j], sizeof(aiVector3D));
 	}
 	
 	//normals
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		if (!info.has_normals) break;
 
@@ -102,7 +102,7 @@ Mesh AssimpLoadMesh(const char* filename)
 	}
 
 	//textcoords
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		if (!info.has_texture_coords) break;
 
