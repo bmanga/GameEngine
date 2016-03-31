@@ -78,11 +78,10 @@ Mesh AssimpLoadMesh(const char* filename)
 		//force size to 4 bytes per index
 		uint32_t indices[3] = { face.mIndices[0], face.mIndices[1], face.mIndices[2] };
 		
-		memcpy(&(buffer.get()[12 * j]), indices, 12);
+		memcpy(&(buffer[12 * j]), indices, 12);
 
 	}
 
-	auto deleteme = buffer.get();
 	//vertices
 	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{

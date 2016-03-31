@@ -161,9 +161,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ecs\manager.cpp" />
     <ClCompile Include="ecs\system.cpp" />
-    <ClCompile Include="Importer.cpp" />
     <ClCompile Include="ConsoleLogger.cpp" />
-    <ClCompile Include="Importer_Assimp.cpp" />
     <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
@@ -187,7 +185,6 @@
     <ClInclude Include="ecs\manager.h" />
     <ClInclude Include="ecs\system.h" />
     <ClInclude Include="file_paths.h" />
-    <ClInclude Include="Importer.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
     <ClInclude Include="linear_allocator.h" />
