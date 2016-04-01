@@ -29,9 +29,10 @@ struct Mesh
 
 Mesh AssimpLoadMesh(const char* filename)
 {
+	std::experimental::filesystem::path p = "../assets/mesh/unprocessed";
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile( filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+	const aiScene* scene = importer.ReadFile((p/filename).generic_string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
 	if(!scene)
 	{
@@ -71,26 +72,25 @@ Mesh AssimpLoadMesh(const char* filename)
 	//fill in the buffer
 
 	//indices
-	for (int j = 0; j < mesh->mNumFaces; ++j)
+	for (unsigned j = 0; j < mesh->mNumFaces; ++j)
 	{
 		aiFace face = mesh->mFaces[j];
 		//force size to 4 bytes per index
 		uint32_t indices[3] = { face.mIndices[0], face.mIndices[1], face.mIndices[2] };
 		
-		memcpy(&(buffer.get()[12 * j]), indices, 12);
+		memcpy(&(buffer[12 * j]), indices, 12);
 
 	}
 
-	auto deleteme = buffer.get();
 	//vertices
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		size_t index = sizeof(aiVector3D) * j + indexBufferSize;
 		memcpy(&buffer[index], &mesh->mVertices[j], sizeof(aiVector3D));
 	}
 	
 	//normals
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		if (!info.has_normals) break;
 
@@ -101,7 +101,7 @@ Mesh AssimpLoadMesh(const char* filename)
 	}
 
 	//textcoords
-	for (int j = 0; j < info.vertex_count; ++j)
+	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
 		if (!info.has_texture_coords) break;
 
@@ -120,8 +120,10 @@ Mesh AssimpLoadMesh(const char* filename)
 
 void DumpMeshToFile(const Mesh& mesh, const char* filename)
 {
-	std::experimental::filesystem::path p = "(../assets/mesh)";
-	std::fstream binOut(filename, std::ios::out | std::ios::binary);
+	std::experimental::filesystem::path p = "../assets/mesh";
+	//if (p.has_filename()) std::cout << "hellooo\n";
+	std::cout << p.root_name();
+	std::fstream binOut(p/filename, std::ios::out | std::ios::binary);
 
 	binOut.write((char*)&mesh.info, sizeof(MeshBufferHeader));
 	binOut.write((char*)&mesh.buffer_size, sizeof(u32));
@@ -130,15 +132,17 @@ void DumpMeshToFile(const Mesh& mesh, const char* filename)
 }
 int main()
 {
+	std::cout << "Model to load must be located is 'assets/mesh/unprocessed'\n"
+		         "output model will be located in 'assets/mesh'\n";
 	std::cout << "[model to load] [output file]: ";
 	std::string model, result;
 	std::cin >> model >> result;
 	auto mesh = AssimpLoadMesh(model.c_str());
 	DumpMeshToFile(mesh, result.c_str());
-	if (!mesh.buffer_size)
+	
+	std::cout << "press q to quit: ";
+	do
 	{
-		std::cout << "warning, no model found\n";
-		std::string s;
-		std::cin >> s;
-	}
+		std::cin >> model;
+	} while (model != "q");
 }

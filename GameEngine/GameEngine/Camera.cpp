@@ -12,7 +12,7 @@ using namespace Lemur;
 Camera::Camera() 
 	
 {
-	m_perspective = (glm::perspective(m_fov, 800.0f / 600.0f, 1.0f, 10.0f));
+	m_perspective = (glm::perspective(m_fov, m_aspect, m_zNear, m_zFar));
 }
 
 void Camera::rotateLocalX(float degrees)

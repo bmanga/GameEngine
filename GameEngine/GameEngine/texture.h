@@ -2,6 +2,7 @@
 
 #include "opengl_master.h"
 
+namespace Lemur {
 enum TextureFormat
 {
 	RGB = GL_RGB,
@@ -56,3 +57,5 @@ public:
 		return id;
 	}
 };
+
+}// namespace Lemur;

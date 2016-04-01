@@ -46,8 +46,14 @@ else {}\
 #define ASSERT_CLINFO
 #endif
 
+
+inline std::string to_string(const char* str)
+{
+	return str;
+}
+
 #define CSTR(a, b) \
-(std::string(a) + std::to_string(b)).c_str()
+(std::string(a) + to_string(b)).c_str()
 
 #define CSTR2(a, b, c) \
-(std::string(a) + std::to_string(b) + std::string(c)).c_str()
+(std::string(a) + to_string(b) + std::string(c)).c_str()

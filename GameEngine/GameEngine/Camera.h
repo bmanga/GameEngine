@@ -72,10 +72,10 @@ private:
 	vec3 m_direction {0, -1, 0.0};
 	vec3 m_up{ 0.0, 0.0, 1.0 };
 
-	float m_zNear = 0.01f;
-	float m_zFar  = 1000.0f;
+	float m_zNear = 1.f;
+	float m_zFar  = 100.0f;
 	float m_fov = glm::radians(45.0f);
-	float m_aspect = 16.0f / 9.0f;
+	float m_aspect = 8.0f / 6.0f;
 };
 	
 }

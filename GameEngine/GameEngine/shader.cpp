@@ -2,8 +2,9 @@
 
 #include <stdio.h>
 #include <fstream>
-
-std::string Shader::DEFAULT_LOCATION("../assets/shaders/");
+#include "file_paths.h"
+#include "ConsoleLogger.h"
+#include "Lemur.h"
 
 Shader::Shader(ShaderType type, const char* path)
 {
@@ -15,15 +16,17 @@ Shader::Shader(ShaderType type, const char* path)
 	compile();
 }
 
-void Shader::loadSource(const char* path)
+void Shader::loadSource(const char* name)
 {
 	using namespace std;
 
-	std::string file = DEFAULT_LOCATION + path;
-	ifstream shader_code(file, ios::in | ios::binary);
+	ifstream shader_code(Lemur::SHADER_PATH/name, ios::in | ios::binary);
 
-	if (!shader_code) printf(("Shader '" + file + "' not found!").c_str());
-
+	if (!shader_code)
+	{
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, CSTR2("Shader ", name, " not found"));
+	}
+	
 	// Get file size
 	shader_code.seekg(0, ios::end);
 	int32_t length = static_cast<uint32_t>(shader_code.tellg());

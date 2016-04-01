@@ -44,5 +44,5 @@ public:
 template<unsigned N>
 GLuint BufferObject<N>::m_active_id = 0;
 
-using VertexBufferObject = BufferObject<GL_ARRAY_BUFFER>;
-using IndexBufferObject = BufferObject<GL_ELEMENT_ARRAY_BUFFER>;
+using VertexBufferObject_t = BufferObject<GL_ARRAY_BUFFER>;
+using IndexBufferObject_t = BufferObject<GL_ELEMENT_ARRAY_BUFFER>;

@@ -21,9 +21,6 @@ private:
 	bool compile();
 
 	void printLog();
-
-	static std::string DEFAULT_LOCATION;
-
 public:
 	Shader(ShaderType type, const char* path);
 
