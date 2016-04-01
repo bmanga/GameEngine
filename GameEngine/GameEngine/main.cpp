@@ -5,20 +5,18 @@
 #include <stdio.h>
 #include <string>
 #include <memory>
-#include <iostream>
 #include "Camera.h"
-#include <typeinfo>
 #include "render_system.h"
 #include "ConsoleLogger.h"
 #include "TaskExecutor.h"
-#include "Importer.h"
 #include "Lemur.h"
-#include "Mesh_v2.h"
+#include "Mesh.h"
+#include "Manager.h"
 #include "linear_allocator.h"
-
 #include "render_component.h"
 #include "ecs\manager.h"
 #include "ecs\entity.h"
+#include "position_component.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -37,7 +35,6 @@ RenderSystem* renderer = new RenderSystem(manager);
 
 Lemur::Camera g_camera;
 
-Mesh mesh;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
@@ -52,14 +49,8 @@ void run()
 
 int main(int argc, char* args[])
 {
-	todo::Mesh mq;
-	mq.loadFromFile("monkey.lbm");
-	float* ptr = (float*) mq.vertexBuffer();
-	/*for (int j = 0; j < 9; j += 3)
-	{
-		printf("%f %f %f \n", ptr[j], ptr[j + 1], ptr[j + 2]);
-	}*/
-
+	Lemur::MeshManager mm;
+	Lemur::TextureManager tm;
 	using namespace std::string_literals;
 	double x = 2.3;
 	int y = 1;
@@ -93,16 +84,24 @@ int main(int argc, char* args[])
 	// Enable text input
 	SDL_StartTextInput();
 
+	// Hides the cursor
+	SDL_ShowCursor(SDL_FALSE);
+
 	//////////////////////////////////////
 	manager.createComponentStore<RenderComponent>();
 	manager.createComponentStore<LightComponent>();
+	manager.createComponentStore<PositionComponent>();
 	manager.addSystem(ecs::System::ptr(renderer));
 
 	RenderComponent render_component;
-	render_component.mesh = new todo::Mesh();
-	render_component.mesh->loadFromFile("..\\assets\\mesh\\monkey.lbm");
+	render_component.mesh = mm.load("model.lbm");
 	render_component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-	render_component.texture = new Texture("..\\assets\\textures\\crate.png");
+	render_component.texture = tm.load("crate.png");
+
+	PositionComponent position_component;
+	position_component.x = 0;
+	position_component.y = 0;
+	position_component.z = 0;
 
 	LightComponent light_component;
 	light_component.position.x = 0.0f;
@@ -133,6 +132,7 @@ int main(int argc, char* args[])
 	ecs::Entity render_entity = manager.createEntity();
 	manager.addComponent(render_entity, std::move(render_component));
 	manager.addComponent(render_entity, std::move(light_component));
+	manager.addComponent(render_entity, std::move(position_component));
 	manager.registerEntity(render_entity);
 	//////////////////////////////////////
 	// NOTE: This is how it should be done.
@@ -185,6 +185,8 @@ int main(int argc, char* args[])
 				int x, y;
 				SDL_GetMouseState(&x, &y);
 				handleMouse(x, y);
+
+				SDL_WarpMouseInWindow(global_window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 			}
 		}
 
@@ -308,15 +310,9 @@ void update()
 
 void handleMouse(int x, int y)
 {
-	static int prev_x = 400, prev_y = 300;
-
-	auto dx = x - prev_x;
-	auto dy = y - prev_y;
-
-	prev_x = x;
-	prev_y = y;
+	int dx = x - (SCREEN_WIDTH / 2);
+	int dy = y - (SCREEN_HEIGHT / 2);
 
 	g_camera.rotateRelativeX(-dy / 2.f);
 	g_camera.rotateRelativeY(-dx / 2.f);
-
 }

@@ -517,6 +517,7 @@ void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 {
 	const RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
 	const LightComponent& light = manager.getComponentStore<LightComponent>().get(entity);
+	PositionComponent& position = manager.getComponentStore<PositionComponent>().get(entity);
 
 	if (!bos_created) {
 		component_vbo = new VertexBufferObject();
@@ -555,8 +556,12 @@ void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 	GLint proj_uniform = renderable.program->getUniformLocation("proj");
 	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
+	// Identity matrix
+	model = glm::mat4(1.0f);
+
 	// Apply the model transformation
-	model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+	//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+	model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
 	int model_uniform = renderable.program->getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 

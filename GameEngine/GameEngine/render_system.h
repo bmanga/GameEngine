@@ -19,6 +19,7 @@
 
 #include "render_component.h"
 #include "light_component.h"
+#include "position_component.h"
 
 namespace lm = Lemur::math;
 
@@ -146,6 +147,7 @@ public:
 		ecs::ComponentTypeSet required_components;
 		required_components.insert(RenderComponent::type);
 		required_components.insert(LightComponent::type);
+		required_components.insert(PositionComponent::type);
 		setRequiredComponents(std::move(required_components));
 	}
 

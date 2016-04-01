@@ -195,6 +195,7 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="opengl_master.h" />
+    <ClInclude Include="position_component.h" />
     <ClInclude Include="priority_queue_threadsafe.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="render_component.h" />
