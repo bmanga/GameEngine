@@ -2,14 +2,9 @@
 
 #include "component_type.h"
 
-template <size_t N>
-struct ConstVal
-{
-	enum {value = N};
-};
 
-namespace ecs
-{
+
+namespace ecs {
 
 /*
 	A Component is a data structure that maintains a sub-state of an Entity.
