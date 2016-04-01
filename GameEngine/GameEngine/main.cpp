@@ -16,6 +16,7 @@
 #include "render_component.h"
 #include "ecs\manager.h"
 #include "ecs\entity.h"
+#include "position_component.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -39,8 +40,6 @@ void handleMouse(int x, int y);
 
 #define MEM_SIZE (1024 * 1024 * 1000) // 1 GB
 LinearAllocator* linear_allocator = nullptr;
-
-//#define MODEL_MODE
 
 void run()
 {
@@ -85,19 +84,80 @@ int main(int argc, char* args[])
 	// Enable text input
 	SDL_StartTextInput();
 
+	// Hides the cursor
+	SDL_ShowCursor(SDL_FALSE);
+
 	//////////////////////////////////////
 	manager.createComponentStore<RenderComponent>();
+	manager.createComponentStore<LightComponent>();
+	manager.createComponentStore<PositionComponent>();
 	manager.addSystem(ecs::System::ptr(renderer));
 
-	RenderComponent component;
+	RenderComponent render_component;
+	render_component.mesh = mm.load("model.lbm");
+	render_component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
+	render_component.texture = tm.load("crate.png");
 
-	component.mesh = mm.load("model.lbm");
-	component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-	component.texture =tm.load("crate.png");
+	PositionComponent position_component;
+	position_component.x = 0;
+	position_component.y = 0;
+	position_component.z = 0;
 
-	ecs::Entity entity = manager.createEntity();
-	manager.addComponent(entity, std::move(component));
-	manager.registerEntity(entity);
+	LightComponent light_component;
+	light_component.position.x = 0.0f;
+	light_component.position.y = 3.0f;
+	light_component.position.z = 0.0f;
+
+	light_component.ambient.r = 1.0f;
+	light_component.ambient.g = 1.0f;
+	light_component.ambient.b = 1.0f;
+
+	light_component.diffuse.r = 1.0f;
+	light_component.diffuse.g = 1.0f;
+	light_component.diffuse.b = 1.0f;
+
+	light_component.specular.r = 1.0f;
+	light_component.specular.g = 1.0f;
+	light_component.specular.b = 1.0f;
+
+	// NOTE: This is not how it should be done. The RenderComponent and LightComponent
+	// should be contained in two different Entities. The reason this does not work is
+	// because Systems check for all their required Components and do not allow Entities
+	// which have a subset of those Components.
+	// Positioning these separate Components is currently achieved by having two different
+	// position attributes in the Components (this should not be the case).
+	//
+	// TODO: Improve on System by designing a filtering algorithm which allows Systems to
+	// specify an AND/OR relationship between required Components.
+	ecs::Entity render_entity = manager.createEntity();
+	manager.addComponent(render_entity, std::move(render_component));
+	manager.addComponent(render_entity, std::move(light_component));
+	manager.addComponent(render_entity, std::move(position_component));
+	manager.registerEntity(render_entity);
+	//////////////////////////////////////
+	// NOTE: This is how it should be done.
+	/*
+	LightComponent light_component;
+	light_component.position.x = 0.0f;
+	light_component.position.y = 3.0f;
+	light_component.position.z = 0.0f;
+
+	light_component.ambient.r = 1.0f;
+	light_component.ambient.g = 1.0f;
+	light_component.ambient.b = 1.0f;
+
+	light_component.diffuse.r = 1.0f;
+	light_component.diffuse.g = 1.0f;
+	light_component.diffuse.b = 1.0f;
+
+	light_component.specular.r = 1.0f;
+	light_component.specular.g = 1.0f;
+	light_component.specular.b = 1.0f;
+
+	ecs::Entity light_entity = manager.createEntity();
+	manager.addComponent(light_entity, std::move(light_component));
+	manager.registerEntity(light_entity);
+	*/
 	//////////////////////////////////////
 
 	SDL_Event e;
@@ -125,19 +185,14 @@ int main(int argc, char* args[])
 				int x, y;
 				SDL_GetMouseState(&x, &y);
 				handleMouse(x, y);
+
+				SDL_WarpMouseInWindow(global_window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 			}
 		}
 
 		// Render quad
-#ifdef MODEL_MODE
-		renderer.renderMesh(g_camera);
-#else
-		//renderer.render(g_camera);
-		//renderer.renderComponent(g_camera);
-		
 		renderer->updateCamera(g_camera);
 		manager.updateEntities(0.0f);
-#endif
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -208,10 +263,6 @@ bool init()
 					printf("Unable to initialize OpenGL!\n");
 					success = false;
 				}*/
-
-#ifdef MODEL_MODE
-				renderer.setMesh(&mesh);
-#endif
 			}
 		}
 	}
@@ -259,15 +310,9 @@ void update()
 
 void handleMouse(int x, int y)
 {
-	static int prev_x = 400, prev_y = 300;
-
-	auto dx = x - prev_x;
-	auto dy = y - prev_y;
-
-	prev_x = x;
-	prev_y = y;
+	int dx = x - (SCREEN_WIDTH / 2);
+	int dy = y - (SCREEN_HEIGHT / 2);
 
 	g_camera.rotateRelativeX(-dy / 2.f);
 	g_camera.rotateRelativeY(-dx / 2.f);
-
 }

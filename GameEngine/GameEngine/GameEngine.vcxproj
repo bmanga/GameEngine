@@ -176,6 +176,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aspect.h" />
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="compiletime_counter.h" />
@@ -189,12 +190,14 @@
     <ClInclude Include="file_paths.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
+    <ClInclude Include="light_component.h" />
     <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="opengl_master.h" />
+    <ClInclude Include="position_component.h" />
     <ClInclude Include="priority_queue_threadsafe.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="render_component.h" />
