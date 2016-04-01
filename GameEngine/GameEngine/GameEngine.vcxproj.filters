@@ -170,5 +170,11 @@
     <ClInclude Include="ecs\manager.h">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
+    <ClInclude Include="light_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aspect.h">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

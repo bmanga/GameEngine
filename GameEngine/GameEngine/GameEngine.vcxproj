@@ -180,6 +180,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aspect.h" />
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ecs\component.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Importer.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
+    <ClInclude Include="light_component.h" />
     <ClInclude Include="linear_allocator.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="allocator.h" />

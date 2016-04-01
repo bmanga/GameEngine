@@ -512,12 +512,14 @@ void RenderSystem::renderComponent(Lemur::Camera camera)
 }
 */
 
-glm::vec3 mesh_light_pos(0.0f, 3.0f, 0.0f);
+//glm::vec3 mesh_light_pos(0.0f, 3.0f, 0.0f);
+
 bool bos_created = false;
 
 void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 {
 	const RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
+	const LightComponent& light = manager.getComponentStore<LightComponent>().get(entity);
 
 	if (!bos_created) {
 		component_vbo = new VertexBufferObject();
@@ -576,10 +578,14 @@ void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 	int light_diffuse_uniform = renderable.program->getUniformLocation("light.diffuse");
 	int light_specular_uniform = renderable.program->getUniformLocation("light.specular");
 
-	glUniform3f(light_pos_uniform, mesh_light_pos.x, mesh_light_pos.y, mesh_light_pos.z);
-	glUniform3f(light_ambient_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
+	//glUniform3f(light_pos_uniform, mesh_light_pos.x, mesh_light_pos.y, mesh_light_pos.z);
+	//glUniform3f(light_ambient_uniform, 1.0f, 1.0f, 1.0f);
+	//glUniform3f(light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
+	//glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
+	glUniform3f(light_pos_uniform, light.position.x, light.position.y, light.position.z);
+	glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
+	glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
+	glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
 
 	component_vbo->bind();
 
