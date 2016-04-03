@@ -52,11 +52,55 @@ size_t Manager::registerEntity(const Entity entity)
 	for (auto system = systems.begin(); system != systems.end(); ++system)
 	{
 		auto system_required_components = (*system)->getRequiredComponents();
-		if (std::includes(entity_components.begin(), entity_components.end(), system_required_components.begin(), system_required_components.end()))
+
+		for (auto ct : entity_components)
 		{
-			// Registers the matching Entity
-			(*system)->registerEntity(entity);
-			++associated_systems;
+			bool register_entity = true;
+
+			// Check if entity component is in system-required components
+			const bool is_in_required = system_required_components.find(ct) != system_required_components.end();
+			if (!is_in_required) break;
+
+			auto and_relationships = (*system)->getAndRelationships();
+			auto or_relationships = (*system)->getOrRelationships();
+
+			// Loop through all AND relationship sets
+			for (auto and_set : and_relationships)
+			{
+				// Check if entity component is in relationship set
+				const bool is_in_and = and_set.find(ct) != and_set.end();
+				if (is_in_and)
+				{
+					// Make sure that entity has all components in AND relationship
+					// NOTE: Not sure if this does what I want it to...
+					if (!std::includes(entity_components.begin(), entity_components.end(), and_set.begin(), and_set.end()))
+					{
+						register_entity = false;
+					}
+					//// Make sure that entity has all components in AND relationship
+					//for (std::set<ComponentType>::iterator i = and_set.begin(); i != and_set.end(); i++)
+					//{
+					//	// If entity doesn't have all components in the AND set, do not register the entity
+					//	if (entity_components.find(*i) == entity_components.end())
+					//		register_entity = false;
+					//}
+				}
+			}
+
+			// Loop through all OR relationship sets
+			for (auto or_set : or_relationships)
+			{
+				// Check if entity component is in relationship set
+				const bool is_in_or = or_set.find(ct) != or_set.end();
+				if (!is_in_or) register_entity = false;
+			}
+
+			// Register the entity in the system if it meets all AND/OR relationships
+			if (register_entity)
+			{
+				(*system)->registerEntity(entity);
+				++associated_systems;
+			}
 		}
 	}
 

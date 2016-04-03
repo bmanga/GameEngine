@@ -2,6 +2,8 @@
 
 #include "component_type.h"
 
+#include <unordered_map>
+
 template <size_t N>
 struct ConstVal
 {
@@ -21,7 +23,6 @@ struct Component
 {
 	// Default invalid component type
 	static constexpr ComponentType type = _invalid_component_type;
-
 };
 
 }

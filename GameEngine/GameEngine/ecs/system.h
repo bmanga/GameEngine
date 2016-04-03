@@ -25,7 +25,12 @@ private:
 	/*
 		Lists the types of all the Components required by the System.
 	*/
+	// NOTE: This is not really required anymore due to relation sets
 	ComponentTypeSet required_components;
+
+	// ADDED LATER
+	AndRelationSet and_components;
+	OrRelationSet or_components;
 
 	/*
 		Lists all the matching Entities having required Components for the System.
@@ -40,6 +45,18 @@ protected:
 	inline void setRequiredComponents(ComponentTypeSet&& required_components)
 	{
 		this->required_components = std::move(required_components);
+	}
+
+	// ADDED LATER
+	inline void setAnd(ComponentTypeSet&& set)
+	{
+		and_components.insert(std::move(set));
+	}
+
+	// ADDED LATER
+	inline void setOr(ComponentTypeSet&& set)
+	{
+		or_components.insert(std::move(set));
 	}
 
 	/*
@@ -61,6 +78,18 @@ public:
 	inline const ComponentTypeSet& getRequiredComponents() const
 	{
 		return required_components;
+	}
+
+	// ADDED LATER
+	inline const AndRelationSet& getAndRelationships() const
+	{
+		return and_components;
+	}
+
+	// ADDED LATER
+	inline const OrRelationSet& getOrRelationships() const
+	{
+		return or_components;
 	}
 
 	/*
@@ -86,6 +115,12 @@ public:
 	{
 		return (matching_entities.end() != matching_entities.find(entity));
 	}
+
+	/*
+		
+	*/
+	virtual void begin() {}
+	virtual void end() {}
 
 	/*
 		Update function for all Entities in the System.

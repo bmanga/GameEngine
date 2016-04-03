@@ -20,4 +20,7 @@ static constexpr ComponentType _invalid_component_type = 0;
 */
 typedef std::set<ComponentType> ComponentTypeSet;
 
+typedef std::set<ComponentTypeSet> AndRelationSet;
+typedef std::set<ComponentTypeSet> OrRelationSet;
+
 }

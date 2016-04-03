@@ -16,7 +16,6 @@ struct RenderComponent : public ecs::Component
 {
 	static constexpr ecs::ComponentType type = 1337;
 
-	int x, y, z;				// Make component
 	int rot_x, rot_y, rot_z;	// Make component
 	ShaderProgram* program;
 	std::shared_ptr<Lemur::Texture> texture;

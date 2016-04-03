@@ -87,61 +87,29 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	//////////////////////////////////////
+	//////////////////////////////////////////////////
 	manager.createComponentStore<RenderComponent>();
 	manager.createComponentStore<LightComponent>();
 	manager.createComponentStore<PositionComponent>();
+	//////////////////////////////////////////////////
 	manager.addSystem(ecs::System::ptr(renderer));
-
+	//////////////////////////////////////////////////
 	RenderComponent render_component;
 	render_component.mesh = mm.load("model.lbm");
 	render_component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
 	render_component.texture = tm.load("crate.png");
 
-	PositionComponent position_component;
-	position_component.x = 0;
-	position_component.y = 0;
-	position_component.z = 0;
+	PositionComponent render_position;
+	render_position.x = 0;
+	render_position.y = 0;
+	render_position.z = 0;
 
-	LightComponent light_component;
-	light_component.position.x = 0.0f;
-	light_component.position.y = 3.0f;
-	light_component.position.z = 0.0f;
-
-	light_component.ambient.r = 1.0f;
-	light_component.ambient.g = 1.0f;
-	light_component.ambient.b = 1.0f;
-
-	light_component.diffuse.r = 1.0f;
-	light_component.diffuse.g = 1.0f;
-	light_component.diffuse.b = 1.0f;
-
-	light_component.specular.r = 1.0f;
-	light_component.specular.g = 1.0f;
-	light_component.specular.b = 1.0f;
-
-	// NOTE: This is not how it should be done. The RenderComponent and LightComponent
-	// should be contained in two different Entities. The reason this does not work is
-	// because Systems check for all their required Components and do not allow Entities
-	// which have a subset of those Components.
-	// Positioning these separate Components is currently achieved by having two different
-	// position attributes in the Components (this should not be the case).
-	//
-	// TODO: Improve on System by designing a filtering algorithm which allows Systems to
-	// specify an AND/OR relationship between required Components.
 	ecs::Entity render_entity = manager.createEntity();
 	manager.addComponent(render_entity, std::move(render_component));
-	manager.addComponent(render_entity, std::move(light_component));
-	manager.addComponent(render_entity, std::move(position_component));
+	manager.addComponent(render_entity, std::move(render_position));
 	manager.registerEntity(render_entity);
-	//////////////////////////////////////
-	// NOTE: This is how it should be done.
-	/*
+	//////////////////////////////////////////////////
 	LightComponent light_component;
-	light_component.position.x = 0.0f;
-	light_component.position.y = 3.0f;
-	light_component.position.z = 0.0f;
-
 	light_component.ambient.r = 1.0f;
 	light_component.ambient.g = 1.0f;
 	light_component.ambient.b = 1.0f;
@@ -153,11 +121,16 @@ int main(int argc, char* args[])
 	light_component.specular.r = 1.0f;
 	light_component.specular.g = 1.0f;
 	light_component.specular.b = 1.0f;
+
+	PositionComponent light_position;
+	light_position.x = 0;
+	light_position.y = 3.0f;
+	light_position.z = 0;
 
 	ecs::Entity light_entity = manager.createEntity();
 	manager.addComponent(light_entity, std::move(light_component));
+	manager.addComponent(light_entity, std::move(light_position));
 	manager.registerEntity(light_entity);
-	*/
 	//////////////////////////////////////
 
 	SDL_Event e;

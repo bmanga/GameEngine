@@ -152,9 +152,6 @@
     <ClInclude Include="light_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="aspect.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
     <ClInclude Include="file_paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>

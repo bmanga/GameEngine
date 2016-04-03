@@ -512,14 +512,28 @@ void RenderSystem::renderComponent(Lemur::Camera camera)
 //glm::vec3 mesh_light_pos(0.0f, 3.0f, 0.0f);
 
 bool bos_created = false;
+float count = 0.0f;
+
+ShaderProgram* active_program = nullptr;
+RenderComponent* active_render_component = nullptr;
 
 void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 {
-	const RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
-	const LightComponent& light = manager.getComponentStore<LightComponent>().get(entity);
-	PositionComponent& position = manager.getComponentStore<PositionComponent>().get(entity);
+	// Initialize clear color
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-	if (!bos_created) {
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	// Clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Create the various buffer objects on the first pass through updateEntity()
+	if (!bos_created && manager.getComponentStore<RenderComponent>().has(entity))
+	{
+		RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
+		active_render_component = &renderable;
+
 		component_vbo = new VertexBufferObject();
 		component_vbo->bind();
 		component_vbo->bufferData(renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
@@ -535,80 +549,98 @@ void RenderSystem::updateEntity(float elapsed_time, ecs::Entity entity)
 		bos_created = true;
 	}
 
-	// Initialize clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	// Modify the various matrices and materials for the renderable component
+	// Also binds the active shader program
+	if (manager.getComponentStore<RenderComponent>().has(entity) &&
+		manager.getComponentStore<PositionComponent>().has(entity))
+	{
+		RenderComponent& renderable = manager.getComponentStore<RenderComponent>().get(entity);
+		PositionComponent& position = manager.getComponentStore<PositionComponent>().get(entity);
 
-	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
+		// Bind program
+		renderable.program->use();
+		active_program = renderable.program;
 
-	// Clear color buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		lm::mat4 view = camera.getView();
+		GLint view_uniform = renderable.program->getUniformLocation("view");
+		glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
 
-	// Bind program
-	renderable.program->use();
+		// Create the perspective projection matrix
+		lm::mat4 proj = camera.getProjection();
+		GLint proj_uniform = renderable.program->getUniformLocation("proj");
+		glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
-	lm::mat4 view = camera.getView();
-	GLint view_uniform = renderable.program->getUniformLocation("view");
-	glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+		// Identity matrix
+		model = glm::mat4(1.0f);
 
-	// Create the perspective projection matrix
-	lm::mat4 proj = camera.getProjection();
-	GLint proj_uniform = renderable.program->getUniformLocation("proj");
-	glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+		// Apply the model transformation
+		//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+		model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
+		int model_uniform = renderable.program->getUniformLocation("model");
+		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
-	// Identity matrix
-	model = glm::mat4(1.0f);
+		int mat_ambient_uniform = renderable.program->getUniformLocation("material.ambient");
+		int mat_diffuse_uniform = renderable.program->getUniformLocation("material.diffuse");
+		int mat_specular_uniform = renderable.program->getUniformLocation("material.specular");
+		int mat_shininess_uniform = renderable.program->getUniformLocation("material.shininess");
 
-	// Apply the model transformation
-	//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
-	model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
-	int model_uniform = renderable.program->getUniformLocation("model");
-	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+		glUniform3f(mat_ambient_uniform, 0.05f, 0.0f, 0.0f);
+		glUniform3f(mat_diffuse_uniform, 0.5f, 0.4f, 0.4f);
+		glUniform3f(mat_specular_uniform, 0.7f, 0.04f, 0.04f);
+		glUniform1f(mat_shininess_uniform, 0.078125f);
+	}
 
-	int mat_ambient_uniform = renderable.program->getUniformLocation("material.ambient");
-	int mat_diffuse_uniform = renderable.program->getUniformLocation("material.diffuse");
-	int mat_specular_uniform = renderable.program->getUniformLocation("material.specular");
-	int mat_shininess_uniform = renderable.program->getUniformLocation("material.shininess");
+	// Uploads the light coordinates and colors
+	if (manager.getComponentStore<LightComponent>().has(entity) &&
+		manager.getComponentStore<PositionComponent>().has(entity) &&
+		active_program != nullptr)
+	{
+		LightComponent& light = manager.getComponentStore<LightComponent>().get(entity);
+		PositionComponent& light_position = manager.getComponentStore<PositionComponent>().get(entity);
 
-	glUniform3f(mat_ambient_uniform, 0.0215f, 0.1745f, 0.0215f);
-	glUniform3f(mat_diffuse_uniform, 0.07568f, 0.61424f, 0.07568f);
-	glUniform3f(mat_specular_uniform, 0.633f, 0.727811f, 0.633f);
-	glUniform1f(mat_shininess_uniform, 0.6f);
+		int light_pos_uniform = active_program->getUniformLocation("light.position");
+		int light_ambient_uniform = active_program->getUniformLocation("light.ambient");
+		int light_diffuse_uniform = active_program->getUniformLocation("light.diffuse");
+		int light_specular_uniform = active_program->getUniformLocation("light.specular");
 
-	int light_pos_uniform = renderable.program->getUniformLocation("light.position");
-	int light_ambient_uniform = renderable.program->getUniformLocation("light.ambient");
-	int light_diffuse_uniform = renderable.program->getUniformLocation("light.diffuse");
-	int light_specular_uniform = renderable.program->getUniformLocation("light.specular");
+		light_position.x = (float)cos(count) * 30.0f;
+		light_position.y = (float)sin(count) * 30.0f;
+		count += 0.05f;
+		if (count >= glm::pi<float>() * 2.0f) count = 0;
 
-	//glUniform3f(light_pos_uniform, mesh_light_pos.x, mesh_light_pos.y, mesh_light_pos.z);
-	//glUniform3f(light_ambient_uniform, 1.0f, 1.0f, 1.0f);
-	//glUniform3f(light_diffuse_uniform, 1.0f, 1.0f, 1.0f);
-	//glUniform3f(light_specular_uniform, 1.0f, 1.0f, 1.0f);
-	glUniform3f(light_pos_uniform, light.position.x, light.position.y, light.position.z);
-	glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
-	glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
-	glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
+		glUniform3f(light_pos_uniform, light_position.x, light_position.y, light_position.z);
+		glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
+		glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
+		glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
+	}
+}
 
-	component_vbo->bind();
+void RenderSystem::end()
+{
+	// Binds the various buffer objects and draws the elements
+	if (active_program != nullptr)
+	{
+		component_vbo->bind();
 
-	// Enable vertex position
-	int pos_attrib = renderable.program->getAttribLocation("position");
-	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		// Enable vertex position
+		int pos_attrib = active_program->getAttribLocation("position");
+		glEnableVertexAttribArray(pos_attrib);
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	component_nbo->bind();
+		component_nbo->bind();
 
-	int norm_attrib = renderable.program->getAttribLocation("in_normal");
-	glEnableVertexAttribArray(norm_attrib);
-	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		int norm_attrib = active_program->getAttribLocation("in_normal");
+		glEnableVertexAttribArray(norm_attrib);
+		glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	component_ibo->bind();
-	glDrawElements(GL_TRIANGLES, renderable.mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
+		component_ibo->bind();
+		glDrawElements(GL_TRIANGLES, active_render_component->mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
 
-	// Disable vertex position
-	glDisableVertexAttribArray(pos_attrib);
-	glDisableVertexAttribArray(norm_attrib);
+		// Disable vertex position
+		glDisableVertexAttribArray(pos_attrib);
+		glDisableVertexAttribArray(norm_attrib);
 
-	// Unbind program
-	glUseProgram(NULL);
+		// Unbind program
+		glUseProgram(NULL);
+	}
 }

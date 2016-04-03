@@ -144,11 +144,19 @@ public:
 	RenderSystem(ecs::Manager& manager) :
 		ecs::System(manager)
 	{
+		// TODO: Maybe do away with required components and assign required components
+		// through AND/OR relationship functions
 		ecs::ComponentTypeSet required_components;
 		required_components.insert(RenderComponent::type);
 		required_components.insert(LightComponent::type);
 		required_components.insert(PositionComponent::type);
 		setRequiredComponents(std::move(required_components));
+
+		ecs::ComponentTypeSet or_components;
+		or_components.insert(RenderComponent::type);
+		or_components.insert(LightComponent::type);
+		or_components.insert(PositionComponent::type);
+		setOr(std::move(or_components));
 	}
 
 	void updateCamera(Lemur::Camera camera)
@@ -157,4 +165,6 @@ public:
 	}
 
 	void updateEntity(float elapsed_time, ecs::Entity entity) override;
+
+	void end() override;
 };
