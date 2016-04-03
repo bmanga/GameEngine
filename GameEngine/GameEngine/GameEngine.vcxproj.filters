@@ -161,5 +161,11 @@
     <ClInclude Include="position_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="compiletime_counter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="component_typeid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

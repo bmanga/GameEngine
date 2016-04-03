@@ -2,16 +2,9 @@
 
 #include "component_type.h"
 
-#include <unordered_map>
 
-template <size_t N>
-struct ConstVal
-{
-	enum {value = N};
-};
 
-namespace ecs
-{
+namespace ecs {
 
 /*
 	A Component is a data structure that maintains a sub-state of an Entity.
@@ -23,6 +16,7 @@ struct Component
 {
 	// Default invalid component type
 	static constexpr ComponentType type = _invalid_component_type;
+
 };
 
 }

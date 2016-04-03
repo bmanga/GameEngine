@@ -178,6 +178,8 @@
   <ItemGroup>
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="compiletime_counter.h" />
+    <ClInclude Include="component_typeid.h" />
     <ClInclude Include="ecs\component.h" />
     <ClInclude Include="ecs\component_store.h" />
     <ClInclude Include="ecs\component_type.h" />
