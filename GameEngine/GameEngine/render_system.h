@@ -13,9 +13,7 @@
 
 #include "Mesh.h"
 
-#include "ecs\system.h"
-#include "ecs\manager.h"
-#include "ecs\component_type.h"
+#include "ecs.h"
 
 #include "render_component.h"
 #include "light_component.h"
@@ -130,6 +128,7 @@ public:
 };
 */
 
+/*
 class RenderSystem : public ecs::System
 {
 private:
@@ -167,4 +166,27 @@ public:
 	void updateEntity(float elapsed_time, ecs::Entity entity) override;
 
 	void end() override;
+};
+*/
+
+class RenderSystem
+{
+private:
+	using SystemManager = Lemur::MyManager;
+	SystemManager manager;
+
+	Lemur::math::mat4 model;
+	Lemur::Camera camera;
+
+	VertexBufferObject* component_vbo = nullptr;
+	IndexBufferObject* component_ibo = nullptr;
+	VertexBufferObject* component_nbo = nullptr;
+
+public:
+	RenderSystem(Lemur::ecs::Manager<Lemur::MySettings>& manager)
+	{
+		this->manager = manager;
+	}
+
+	void render(Lemur::Camera camera);
 };

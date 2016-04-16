@@ -88,7 +88,7 @@ void Lemur::ShaderProgram_v2::compileShader(u32 id, const char* source)
 	i32 success = false;
 	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 	
-	ASSERT_CLERROR(success, "ShaderProgram", "Unable to compile vertex shader")
+	ASSERT_CLERROR(success, "ShaderProgram", "Unable to compile vertex shader");
 	if(!success)
 	{
 		printf("Unabl to compile vertex shader %d\n", id);

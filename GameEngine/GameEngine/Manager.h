@@ -4,10 +4,11 @@
 #include <unordered_map>
 #include <memory>
 
+#include "texture.h"
+#include "Mesh.h"
 
-namespace Lemur{
-class Mesh;
-class Texture;
+namespace Lemur
+{
 
 template <class Ty>
 class Manager

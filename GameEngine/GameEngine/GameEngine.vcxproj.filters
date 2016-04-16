@@ -16,11 +16,8 @@
     <Filter Include="tasks and executors">
       <UniqueIdentifier>{2691e30a-6f58-44a8-826a-d3cd2cb33da4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ecs">
-      <UniqueIdentifier>{f8dd4909-0dc0-4657-9f69-d60a7f5a5283}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\ecs">
-      <UniqueIdentifier>{d5361ffd-3448-4389-ac02-d451db356936}</UniqueIdentifier>
+    <Filter Include="Header Files\BMPL">
+      <UniqueIdentifier>{73cc1beb-0d6a-4cff-b298-7eb560fe2395}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -56,12 +53,6 @@
     </ClCompile>
     <ClCompile Include="linear_allocator.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs\manager.cpp">
-      <Filter>Source Files\ecs</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs\system.cpp">
-      <Filter>Source Files\ecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,24 +122,6 @@
     <ClInclude Include="render_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ecs\component.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\component_store.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\component_type.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\entity.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\system.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\manager.h">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
     <ClInclude Include="light_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -166,6 +139,24 @@
     </ClInclude>
     <ClInclude Include="component_typeid.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MPL.h">
+      <Filter>Header Files\BMPL</Filter>
+    </ClInclude>
+    <ClInclude Include="TLAlgorithm.h">
+      <Filter>Header Files\BMPL</Filter>
+    </ClInclude>
+    <ClInclude Include="Typelist.h">
+      <Filter>Header Files\BMPL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

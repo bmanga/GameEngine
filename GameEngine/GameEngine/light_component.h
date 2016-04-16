@@ -1,14 +1,9 @@
 #pragma once
 
-#include "ecs\component.h"
-#include "ecs\component_type.h"
-
 #include "math.h"
 
-struct LightComponent : public ecs::Component
+struct CLight
 {
-	static const ecs::ComponentType type = 1338;
-
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;

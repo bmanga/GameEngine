@@ -93,7 +93,7 @@ void Texture::bind()
 
 unsigned char* Texture::loadPixels(const char* path)
 {
-	return SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
+	return SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGBA);
 }
 
 void Texture::freePixels(unsigned char* pixels)

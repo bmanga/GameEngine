@@ -6,17 +6,15 @@
 #include <string>
 #include <memory>
 #include "Camera.h"
-#include "render_system.h"
 #include "ConsoleLogger.h"
 #include "TaskExecutor.h"
 #include "Lemur.h"
 #include "Mesh.h"
 #include "Manager.h"
 #include "linear_allocator.h"
-#include "render_component.h"
-#include "ecs\manager.h"
-#include "ecs\entity.h"
-#include "position_component.h"
+
+#include "render_system.h"
+#include "ecs.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -29,9 +27,6 @@ void update();
 
 SDL_Window* global_window = nullptr;
 SDL_GLContext global_context;
-
-ecs::Manager manager;
-RenderSystem* renderer = new RenderSystem(manager);
 
 Lemur::Camera g_camera;
 
@@ -87,51 +82,43 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	//////////////////////////////////////////////////
-	manager.createComponentStore<RenderComponent>();
-	manager.createComponentStore<LightComponent>();
-	manager.createComponentStore<PositionComponent>();
-	//////////////////////////////////////////////////
-	manager.addSystem(ecs::System::ptr(renderer));
-	//////////////////////////////////////////////////
-	RenderComponent render_component;
-	render_component.mesh = mm.load("model.lbm");
-	render_component.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-	render_component.texture = tm.load("crate.png");
+	Lemur::MyManager manager;
 
-	PositionComponent render_position;
-	render_position.x = 0;
-	render_position.y = 0;
-	render_position.z = 0;
+	// Ensures ECS Manager's underlying Settings struct works correctly
+	static Lemur::MySettings settings;
+	std::cout << "Components: " << settings.componentCount() << std::endl;
+	std::cout << "Tags: " << settings.tagCount() << std::endl;
+	std::cout << "Signatures: " << settings.signatureCount() << std::endl;
 
-	ecs::Entity render_entity = manager.createEntity();
-	manager.addComponent(render_entity, std::move(render_component));
-	manager.addComponent(render_entity, std::move(render_position));
-	manager.registerEntity(render_entity);
-	//////////////////////////////////////////////////
-	LightComponent light_component;
-	light_component.ambient.r = 1.0f;
-	light_component.ambient.g = 1.0f;
-	light_component.ambient.b = 1.0f;
+	Lemur::ecs::EntityIndex model(manager.createIndex());
+	auto& model_position(manager.addComponent<CPosition>(model));
+	model_position.x = 0.0f;
+	model_position.y = 0.0f;
+	model_position.z = 0.0f;
+	auto& renderable(manager.addComponent<CRenderable>(model));
+	renderable.mesh = mm.load("model.lbm");
+	renderable.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
+	renderable.texture = tm.load("crate.png");
 
-	light_component.diffuse.r = 1.0f;
-	light_component.diffuse.g = 1.0f;
-	light_component.diffuse.b = 1.0f;
+	Lemur::ecs::EntityIndex point_light(manager.createIndex());
+	auto& light_position(manager.addComponent<CPosition>(point_light));
+	light_position.x = 0.0f;
+	light_position.y = 0.0f;
+	light_position.z = 0.0f;
+	auto& light(manager.addComponent<CLight>(point_light));
+	light.ambient.r = 1.0f;
+	light.ambient.g = 1.0f;
+	light.ambient.b = 1.0f;
+	light.diffuse.r = 1.0f;
+	light.diffuse.g = 1.0f;
+	light.diffuse.b = 1.0f;
+	light.specular.r = 1.0f;
+	light.specular.g = 1.0f;
+	light.specular.b = 1.0f;
 
-	light_component.specular.r = 1.0f;
-	light_component.specular.g = 1.0f;
-	light_component.specular.b = 1.0f;
+	manager.refresh();
 
-	PositionComponent light_position;
-	light_position.x = 0;
-	light_position.y = 3.0f;
-	light_position.z = 0;
-
-	ecs::Entity light_entity = manager.createEntity();
-	manager.addComponent(light_entity, std::move(light_component));
-	manager.addComponent(light_entity, std::move(light_position));
-	manager.registerEntity(light_entity);
-	//////////////////////////////////////
+	RenderSystem render_system(manager);
 
 	SDL_Event e;
 	bool quit = false;
@@ -164,8 +151,9 @@ int main(int argc, char* args[])
 		}
 
 		// Render quad
-		renderer->updateCamera(g_camera);
-		manager.updateEntities(0.0f);
+#ifdef ECS_TEST
+		render_system.render(g_camera);
+#endif
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);

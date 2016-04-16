@@ -132,6 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ENABLE_ASSERT_CL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -149,6 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ENABLE_ASSERT_CL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -159,8 +161,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ecs\manager.cpp" />
-    <ClCompile Include="ecs\system.cpp" />
     <ClCompile Include="ConsoleLogger.cpp" />
     <ClCompile Include="linear_allocator.cpp" />
     <ClCompile Include="main.cpp" />
@@ -180,21 +180,18 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="compiletime_counter.h" />
     <ClInclude Include="component_typeid.h" />
-    <ClInclude Include="ecs\component.h" />
-    <ClInclude Include="ecs\component_store.h" />
-    <ClInclude Include="ecs\component_type.h" />
-    <ClInclude Include="ecs\entity.h" />
-    <ClInclude Include="ecs\manager.h" />
-    <ClInclude Include="ecs\system.h" />
+    <ClInclude Include="ecs.h" />
     <ClInclude Include="file_paths.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="Lemur.h" />
     <ClInclude Include="light_component.h" />
     <ClInclude Include="linear_allocator.h" />
+    <ClInclude Include="material.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MPL.h" />
     <ClInclude Include="opengl_master.h" />
     <ClInclude Include="position_component.h" />
     <ClInclude Include="priority_queue_threadsafe.h" />
@@ -208,6 +205,9 @@
     <ClInclude Include="TaskExecutor.h" />
     <ClInclude Include="TaskFuture.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="texture_manager.h" />
+    <ClInclude Include="TLAlgorithm.h" />
+    <ClInclude Include="Typelist.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
