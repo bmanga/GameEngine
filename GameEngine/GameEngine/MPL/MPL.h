@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Typelist.h"
 #include "TLAlgorithm.h"
 #include <tuple>
@@ -32,26 +31,25 @@ constexpr decltype(auto) ApplyTuple(Fn&& fn, TTuple&& tuple,
 	return std::forward<Fn>(fn)(std::get<Is>(std::forward<TTuple>(tuple))...);
 }
 
-
-template <class T>
-struct KavanType
+template <class Ty>
+struct Type
 {
-	using type = T;
+	using type = Ty;
 };
 
-
-template <class TL, class Fn> struct ForEachTypeKavan;
-
-template <class... Args, class Fn>
-struct ForEachTypeKavan <Typelist<Args...>, Fn>
+template <class TL> struct ForEachTypeAsArg;
+template <class... Ts> 
+struct ForEachTypeAsArg<Typelist<Ts...>>
 {
-	static void execute(Fn fn)
+	template <class Fn>
+	static constexpr void execute(Fn&& fn)
 	{
-		// FIX: DIRTY HACK 0
-		int swallow[] = { 0, (fn(KavanType<Args>{}), 0)... };
+		return (void)std::initializer_list<int>{
+			(std::forward<Fn>(fn)(Type<Ts>{}), 0)...
+		};
 	}
-
 };
+
 
 }//namespace impl
 
@@ -61,14 +59,10 @@ constexpr void ForEachType()
 	return (void)impl::ForEachType<TL, Fn>::execute();
 }
 
-template <class TL, class Fn>
-constexpr void ForEachTypeKavan(Fn fn)
-{
-	return (void)impl::ForEachTypeKavan<TL, Fn>::execute(fn);
-}
+
 
 template <class Fn, class... Args>
-constexpr void ForEachArg(Fn&& fn, Args&&... args)
+constexpr void ForEachArg (Fn&& fn, Args&&... args)
 {
 	return (void)std::initializer_list<int>
 	{
@@ -85,9 +79,17 @@ constexpr void ForEachInTuple(Fn&& fn, TTuple&& tuple)
 
 //NOTE: there is a standard c++17 version (std::apply), replace soon
 template <class Fn, class TTuple>
-constexpr decltype(auto) ApplyTuple(Fn&& fn, TTuple&& tuple)
+constexpr decltype(auto) ApplyTuple (Fn&& fn, TTuple&& tuple)
 {
 	return impl::ApplyTuple(std::forward<Fn>(fn), std::forward<TTuple>(tuple),
 		std::make_index_sequence < std::tuple_size<std::decay_t<TTuple>>::value > {});
 }
+
+template <class TL, class Fn>
+constexpr void ForEachTypeAsArg(Fn&& fn)
+{
+	return (void)impl::ForEachTypeAsArg<TL>::execute(std::forward<Fn>(fn));
 }
+}//namespace BMPL
+
+#define BMPL_TYPE(var) typename decltype(var)::type
