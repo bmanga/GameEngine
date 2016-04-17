@@ -1,4 +1,4 @@
-#include "opengl_master.h"
+#include "OpenGLMaster.h"
 
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -11,10 +11,10 @@
 #include "Lemur.h"
 #include "Mesh.h"
 #include "Manager.h"
-#include "linear_allocator.h"
+#include "LinearAllocator.h"
 
-#include "render_system.h"
-#include "ecs.h"
+#include "RenderSystem.h"
+#include "ECS.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;

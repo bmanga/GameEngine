@@ -1,10 +1,10 @@
 #include "Mesh.h"
 #include <fstream>
 #include <filesystem>
-#include "types.h"
+#include "Types.h"
 #include <GL/glew.h>
 #include "Lemur.h"
-#include "file_paths.h"
+#include "FilePaths.h"
 
 namespace Lemur {
 

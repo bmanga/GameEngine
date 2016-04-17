@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <fstream>
-#include "file_paths.h"
+#include "FilePaths.h"
 #include "ConsoleLogger.h"
 #include "Lemur.h"
 

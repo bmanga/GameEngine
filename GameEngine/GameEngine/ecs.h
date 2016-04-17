@@ -10,9 +10,9 @@
 #define ECS_TEST
 
 #ifdef ECS_TEST
-#include "position_component.h"
-#include "render_component.h"
-#include "light_component.h"
+#include "PositionComponent.h"
+#include "RenderComponent.h"
+#include "LightComponent.h"
 #endif
 
 #define ECS_TYPE(t) typename decltype(t)::type
@@ -226,7 +226,7 @@ struct Settings
 	{
 		//constexpr size_t index = SignatureList::indexOf<T>;
 		return BMPL::impl::IndexOf<SignatureList, TSignature>::value;
-		
+
 	}
 
 	using Bitset = std::bitset<ThisType::componentCount() + ThisType::tagCount()>;

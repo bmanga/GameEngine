@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl_master.h"
+#include "OpenGLMaster.h"
 
 namespace Lemur {
 enum TextureFormat
