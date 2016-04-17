@@ -1,15 +1,8 @@
 #include "OpenGLMaster.h"
 
 #include <SDL.h>
-#include <SDL_opengl.h>
-#include <stdio.h>
-#include <string>
-#include <memory>
+
 #include "Camera.h"
-#include "ConsoleLogger.h"
-#include "TaskExecutor.h"
-#include "Lemur.h"
-#include "Mesh.h"
 #include "Manager.h"
 #include "LinearAllocator.h"
 
@@ -33,9 +26,6 @@ Lemur::Camera g_camera;
 namespace lm = Lemur::math;
 void handleMouse(int x, int y);
 
-#define MEM_SIZE (1024 * 1024 * 1000) // 1 GB
-LinearAllocator* linear_allocator = nullptr;
-
 void run()
 {
 	while (g_run)
@@ -46,35 +36,8 @@ int main(int argc, char* args[])
 {
 	Lemur::MeshManager mm;
 	Lemur::TextureManager tm;
-	using namespace std::string_literals;
-	double x = 2.3;
-	int y = 1;
-	using tt = int;
-	std::vector<tt> vi;
+	Lemur::MyManager manager;
 
-	ASSERT_CLERROR(false, CODE_LOCATION," error here");
-	Lemur::ConsoleLogger::Error("mfde", "sup\n there is something \n extremely wrong\n");
-	Lemur::ConsoleLogger::Warning("mgde", "sup");
-	Lemur::ConsoleLogger::Info("mdswe", "suffsdap");
-	Lemur::ConsoleLogger::Debug("msdfse", "ssdsup");
-	Lemur::ConsoleLogger::Warning("mfste", "susdgfdsp");
-
-	// vvv LINEAR ALLOCATOR vvv
-	void* mem = malloc(MEM_SIZE);
-	linear_allocator = new LinearAllocator(MEM_SIZE, mem);
-
-	std::string* s = new(linear_allocator->allocate(sizeof(std::string), 4)) std::string();
-	*s = "foo";
-
-	std::string* s2 = new(linear_allocator->allocate(sizeof(std::string), 4)) std::string();
-	*s2 = "bar";
-	// ^^^ LINEAR ALLOCATOR ^^^
-
-	std::vector<int> v2;
-	v2.push_back(11);
-
-	TaskExecutor ts;
-	//auto m = ts.schedule(run);
 	init();
 	// Enable text input
 	SDL_StartTextInput();
@@ -82,29 +45,26 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	Lemur::MyManager manager;
-
-	// Ensures ECS Manager's underlying Settings struct works correctly
-	static Lemur::MySettings settings;
-	std::cout << "Components: " << settings.componentCount() << std::endl;
-	std::cout << "Tags: " << settings.tagCount() << std::endl;
-	std::cout << "Signatures: " << settings.signatureCount() << std::endl;
 
 	Lemur::ecs::EntityIndex model(manager.createIndex());
+
 	auto& model_position(manager.addComponent<CPosition>(model));
 	model_position.x = 0.0f;
 	model_position.y = 0.0f;
 	model_position.z = 0.0f;
+
 	auto& renderable(manager.addComponent<CRenderable>(model));
 	renderable.mesh = mm.load("model.lbm");
 	renderable.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
 	renderable.texture = tm.load("crate.png");
 
 	Lemur::ecs::EntityIndex point_light(manager.createIndex());
+
 	auto& light_position(manager.addComponent<CPosition>(point_light));
 	light_position.x = 0.0f;
 	light_position.y = 0.0f;
 	light_position.z = 0.0f;
+
 	auto& light(manager.addComponent<CLight>(point_light));
 	light.ambient.r = 1.0f;
 	light.ambient.g = 1.0f;
@@ -150,10 +110,7 @@ int main(int argc, char* args[])
 			}
 		}
 
-		// Render quad
-#ifdef ECS_TEST
 		render_system.render(g_camera);
-#endif
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -218,12 +175,6 @@ bool init()
 					printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 				}
 
-				// Initialize OpenGL
-				/*if (!renderer.initGL())
-				{
-					printf("Unable to initialize OpenGL!\n");
-					success = false;
-				}*/
 			}
 		}
 	}

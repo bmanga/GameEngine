@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MPL.h"
+#include "MPL/MPL.h"
 
 #include <vector>
 #include <bitset>
@@ -10,12 +10,12 @@
 #define ECS_TEST
 
 #ifdef ECS_TEST
-#include "PositionComponent.h"
-#include "RenderComponent.h"
-#include "LightComponent.h"
+#include "position_component.h"
+#include "render_component.h"
+#include "light_component.h"
+#include <gsl.h>
 #endif
 
-#define ECS_TYPE(t) typename decltype(t)::type
 #define ECS_FWD(t) std::forward<decltype(t)> (t)
 
 // Defines a "strong" type alias for `mUnderlying`, called `mName`.
@@ -26,13 +26,13 @@
         mUnderlying value;                                                      \
                                                                                 \
     public:                                                                     \
-        inline mName() = default;                                               \
-        inline mName(const mName& mX) = default;                                \
-        inline mName(mName&& mX) = default;                                     \
-        inline mName& operator=(const mName& rhs) = default;                    \
-        inline mName& operator=(mName&& rhs) = default;                         \
-        inline const explicit mName(mUnderlying mX) noexcept : value{mX} {}		\
-        inline const mName& operator=(mUnderlying rhs) noexcept					\
+        mName() = default;                                                      \
+        mName(const mName& mX) = default;                                       \
+        mName(mName&& mX) = default;                                            \
+        mName& operator=(const mName& rhs) = default;                           \
+        mName& operator=(mName&& rhs) = default;                                \
+        const explicit mName(mUnderlying mX) noexcept : value{mX} {}	    	\
+        const mName& operator=(mUnderlying rhs) noexcept				    	\
         {                                                                       \
             value = rhs;                                                        \
             return *this;                                                       \
@@ -70,11 +70,8 @@
                                                                                 \
     static_assert(std::is_literal_type<mName>{}, "")
 
-namespace Lemur
-{
-
-namespace ecs
-{
+namespace Lemur{
+namespace ecs{
 
 // "Strong typedefs" used here to make sure the types are actually different.
 // Allows function overloads and prevents conversion mistakes.
@@ -132,7 +129,7 @@ private:
 public:
 	void grow(std::size_t new_capacity)
 	{
-		BMPL::ForEachInTuple([this, new_capacity](auto& v)
+		BMPL::ForEachInTuple([new_capacity](auto& v)
 		{
 			v.resize(new_capacity);
 		}, vectors);
@@ -215,6 +212,7 @@ struct Settings
 		return BMPL::impl::IndexOf<ComponentList, TComponent>::value;
 
 	}
+
 	template<typename TTag>
 	static constexpr std::size_t tagId() noexcept
 	{
@@ -226,7 +224,7 @@ struct Settings
 	{
 		//constexpr size_t index = SignatureList::indexOf<T>;
 		return BMPL::impl::IndexOf<SignatureList, TSignature>::value;
-
+		
 	}
 
 	using Bitset = std::bitset<ThisType::componentCount() + ThisType::tagCount()>;
@@ -318,15 +316,15 @@ private:
 		using SignatureTags = typename SignatureBitsets::template SignatureTags<TSignature>;
 
 		// FIX: Make this not so hacky
-		BMPL::ForEachTypeKavan<SignatureComponents>([this, &b](auto t)
+		BMPL::ForEachTypeAsArg<SignatureComponents>([this, &b](auto t)
 		{
-			b[Settings::template componentBit<ECS_TYPE(t)>()] = true;
+			b[Settings::template componentBit<BMPL_TYPE(t)>()] = true;
 		});
 
 		// FIX: Make this not so hacky
-		BMPL::ForEachTypeKavan<SignatureTags>([this, &b](auto t)
+		BMPL::ForEachTypeAsArg<SignatureTags>([this, &b](auto t)
 		{
-			b[Settings::template tagBit<ECS_TYPE(t)>()] = true;
+			b[Settings::template tagBit<BMPL_TYPE(t)>()] = true;
 		});
 	}
 
@@ -334,9 +332,9 @@ public:
 	SignatureBitsetsStorage() noexcept
 	{
 		// FIX: Make this not so hacky
-		BMPL::ForEachTypeKavan<SignatureList>([this](auto t)
+		BMPL::ForEachTypeAsArg<SignatureList>([this](auto t)
 		{
-			this->initializeBitset<ECS_TYPE(t)>();
+			this->initializeBitset<BMPL_TYPE(t)>();
 		});
 	}
 };
