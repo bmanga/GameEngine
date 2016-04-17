@@ -7,14 +7,10 @@
 #include <tuple>
 #include <cassert>
 
-#define ECS_TEST
-
-#ifdef ECS_TEST
-#include "position_component.h"
-#include "render_component.h"
-#include "light_component.h"
-#include <gsl.h>
-#endif
+#include "PositionComponent.h"
+#include "RenderComponent.h"
+#include "LightComponent.h"
+//#include <gsl.h>
 
 #define ECS_FWD(t) std::forward<decltype(t)> (t)
 
