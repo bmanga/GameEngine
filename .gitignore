@@ -213,4 +213,4 @@ ModelManifest.xml
 
 # piece of shit
 *.VC.opendb
-*.VC.db
+GameEngine.VC.db
