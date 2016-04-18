@@ -192,37 +192,19 @@
     <ClInclude Include="Allocator.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Mesh.h" />
-<<<<<<< HEAD
     <ClInclude Include="MPL\MPL.h" />
     <ClInclude Include="MPL\TLAlgorithm.h" />
     <ClInclude Include="MPL\Typelist.h" />
-    <ClInclude Include="opengl_master.h" />
-    <ClInclude Include="position_component.h" />
-=======
-    <ClInclude Include="MPL.h" />
     <ClInclude Include="OpenGLMaster.h" />
     <ClInclude Include="PositionComponent.h" />
->>>>>>> 8c9a61f017ffa3f2a56f07ae4d38736e2ca4bb05
-    <ClInclude Include="priority_queue_threadsafe.h" />
     <ClInclude Include="RenderComponent.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
-    <ClInclude Include="Task.h" />
-    <ClInclude Include="TaskExecutor.h" />
-    <ClInclude Include="TaskFuture.h" />
-<<<<<<< HEAD
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="texture_manager.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="types.h" />
-=======
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="TLAlgorithm.h" />
-    <ClInclude Include="Typelist.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="Types.h" />
->>>>>>> 8c9a61f017ffa3f2a56f07ae4d38736e2ca4bb05
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

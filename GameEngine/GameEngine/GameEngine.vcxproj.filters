@@ -62,18 +62,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Task.h">
-      <Filter>tasks and executors</Filter>
-    </ClInclude>
-    <ClInclude Include="TaskExecutor.h">
-      <Filter>tasks and executors</Filter>
-    </ClInclude>
-    <ClInclude Include="TaskFuture.h">
-      <Filter>tasks and executors</Filter>
-    </ClInclude>
-    <ClInclude Include="priority_queue_threadsafe.h">
-      <Filter>tasks and executors</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,15 +76,6 @@
     </ClInclude>
     <ClInclude Include="Manager.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MPL.h">
-      <Filter>Header Files\BMPL</Filter>
-    </ClInclude>
-    <ClInclude Include="TLAlgorithm.h">
-      <Filter>Header Files\BMPL</Filter>
-    </ClInclude>
-    <ClInclude Include="Typelist.h">
-      <Filter>Header Files\BMPL</Filter>
     </ClInclude>
     <ClInclude Include="PositionComponent.h">
       <Filter>Header Files</Filter>
@@ -140,7 +119,6 @@
     <ClInclude Include="Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-<<<<<<< HEAD
     <ClInclude Include="MPL\MPL.h">
       <Filter>Header Files\BMPL</Filter>
     </ClInclude>
@@ -149,7 +127,7 @@
     </ClInclude>
     <ClInclude Include="MPL\Typelist.h">
       <Filter>Header Files\BMPL</Filter>
-=======
+    </ClInclude>
     <ClInclude Include="Math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -158,12 +136,11 @@
     </ClInclude>
     <ClInclude Include="LinearAllocator.h">
       <Filter>Header Files</Filter>
->>>>>>> 8c9a61f017ffa3f2a56f07ae4d38736e2ca4bb05
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="FPSCounter.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>

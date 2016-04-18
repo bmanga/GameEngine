@@ -7,17 +7,12 @@
 
 #include "Camera.h"
 #include "Manager.h"
-<<<<<<< HEAD
-#include "render_system.h"
-#include "ecs.h"
-#include "Timer.h"
-#include "FPSCounter.h"
-=======
-#include "LinearAllocator.h"
 
+#include "LinearAllocator.h"
+#include "FPSCounter.h"
 #include "RenderSystem.h"
 #include "ECS.h"
->>>>>>> 8c9a61f017ffa3f2a56f07ae4d38736e2ca4bb05
+
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
