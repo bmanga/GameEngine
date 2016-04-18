@@ -96,10 +96,8 @@ int main(int argc, char* args[])
 
 		static int cnt = 0;
 		++cnt;
-		
-			
 
-		if (cnt > fps.fps() + 1) {
+		if (cnt > 60) {
 			fps.update();
 			printf("%f\n", fps.fps());
 			cnt = 0;
