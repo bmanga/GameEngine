@@ -19,6 +19,9 @@
     <Filter Include="Header Files\BMPL">
       <UniqueIdentifier>{73cc1beb-0d6a-4cff-b298-7eb560fe2395}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{8b941668-31e5-40b3-9097-f82b6b1acb7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -149,14 +152,20 @@
     <ClInclude Include="ecs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MPL.h">
+    <ClInclude Include="MPL\MPL.h">
       <Filter>Header Files\BMPL</Filter>
     </ClInclude>
-    <ClInclude Include="TLAlgorithm.h">
+    <ClInclude Include="MPL\TLAlgorithm.h">
       <Filter>Header Files\BMPL</Filter>
     </ClInclude>
-    <ClInclude Include="Typelist.h">
+    <ClInclude Include="MPL\Typelist.h">
       <Filter>Header Files\BMPL</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSCounter.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

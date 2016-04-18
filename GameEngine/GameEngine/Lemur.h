@@ -47,13 +47,42 @@ else {}\
 #endif
 
 
+namespace Lemur {
 inline std::string to_string(const char* str)
 {
 	return str;
 }
 
+
+template <class T>
+std::string to_string_resolver(T t)
+{
+	using std::to_string;
+	using Lemur::to_string;
+	return to_string(t);
+}
+
+namespace impl
+{
+
+template <class Fn>
+void execute_lambda(Fn&& fn)
+{
+#ifndef NDEBUG
+	std::forward<Fn>(fn)();
+#endif
+}
+
+}// namepace impl
+}// namespace Lemur
+
+
+#define DEB_ONLY_BEGIN Lemur::impl::execute_lambda([&]{
+#define DEB_ONLY_END });
+
+
 #define CSTR(a, b) \
-(std::string(a) + to_string(b)).c_str()
+(std::string(a) + Lemur::to_string_resolver(b)).c_str()
 
 #define CSTR2(a, b, c) \
-(std::string(a) + to_string(b) + std::string(c)).c_str()
+(std::string(a) + Lemur::to_string_resolver(b) + std::string(c)).c_str()

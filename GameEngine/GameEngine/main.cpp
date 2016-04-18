@@ -1,11 +1,16 @@
 #include "opengl_master.h"
 
 #include <SDL.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 
 #include "Camera.h"
 #include "Manager.h"
 #include "render_system.h"
 #include "ecs.h"
+#include "Timer.h"
+#include "FPSCounter.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -35,8 +40,11 @@ int main(int argc, char* args[])
 	Lemur::MeshManager mm;
 	Lemur::TextureManager tm;
 	Lemur::MyManager manager;
-
+		
 	init();
+	
+	Lemur::utils::FPSCounter fps;
+
 	// Enable text input
 	SDL_StartTextInput();
 
@@ -80,8 +88,21 @@ int main(int argc, char* args[])
 
 	SDL_Event e;
 	bool quit = false;
+	fps.start();
 	while (!quit)
 	{
+		fps.tick();
+
+		static int cnt = 0;
+		++cnt;
+		
+			
+
+		if (cnt > fps.fps() + 1) {
+			fps.update();
+			printf("%f\n", fps.fps());
+			cnt = 0;
+		}
 		while (SDL_PollEvent(&e) != 0)
 		{
 			// User request quit
@@ -105,6 +126,7 @@ int main(int argc, char* args[])
 				handleMouse(x, y);
 
 				SDL_WarpMouseInWindow(global_window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+				
 			}
 		}
 
@@ -134,6 +156,7 @@ bool init()
 	else
 	{
 		// Use OpenGL 3.1 core
+	
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
