@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "ConsoleLogger.h"
 #include "Lemur.h"
-#include "file_paths.h"
+#include "FilePaths.h"
 
 namespace Lemur {
 

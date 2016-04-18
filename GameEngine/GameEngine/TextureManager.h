@@ -6,7 +6,7 @@
 namespace Lemur
 {
 
-class TextureManager : public Manager<Texture>
+class TextureManager : public ResourceManager<Texture>
 {
 private:
 	unsigned char* loadPixels(const char* path)
@@ -17,7 +17,7 @@ private:
 public:
 	std::shared_ptr<Texture> load(const char* filename)
 	{
-		auto texture = Manager<Texture>::load(filename);
+		auto texture = ResourceManager<Texture>::load(filename);
 	}
 };
 

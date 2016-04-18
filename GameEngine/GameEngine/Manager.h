@@ -11,7 +11,7 @@ namespace Lemur
 {
 
 template <class Ty>
-class Manager
+class ResourceManager
 {
 public:
 	void unloadUnreferenced()
@@ -40,7 +40,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Ty>> m_instances;
 };
 
-using MeshManager = Manager<Mesh>;
-using TextureManager = Manager<Texture>;
+using MeshManager = ResourceManager<Mesh>;
+using TextureManager = ResourceManager<Texture>;
 }
 
