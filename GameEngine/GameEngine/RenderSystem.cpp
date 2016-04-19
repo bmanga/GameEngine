@@ -671,15 +671,15 @@ void RenderSystem::render(Lemur::Camera camera)
 		{
 			component_vbo = new VertexBufferObject();
 			component_vbo->bind();
-			component_vbo->bufferData(renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
+			component_vbo->bufferData((int)renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
 
 			component_ibo = new IndexBufferObject();
 			component_ibo->bind();
-			component_ibo->bufferData(renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
+			component_ibo->bufferData((int)renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
 
 			component_nbo = new VertexBufferObject();
 			component_nbo->bind();
-			component_nbo->bufferData(renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
+			component_nbo->bufferData((int)renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
 
 			active_program = renderable.program;
 			active_render_component = &renderable;
