@@ -12,6 +12,7 @@
 #include "RenderSystem.h"
 #include "ECS.h"
 
+#include "SceneManager.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -52,7 +53,6 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-
 	Lemur::ecs::EntityIndex model(manager.createIndex());
 
 	auto& model_position(manager.addComponent<CPosition>(model));
@@ -84,6 +84,9 @@ int main(int argc, char* args[])
 	light.specular.b = 1.0f;
 
 	manager.refresh();
+
+	SceneManager scene_manager;
+	scene_manager.root.updateAll();
 
 	RenderSystem render_system(manager);
 
