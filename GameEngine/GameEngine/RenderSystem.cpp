@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 
-
+#include <unordered_map>
+#include <vector>
 /*
 THE GRAPHICS PIPELINE:
 
@@ -647,13 +648,18 @@ void RenderSystem::end()
 }
 */
 
-bool bos_created = false;
 float count = 0.0f;
 
-ShaderProgram* active_program = nullptr;
-CRenderable* active_render_component = nullptr;
+// TODO: This could be a vector of struct instances instead...
+std::vector<VertexBufferObject> vbos;
+std::vector<IndexBufferObject> indices;
+std::vector<VertexBufferObject> normals;
+std::vector<ShaderProgram> programs;
+std::vector<CPosition> positions;
+std::vector<Lemur::u32> index_counts;
 
-// WARNING: This is likely to only work with one model and one light in its current state.
+std::unordered_map<std::size_t, bool> creation_map;
+
 void RenderSystem::render(Lemur::Camera camera)
 {
 	// Initialize clear color
@@ -665,99 +671,236 @@ void RenderSystem::render(Lemur::Camera camera)
 	// Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// TODO: This could be implemented more cleanly...
 	manager.forEntitiesMatching<Lemur::SRenderable>([this, camera](auto entity_index, auto& position, auto& renderable)
 	{
-		if (!bos_created)
+		std::unordered_map<std::size_t, bool>::const_iterator got = creation_map.find(entity_index);
+		if (got == creation_map.end())
 		{
-			component_vbo = new VertexBufferObject();
-			component_vbo->bind();
-			component_vbo->bufferData((int)renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
+			VertexBufferObject vbo;
+			vbo.bind();
+			vbo.bufferData((int)renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
 
-			component_ibo = new IndexBufferObject();
-			component_ibo->bind();
-			component_ibo->bufferData((int)renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
+			IndexBufferObject ibo;
+			ibo.bind();
+			ibo.bufferData((int)renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
 
-			component_nbo = new VertexBufferObject();
-			component_nbo->bind();
-			component_nbo->bufferData((int)renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
+			VertexBufferObject nbo;
+			nbo.bind();
+			nbo.bufferData((int)renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
 
-			active_program = renderable.program;
-			active_render_component = &renderable;
+			vbos.push_back(vbo);
+			indices.push_back(ibo);
+			normals.push_back(nbo);
 
-			bos_created = true;
+			programs.push_back(*renderable.program);
+			positions.push_back(position);
+			index_counts.push_back(renderable.mesh->vertexIndexCount());
+
+			creation_map.insert(std::make_pair(entity_index, true));
 		}
+	});
+
+	count += 0.05f;
+	for (unsigned int i = 0; i < vbos.size(); i++)
+	{
+		VertexBufferObject vbo = vbos.at(i);
+		IndexBufferObject ibo = indices.at(i);
+		VertexBufferObject nbo = normals.at(i);
+		ShaderProgram prog = programs.at(i);
+		CPosition pos = positions.at(i);
+		Lemur::u32 index_cnt = index_counts.at(i);
 
 		// Bind program
-		renderable.program->use();
-		active_program = renderable.program;
+		prog.use();
 
 		lm::mat4 view = camera.getView();
-		GLint view_uniform = renderable.program->getUniformLocation("view");
+		GLint view_uniform = prog.getUniformLocation("view");
 		glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
 
 		// Create the perspective projection matrix
 		lm::mat4 proj = camera.getProjection();
-		GLint proj_uniform = renderable.program->getUniformLocation("proj");
+		GLint proj_uniform = prog.getUniformLocation("proj");
 		glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
-		// Identity matrix
-		model = glm::mat4(1.0f);
+		//// Identity matrix
+		//model = glm::mat4(1.0f);
 
-		// Apply the model transformation
-		//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
-		model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
-		int model_uniform = renderable.program->getUniformLocation("model");
-		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+		//// Apply the model transformation
+		////model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+		//model = lm::translate(model, lm::vec3(pos.x, pos.y, pos.z));
+		//int model_uniform = prog.getUniformLocation("model");
+		//glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
-		int mat_ambient_uniform = renderable.program->getUniformLocation("material.ambient");
-		int mat_diffuse_uniform = renderable.program->getUniformLocation("material.diffuse");
-		int mat_specular_uniform = renderable.program->getUniformLocation("material.specular");
-		int mat_shininess_uniform = renderable.program->getUniformLocation("material.shininess");
+		int mat_ambient_uniform = prog.getUniformLocation("material.ambient");
+		int mat_diffuse_uniform = prog.getUniformLocation("material.diffuse");
+		int mat_specular_uniform = prog.getUniformLocation("material.specular");
+		int mat_shininess_uniform = prog.getUniformLocation("material.shininess");
 
 		glUniform3f(mat_ambient_uniform, 0.24725f, 0.1995f, 0.0745f);
 		glUniform3f(mat_diffuse_uniform, 0.75164f, 0.60648f, 0.22648f);
 		glUniform3f(mat_specular_uniform, 0.628281f, 0.555802f, 0.366065f);
 		glUniform1f(mat_shininess_uniform, 0.4f);
-	});
 
-	manager.forEntitiesMatching<Lemur::SLight>([](auto entity_index, auto& position, auto& light)
-	{
-		int light_pos_uniform = active_program->getUniformLocation("light.position");
-		int light_ambient_uniform = active_program->getUniformLocation("light.ambient");
-		int light_diffuse_uniform = active_program->getUniformLocation("light.diffuse");
-		int light_specular_uniform = active_program->getUniformLocation("light.specular");
+		// Identity matrix
+		model = glm::mat4(1.0f);
 
-		position.x = (float)cos(count) * 30.0f;
-		position.y = (float)sin(count) * 30.0f;
-		count += 0.05f;
-		if (count >= glm::pi<float>() * 2.0f) count = 0;
+		manager.forEntitiesMatching<Lemur::SLight>([&](auto entity_index, auto& position, auto& light)
+		{
+			int light_pos_uniform = prog.getUniformLocation("light.position");
+			int light_ambient_uniform = prog.getUniformLocation("light.ambient");
+			int light_diffuse_uniform = prog.getUniformLocation("light.diffuse");
+			int light_specular_uniform = prog.getUniformLocation("light.specular");
+			
+			position.z = (float)cos(count) * 30.0f;
+			position.y = (float)sin(count) * 30.0f;
+			if (count >= glm::pi<float>() * 2.0f) count = 0;
+			
+			glUniform3f(light_pos_uniform, position.x, position.y, position.z);
+			glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
+			glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
+			glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
 
-		glUniform3f(light_pos_uniform, position.x, position.y, position.z);
-		glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
-		glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
-		glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
-	});
+			// Rotate it around 0
+			if (i == (vbos.size() - 1)) model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
+		});
 
-	component_vbo->bind();
+		// Apply the model transformation
+		//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+		if (i != (vbos.size() - 1)) model = lm::translate(model, lm::vec3(pos.x, pos.y, pos.z));
+		int model_uniform = prog.getUniformLocation("model");
+		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
-	// Enable vertex position
-	int pos_attrib = active_program->getAttribLocation("position");
-	glEnableVertexAttribArray(pos_attrib);
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		vbo.bind();
 
-	component_nbo->bind();
+		// Enable vertex position
+		int pos_attrib = prog.getAttribLocation("position");
+		glEnableVertexAttribArray(pos_attrib);
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	int norm_attrib = active_program->getAttribLocation("in_normal");
-	glEnableVertexAttribArray(norm_attrib);
-	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		nbo.bind();
 
-	component_ibo->bind();
-	glDrawElements(GL_TRIANGLES, active_render_component->mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
+		int norm_attrib = prog.getAttribLocation("in_normal");
+		glEnableVertexAttribArray(norm_attrib);
+		glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	// Disable vertex position
-	glDisableVertexAttribArray(pos_attrib);
-	glDisableVertexAttribArray(norm_attrib);
+		ibo.bind();
+		glDrawElements(GL_TRIANGLES, index_cnt, GL_UNSIGNED_INT, NULL);
 
-	// Unbind program
-	glUseProgram(NULL);
+		// Disable vertex position
+		glDisableVertexAttribArray(pos_attrib);
+		glDisableVertexAttribArray(norm_attrib);
+
+		// Unbind program
+		glUseProgram(NULL);
+	}
 }
+
+//// WARNING: This is likely to only work with one model and one light in its current state.
+//void RenderSystem::render(Lemur::Camera camera)
+//{
+//	// Initialize clear color
+//	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+//
+//	// Enable depth testing
+//	glEnable(GL_DEPTH_TEST);
+//
+//	// Clear color buffer
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//	manager.forEntitiesMatching<Lemur::SRenderable>([this, camera](auto entity_index, auto& position, auto& renderable)
+//	{
+//		if (!bos_created)
+//		{
+//			component_vbo = new VertexBufferObject();
+//			component_vbo->bind();
+//			component_vbo->bufferData((int)renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
+//
+//			component_ibo = new IndexBufferObject();
+//			component_ibo->bind();
+//			component_ibo->bufferData((int)renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
+//
+//			component_nbo = new VertexBufferObject();
+//			component_nbo->bind();
+//			component_nbo->bufferData((int)renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
+//
+//			active_program = renderable.program;
+//			active_render_component = &renderable;
+//
+//			bos_created = true;
+//		}
+//
+//		// Bind program
+//		renderable.program->use();
+//		active_program = renderable.program;
+//
+//		lm::mat4 view = camera.getView();
+//		GLint view_uniform = renderable.program->getUniformLocation("view");
+//		glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+//
+//		// Create the perspective projection matrix
+//		lm::mat4 proj = camera.getProjection();
+//		GLint proj_uniform = renderable.program->getUniformLocation("proj");
+//		glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+//
+//		// Identity matrix
+//		model = glm::mat4(1.0f);
+//
+//		// Apply the model transformation
+//		//model = lm::rotate(model, lm::radians(0.25f), lm::vec3(0.0f, 0.0f, 1.0f));
+//		model = lm::translate(model, lm::vec3(position.x, position.y, position.z));
+//		int model_uniform = renderable.program->getUniformLocation("model");
+//		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+//
+//		int mat_ambient_uniform = renderable.program->getUniformLocation("material.ambient");
+//		int mat_diffuse_uniform = renderable.program->getUniformLocation("material.diffuse");
+//		int mat_specular_uniform = renderable.program->getUniformLocation("material.specular");
+//		int mat_shininess_uniform = renderable.program->getUniformLocation("material.shininess");
+//
+//		glUniform3f(mat_ambient_uniform, 0.24725f, 0.1995f, 0.0745f);
+//		glUniform3f(mat_diffuse_uniform, 0.75164f, 0.60648f, 0.22648f);
+//		glUniform3f(mat_specular_uniform, 0.628281f, 0.555802f, 0.366065f);
+//		glUniform1f(mat_shininess_uniform, 0.4f);
+//	});
+//
+//	manager.forEntitiesMatching<Lemur::SLight>([](auto entity_index, auto& position, auto& light)
+//	{
+//		int light_pos_uniform = active_program->getUniformLocation("light.position");
+//		int light_ambient_uniform = active_program->getUniformLocation("light.ambient");
+//		int light_diffuse_uniform = active_program->getUniformLocation("light.diffuse");
+//		int light_specular_uniform = active_program->getUniformLocation("light.specular");
+//
+//		position.x = (float)cos(count) * 30.0f;
+//		position.y = (float)sin(count) * 30.0f;
+//		count += 0.05f;
+//		if (count >= glm::pi<float>() * 2.0f) count = 0;
+//
+//		glUniform3f(light_pos_uniform, position.x, position.y, position.z);
+//		glUniform3f(light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
+//		glUniform3f(light_diffuse_uniform, light.diffuse.r, light.diffuse.g, light.diffuse.b);
+//		glUniform3f(light_specular_uniform, light.specular.r, light.specular.g, light.specular.b);
+//	});
+//
+//	component_vbo->bind();
+//
+//	// Enable vertex position
+//	int pos_attrib = active_program->getAttribLocation("position");
+//	glEnableVertexAttribArray(pos_attrib);
+//	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	component_nbo->bind();
+//
+//	int norm_attrib = active_program->getAttribLocation("in_normal");
+//	glEnableVertexAttribArray(norm_attrib);
+//	glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//
+//	component_ibo->bind();
+//	glDrawElements(GL_TRIANGLES, active_render_component->mesh->vertexIndexCount(), GL_UNSIGNED_INT, NULL);
+//
+//	// Disable vertex position
+//	glDisableVertexAttribArray(pos_attrib);
+//	glDisableVertexAttribArray(norm_attrib);
+//
+//	// Unbind program
+//	glUseProgram(NULL);
+//}

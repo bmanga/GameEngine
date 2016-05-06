@@ -53,17 +53,20 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	Lemur::ecs::EntityIndex model(manager.createIndex());
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		Lemur::ecs::EntityIndex model(manager.createIndex());
 
-	auto& model_position(manager.addComponent<CPosition>(model));
-	model_position.x = 0.0f;
-	model_position.y = 0.0f;
-	model_position.z = 0.0f;
+		auto& model_position(manager.addComponent<CPosition>(model));
+		model_position.x = i * 10.5f;
+		model_position.y = 0.0f;
+		model_position.z = 0.0f;
 
-	auto& renderable(manager.addComponent<CRenderable>(model));
-	renderable.mesh = mm.load("model.lbm");
-	renderable.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-	renderable.texture = tm.load("crate.png");
+		auto& renderable(manager.addComponent<CRenderable>(model));
+		renderable.mesh = mm.load("model.lbm");
+		renderable.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
+		renderable.texture = tm.load("crate.png");
+	}
 
 	Lemur::ecs::EntityIndex point_light(manager.createIndex());
 

@@ -174,10 +174,6 @@ private:
 	Lemur::math::mat4 model;
 	Lemur::Camera camera;
 
-	VertexBufferObject* component_vbo = nullptr;
-	IndexBufferObject* component_ibo = nullptr;
-	VertexBufferObject* component_nbo = nullptr;
-
 public:
 	RenderSystem(Lemur::ecs::Manager<Lemur::MySettings>& manager)
 	{

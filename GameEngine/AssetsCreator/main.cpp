@@ -43,6 +43,7 @@ Mesh AssimpLoadMesh(const char* filename)
 	const aiMesh* mesh = scene->mMeshes[0];
 	MeshBufferHeader info;
 	info.vertex_count = mesh->mNumVertices;
+	std::cout << "num of vertices : " << mesh->mNumVertices << "\n";
 	info.has_normals = mesh->HasNormals();
 	info.has_texture_coords = mesh->HasTextureCoords(0);
 
