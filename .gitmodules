@@ -1,0 +1,3 @@
+[submodule "GameEngine/GameEngine/freetype-gl-cpp"]
+	path = GameEngine/GameEngine/freetype-gl-cpp
+	url = https://github.com/bmanga/freetype-gl-cpp
