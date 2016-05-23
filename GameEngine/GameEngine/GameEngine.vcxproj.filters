@@ -15,6 +15,9 @@
     <Filter Include="Header Files\utils">
       <UniqueIdentifier>{8b941668-31e5-40b3-9097-f82b6b1acb7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Freetype-gl">
+      <UniqueIdentifier>{7a01044a-1a6b-40fd-ad37-007d9f7d4bd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -49,6 +52,15 @@
     </ClCompile>
     <ClCompile Include="TextEngine.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureAtlas.cpp">
+      <Filter>Source Files\Freetype-gl</Filter>
+    </ClCompile>
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureFont.cpp">
+      <Filter>Source Files\Freetype-gl</Filter>
+    </ClCompile>
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\utf8Utils.cpp">
+      <Filter>Source Files\Freetype-gl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

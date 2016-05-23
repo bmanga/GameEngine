@@ -164,6 +164,9 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConsoleLogger.cpp" />
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureAtlas.cpp" />
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureFont.cpp" />
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\utf8Utils.cpp" />
     <ClCompile Include="LinearAllocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math.cpp" />

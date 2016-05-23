@@ -32,12 +32,13 @@ void Shader::loadSource(const char* name)
 	int32_t length = static_cast<uint32_t>(shader_code.tellg());
 	shader_code.seekg(0, ios::beg);
 
-	char* buffer = new char[length];
+	char* buffer = new char[length+1];
+	buffer[length] = '\0';
 	shader_code.read(buffer, length);
 	shader_code.close();
 	const char* ptr = buffer;
 
-	glShaderSource(id, 1, &ptr, &length);
+	glShaderSource(id, 1, &ptr, NULL);
 
 	//KAVAN URE LEAKING
 	//TODO: Can you delete the buffer before you compile? (probs not)
