@@ -169,7 +169,6 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
-    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="TextEngine.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -181,13 +180,15 @@
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CompileTimeCounter.h" />
+    <ClInclude Include="DirectionalLightComponent.h" />
     <ClInclude Include="ECS.h" />
     <ClInclude Include="FilePaths.h" />
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="FPSCounter.h" />
     <ClInclude Include="Lemur.h" />
-    <ClInclude Include="LightComponent.h" />
+    <ClInclude Include="PointLightComponent.h" />
     <ClInclude Include="LinearAllocator.h" />
+    <ClInclude Include="SpotLightComponent.h" />
     <ClInclude Include="SwitchNode.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
@@ -204,7 +205,6 @@
     <ClInclude Include="SceneGroup.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneNode.h" />
-    <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="TextEngine.h" />
     <ClInclude Include="Texture.h" />

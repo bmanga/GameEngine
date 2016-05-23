@@ -53,29 +53,48 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
+	ShaderProgram program("new_shader_vert.vert", "new_shader_frag.frag");
+	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
+	program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
+	program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
+	program.compile();
+
+	///////////////////////////////// ROW OF 10 MODELS /////////////////////////////////
 	for (unsigned int i = 0; i < 10; i++)
 	{
 		Lemur::ecs::EntityIndex model(manager.createIndex());
 
 		auto& model_position(manager.addComponent<CPosition>(model));
-		model_position.x = i * 10.5f;
+		model_position.x = i * 5.0f;
 		model_position.y = 0.0f;
 		model_position.z = 0.0f;
 
 		auto& renderable(manager.addComponent<CRenderable>(model));
-		renderable.mesh = mm.load("model.lbm");
-		renderable.program = new ShaderProgram("material_vertex.vert", "material_fragment.frag");
-		renderable.texture = tm.load("crate.png");
+		renderable.mesh = mm.load("cube.lbm");
+		renderable.material = std::make_shared<Lemur::Material>();
+		renderable.material->shader = std::make_shared<ShaderProgram>(program);
+		renderable.material->texture = tm.load("crate.png");
+		renderable.material->ambient[0] = 0.24725f;
+		renderable.material->ambient[1] = 0.1995f;
+		renderable.material->ambient[2] = 0.0745f;
+		renderable.material->diffuse[0] = 0.75164f;
+		renderable.material->diffuse[1] = 0.60648f;
+		renderable.material->diffuse[2] = 0.22648f;
+		renderable.material->specular[0] = 0.628281f;
+		renderable.material->specular[1] = 0.555802f;
+		renderable.material->specular[2] = 0.366065f;
+		renderable.material->shininess = 0.4f;
 	}
 
+	///////////////////////////////// POINT LIGHT /////////////////////////////////
 	Lemur::ecs::EntityIndex point_light(manager.createIndex());
 
 	auto& light_position(manager.addComponent<CPosition>(point_light));
-	light_position.x = 0.0f;
-	light_position.y = 0.0f;
-	light_position.z = 0.0f;
+	light_position.x = -3.0f;
+	light_position.y = -3.0f;
+	light_position.z = 3.0f;
 
-	auto& light(manager.addComponent<CLight>(point_light));
+	auto& light(manager.addComponent<CPointLight>(point_light));
 	light.ambient.r = 1.0f;
 	light.ambient.g = 1.0f;
 	light.ambient.b = 1.0f;
@@ -85,6 +104,43 @@ int main(int argc, char* args[])
 	light.specular.r = 1.0f;
 	light.specular.g = 1.0f;
 	light.specular.b = 1.0f;
+	light.constant = 1.0f;
+	light.linear = 0.09f;
+	light.quadratic = 0.032f;
+
+	///////////////////////////////// POINT LIGHT RENDERABLE /////////////////////////////////
+	Lemur::ecs::EntityIndex light_renderable(manager.createIndex());
+
+	auto& lr_position(manager.addComponent<CPosition>(light_renderable));
+	lr_position = light_position;
+
+	auto& lr_renderable(manager.addComponent<CRenderable>(light_renderable));
+	lr_renderable.mesh = mm.load("cube.lbm");
+	lr_renderable.material = std::make_shared<Lemur::Material>();
+	lr_renderable.material->shader = std::make_shared<ShaderProgram>(program);
+	lr_renderable.material->emissive[0] = 1.0f;
+	lr_renderable.material->emissive[1] = 1.0f;
+	lr_renderable.material->emissive[2] = 1.0f;
+	lr_renderable.material->shininess = 64.0f;
+
+	///////////////////////////////// SPOT LIGHT /////////////////////////////////
+	Lemur::ecs::EntityIndex spot_light(manager.createIndex());
+
+	auto& sl_position(manager.addComponent<CPosition>(spot_light));
+	sl_position.x = g_camera.getCenter().x;
+	sl_position.y = g_camera.getCenter().y;
+	sl_position.z = g_camera.getCenter().z;
+
+	auto& sl_light(manager.addComponent<CSpotLight>(spot_light));
+	sl_light.direction = g_camera.getDirection();
+	sl_light.cut_off = glm::cos(glm::radians(12.5f)); // Must be cosine value - prevents expensive arccos calculation in fragment shader.
+	sl_light.outer_cut_off = lm::cos(lm::radians(15.0f)); // Must be cosine value - prevents expensive arccos calculation in fragment shader.
+	sl_light.constant = 1.0f;
+	sl_light.linear = 0.09f;
+	sl_light.quadratic = 0.032f;
+	sl_light.ambient = glm::vec3(0.0f);
+	sl_light.diffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+	sl_light.specular = glm::vec3(1.0f, 0.0f, 1.0f);
 
 	manager.refresh();
 
@@ -96,6 +152,7 @@ int main(int argc, char* args[])
 	SDL_Event e;
 	bool quit = false;
 	fps.start();
+	unsigned int count = 0;
 	while (!quit)
 	{
 		fps.tick();
@@ -161,7 +218,6 @@ bool init()
 	else
 	{
 		// Use OpenGL 3.1 core
-	
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

@@ -13,6 +13,7 @@ struct Material
 	// NOTE:
 	// The shader program could be decided by the engine instead.
 	// Time will tell.
+	// Uber-shaders seem to be the way to go.
 	//
 	// Materials should be sorted with the following attributes
 	// taking precedence over the others:
@@ -37,6 +38,8 @@ struct Material
 
 	float shininess;
 	float transparency;
+
+	bool use_texturing;
 };
 
 }

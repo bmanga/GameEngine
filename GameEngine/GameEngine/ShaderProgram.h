@@ -1,8 +1,12 @@
 #pragma once
 
-#include "shader.h"
-
 #include <string>
+
+enum ShaderType
+{
+	VERTEX = GL_VERTEX_SHADER,
+	FRAGMENT = GL_FRAGMENT_SHADER
+};
 
 class ShaderProgram
 {
@@ -24,19 +28,28 @@ private:
 		"TimeInMilliseconds"
 	};
 
-	unsigned int id;
+	unsigned int program_id;
 	static unsigned int using_id;
 
-	Shader* vertex_shader;
-	Shader* fragment_shader;
+	unsigned int vertex_shader_id;
+	unsigned int fragment_shader_id;
 
-	void link();
+	std::string vertex_source;
+	std::string fragment_source;
+
+	std::string loadShaderSource(const char* name);
+	bool compileShader(unsigned int shader_id);
+
+	bool linkProgram();
 
 	void printLog();
 
 public:
-	ShaderProgram(Shader& vertex_shader, Shader& fragment_shader);
 	ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path);
+
+	void addDefine(const char* name, const char* value, ShaderType type);
+	void addDefine(const char* name, ShaderType type);
+	bool compile();
 
 	int getAttribLocation(const char* name);
 	int getUniformLocation(const char* name);

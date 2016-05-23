@@ -9,8 +9,9 @@
 
 #include "PositionComponent.h"
 #include "RenderComponent.h"
-#include "LightComponent.h"
-//#include <gsl.h>
+#include "PointLightComponent.h"
+#include "DirectionalLightComponent.h"
+#include "SpotLightComponent.h"
 
 #define ECS_FWD(t) std::forward<decltype(t)> (t)
 
@@ -814,7 +815,7 @@ public:
 
 using MyComponents = Lemur::ecs::ComponentList
 <
-	CPosition, CRenderable, CLight
+	CPosition, CRenderable, CPointLight, CDirLight, CSpotLight
 >;
 
 struct TTestTag {};
@@ -825,10 +826,12 @@ using MyTags = Lemur::ecs::TagList
 >;
 
 using SRenderable = Lemur::ecs::Signature<CPosition, CRenderable>;
-using SLight = Lemur::ecs::Signature<CPosition, CLight>;
+using SPointLight = Lemur::ecs::Signature<CPosition, CPointLight>;
+using SDirLight = Lemur::ecs::Signature<CPosition, CDirLight>;
+using SSpotLight = Lemur::ecs::Signature<CPosition, CSpotLight>;
 using MySignatures = Lemur::ecs::SignatureList
 <
-	SRenderable, SLight
+	SRenderable, SPointLight, SDirLight, SSpotLight
 >;
 
 using MySettings = Lemur::ecs::Settings

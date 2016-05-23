@@ -4,16 +4,11 @@
 
 #include "Texture.h"
 #include "ShaderProgram.h"
+#include "Material.h"
 
-//namespace Lemur
-//{
-//class Mesh;
-//class Texture;
-//}
 struct CRenderable
 {
-	int rot_x, rot_y, rot_z;	// Make component
-	ShaderProgram* program;
-	std::shared_ptr<Lemur::Texture> texture;
+	int rot_x, rot_y, rot_z;	// Make component (CTransform?)
+	std::shared_ptr<Lemur::Material> material;
 	std::shared_ptr<Lemur::Mesh> mesh;
 };

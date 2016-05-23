@@ -12,7 +12,7 @@
 #include "ECS.h"
 
 #include "RenderComponent.h"
-#include "LightComponent.h"
+#include "PointLightComponent.h"
 #include "PositionComponent.h"
 
 namespace lm = Lemur::math;
@@ -89,82 +89,6 @@ public:
 	}
 };
 
-/*
-class RenderSystem
-{
-private:
-	Lemur::math::mat4 model;
-
-	ShaderProgram* active_program = nullptr;
-	GLuint global_vao = 0;
-	VertexBufferObject* global_vbo = nullptr;
-	IndexBufferObject* global_ibo = nullptr;
-
-	Texture* active_texture = nullptr;
-	Texture* specular_texture = nullptr;
-
-	Mesh* mesh = nullptr;
-	VertexBufferObject* mesh_vbo = nullptr;
-	IndexBufferObject* mesh_ibo = nullptr;
-	VertexBufferObject* mesh_normal_bo = nullptr;
-
-	RenderComponent* component = nullptr;
-
-public:
-	RenderSystem();
-	~RenderSystem();
-
-	bool initGL();
-	void render(Lemur::Camera camera);
-
-	void renderMesh(Lemur::Camera camera);
-	void setMesh(Mesh* mesh);
-
-	void renderComponent(Lemur::Camera camera);
-};
-*/
-
-/*
-class RenderSystem : public ecs::System
-{
-private:
-	Lemur::math::mat4 model;
-	Lemur::Camera camera;
-
-	VertexBufferObject* component_vbo = nullptr;
-	IndexBufferObject* component_ibo = nullptr;
-	VertexBufferObject* component_nbo = nullptr;
-
-public:
-	RenderSystem(ecs::Manager& manager) :
-		ecs::System(manager)
-	{
-		// TODO: Maybe do away with required components and assign required components
-		// through AND/OR relationship functions
-		ecs::ComponentTypeSet required_components;
-		required_components.insert(RenderComponent::type);
-		required_components.insert(LightComponent::type);
-		required_components.insert(PositionComponent::type);
-		setRequiredComponents(std::move(required_components));
-
-		ecs::ComponentTypeSet or_components;
-		or_components.insert(RenderComponent::type);
-		or_components.insert(LightComponent::type);
-		or_components.insert(PositionComponent::type);
-		setOr(std::move(or_components));
-	}
-
-	void updateCamera(Lemur::Camera camera)
-	{
-		this->camera = camera;
-	}
-
-	void updateEntity(float elapsed_time, ecs::Entity entity) override;
-
-	void end() override;
-};
-*/
-
 class RenderSystem
 {
 private:
@@ -172,7 +96,6 @@ private:
 	SystemManager manager;
 
 	Lemur::math::mat4 model;
-	Lemur::Camera camera;
 
 public:
 	RenderSystem(Lemur::ecs::Manager<Lemur::MySettings>& manager)
@@ -180,5 +103,6 @@ public:
 		this->manager = manager;
 	}
 
+	void setup();
 	void render(Lemur::Camera camera);
 };
