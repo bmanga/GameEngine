@@ -11,22 +11,8 @@ enum ShaderType
 class ShaderProgram
 {
 private:
-	std::string RESERVED[14] = {
-		"ModelView",
-		"ModelViewI",
-		"ModelViewT",
-		"ModelViewIT",
-		"ProjectionMatrix",
-		"ProjectionMatrixI",
-		"ProjectionMatrixT",
-		"ProjectionMatrixIT",
-		"ViewMatrix",
-		"ViewMatrixI",
-		"ViewMatrixIT",
-		"CamPos",
-		"TimeInSeconds",
-		"TimeInMilliseconds"
-	};
+	//TODO: RESERVED can be array of chars and be constexpr
+	static const std::string RESERVED[14]; 
 
 	unsigned int program_id;
 	static unsigned int using_id;
@@ -37,12 +23,12 @@ private:
 	std::string vertex_source;
 	std::string fragment_source;
 
-	std::string loadShaderSource(const char* name);
-	bool compileShader(unsigned int shader_id);
+	std::string loadShaderSource(const char* name) const;
+	bool compileShader(unsigned int shader_id) const;
 
-	bool linkProgram();
+	bool linkProgram() const;
 
-	void printLog();
+	void printLog() const;
 
 public:
 	ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path);
@@ -51,11 +37,11 @@ public:
 	void addDefine(const char* name, ShaderType type);
 	bool compile();
 
-	int getAttribLocation(const char* name);
-	int getUniformLocation(const char* name);
+	int getAttribLocation(const char* name) const;
+	int getUniformLocation(const char* name) const;
 
-	bool isUsing();
-	void use();
+	bool isUsing() const;
+	void use() const;
 
-	std::string* getParameters();
+	static const std::string* getParameters();
 };

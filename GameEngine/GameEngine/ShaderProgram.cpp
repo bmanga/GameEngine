@@ -7,16 +7,35 @@
 
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path)
+const std::string ShaderProgram::RESERVED[14]= {
+	"ModelView",
+	"ModelViewI",
+	"ModelViewT",
+	"ModelViewIT",
+	"ProjectionMatrix",
+	"ProjectionMatrixI",
+	"ProjectionMatrixT",
+	"ProjectionMatrixIT",
+	"ViewMatrix",
+	"ViewMatrixI",
+	"ViewMatrixIT",
+	"CamPos",
+	"TimeInSeconds",
+	"TimeInMilliseconds"
+};
+
+
+ShaderProgram::ShaderProgram(const char* vertex_shader_path, 
+	const char* fragment_shader_path) :
+	vertex_source(loadShaderSource(vertex_shader_path)),
+	fragment_source(loadShaderSource(fragment_shader_path))
 {
 	vertex_shader_id = glCreateShader(VERTEX);
 	fragment_shader_id = glCreateShader(FRAGMENT);
-
-	vertex_source = loadShaderSource(vertex_shader_path);
-	fragment_source = loadShaderSource(fragment_shader_path);
+	program_id = 0;
 }
 
-std::string ShaderProgram::loadShaderSource(const char* name)
+std::string ShaderProgram::loadShaderSource(const char* name) const
 {
 	using namespace std;
 
@@ -24,8 +43,9 @@ std::string ShaderProgram::loadShaderSource(const char* name)
 
 	if (!shader_code)
 	{
-		Lemur::ConsoleLogger::Error(CODE_LOCATION, CSTR2("Shader ", name, " not found"));
-		return NULL;
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
+			Lemur::cstr("Shader ", name, " not found"));
+		return "";
 	}
 
 	// Get file size
@@ -44,13 +64,12 @@ std::string ShaderProgram::loadShaderSource(const char* name)
 	return source;
 }
 
-void ShaderProgram::addDefine(const char* name, const char* value, ShaderType type)
+void ShaderProgram::addDefine(const char* name, 
+	const char* value, 
+	ShaderType type)
 {
-	std::string statement = "#define ";
-	statement.append(name);
-	statement.append(" ");
-	statement.append(value);
-	statement.append("\r\n");
+	auto statement = Lemur::str("#define ", name, " ", value, "\r\n");
+
 	switch (type)
 	{
 	case VERTEX:
@@ -89,12 +108,16 @@ bool ShaderProgram::compile()
 
 	if (!compileShader(vertex_shader_id))
 	{
-		//Lemur::ConsoleLogger::Error(CODE_LOCATION, CSTR2("Unable to compile vertex shader \'", vertex_shader_path, "\' [ID: ", vertex_shader_id, "]"));
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
+			Lemur::cstr("Unable to compile vertex shader",
+				" [ID: ", vertex_shader_id, "]"));
 		return false;
 	}
 	if (!compileShader(fragment_shader_id))
 	{
-		//Lemur::ConsoleLogger::Error(CODE_LOCATION, CSTR2("Unable to compile fragment shader \'", fragment_shader_path, "\' [ID: ", fragment_shader_id, "]"));
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
+			Lemur::cstr("Unable to compile fragment shader", 
+				" [ID: ", fragment_shader_id, "]"));
 		return false;
 	}
 
@@ -105,14 +128,16 @@ bool ShaderProgram::compile()
 
 	if (!linkProgram())
 	{
-		//Lemur::ConsoleLogger::Error(CODE_LOCATION, CSTR2("Error linking shader program with \'" + vertex_shader_path "\' and \'", fragment_shader_path, "\' [ID: ", program_id, "]"));
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
+			Lemur::cstr("Error linking shader program with [ID: ",
+				program_id, "]"));
 		return false;
 	}
 
 	return true;
 }
 
-bool ShaderProgram::compileShader(unsigned int shader_id)
+bool ShaderProgram::compileShader(unsigned int shader_id) const
 {
 	bool success = true;
 
@@ -129,7 +154,7 @@ bool ShaderProgram::compileShader(unsigned int shader_id)
 	return success;
 }
 
-bool ShaderProgram::linkProgram()
+bool ShaderProgram::linkProgram() const
 {
 	glLinkProgram(program_id);
 
@@ -146,7 +171,7 @@ bool ShaderProgram::linkProgram()
 	return true;
 }
 
-int ShaderProgram::getAttribLocation(const char* name)
+int ShaderProgram::getAttribLocation(const char* name) const
 {
 	if (!isUsing())
 	{
@@ -163,7 +188,7 @@ int ShaderProgram::getAttribLocation(const char* name)
 	return location;
 }
 
-int ShaderProgram::getUniformLocation(const char* name)
+int ShaderProgram::getUniformLocation(const char* name) const
 {
 	if (!isUsing())
 	{
@@ -180,18 +205,18 @@ int ShaderProgram::getUniformLocation(const char* name)
 	return location;
 }
 
-bool ShaderProgram::isUsing()
+bool ShaderProgram::isUsing() const
 {
 	return program_id == using_id;
 }
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
 	glUseProgram(program_id);
 	using_id = program_id;
 }
 
-void ShaderProgram::printLog()
+void ShaderProgram::printLog() const
 {
 	//Make sure name is shader
 	if (glIsProgram(program_id))
@@ -223,7 +248,7 @@ void ShaderProgram::printLog()
 	}
 }
 
-std::string* ShaderProgram::getParameters()
+const std::string* ShaderProgram::getParameters()
 {
 	return RESERVED;
 }

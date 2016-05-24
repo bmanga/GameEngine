@@ -1,76 +1,10 @@
 #include "TextEngine.h"
 #include "OpenGLMaster.h"
-#include "freetype-gl-cpp/freetype-gl-cpp/utf8Utils.h"
+#include "freetype-gl-cpp/freetype-gl-cpp/Utility.h"
 #include <cassert>
+#include <iterator>
 
-namespace
-{
 
-class glyph_iterator
-{
-private:
-	size_t index = 0;
-	const char* codepoints;
-	ftgl::Font* font;
-
-public:
-	using underlying_type = const ftgl::Glyph*;
-
-	glyph_iterator(ftgl::Font* font, const char* codepoints, size_t index) :
-		font(font),
-		codepoints(codepoints),
-		index(index)
-	{
-		assert(codepoints);
-	}
-
-	glyph_iterator& operator++()
-	{
-		index += ftgl::utf8_surrogate_len(codepoints + index);
-		return *this;
-	}
-
-	const ftgl::Glyph* operator*() const
-	{
-		return font->getLoadedGlyph(ftgl::utf8_to_utf32(codepoints + index));
-	}
-
-	bool operator!= (const glyph_iterator& itr) const
-	{
-		assert(itr.codepoints == codepoints && itr.font == font);
-
-		if (itr.index != index) return true;
-
-		return false;
-	}
-};
-
-class glyph_range
-{
-private:
-	const char* codepoints;
-	ftgl::Font* font;
-public:
-	glyph_range(ftgl::Font* font, const char* codepoints) :
-		codepoints(codepoints),
-		font(font)
-	{
-		font->loadGlyphs(codepoints);
-	}
-
-	glyph_iterator begin() const 
-	{
-		return{ font, codepoints, 0 };
-	}
-
-	glyph_iterator end() const
-	{
-		return{ font, codepoints, ftgl::utf8_strlen(codepoints) };
-	}
-
-};
-
-}
 bool Lemur::TextEngine::loadFont(std::string name, float size, fs::path path)
 {
 	atlantes.push_back(std::make_unique<ftgl::TextureAtlas>(512, 512, 1));
@@ -102,7 +36,7 @@ void Lemur::TextEngine::displayText(const char* text, Pen& pen)
 
 	const ftgl::Glyph* previous = nullptr;
 
-	for (auto* glyph : glyph_range(activeFont, text))
+	for (auto* glyph : ftgl::glyph_range(activeFont, text))
 	{
 		if (glyph == nullptr) continue;
 
@@ -121,16 +55,17 @@ void Lemur::TextEngine::displayText(const char* text, Pen& pen)
 		float s1 = glyph->s1;
 		float t1 = glyph->t1;
 
+
 		GLuint indices[6] = { 0, 1, 2, 0, 2, 3 };
 		Vertex vertices[4] = {
-			{float(x0), float(y0), 0,  s0, t0},
-			{float(x0), float(y1), 0,  s0, t1},
-			{float(x1), float(y1), 0,  s1, t1},
-			{float(x1), float(y0), 0,  s1, t0}
+			{float(x0), float(y0), 0,  s0, t0, pen.r, pen.g, pen.b, pen.a },
+			{float(x0), float(y1), 0,  s0, t1, pen.r, pen.g, pen.b, pen.a },
+			{float(x1), float(y1), 0,  s1, t1, pen.r, pen.g, pen.b, pen.a },
+			{float(x1), float(y0), 0,  s1, t0, pen.r, pen.g, pen.b, pen.a }
 		};
 
+		buffer.push_back((const char*)vertices, 4, indices, 6);
 		pen.x += glyph->advance_x;
-
 		previous = glyph;
 
 	}

@@ -4,7 +4,7 @@
 #include <string>
 #include <typeinfo>
 #include "types.h"
-
+#include <sstream>
 
 
 
@@ -12,14 +12,27 @@ namespace Lemur
 {
 
 std::string demangle(const char *abiName);
-
-
 std::string filter_filename_location(std::string file);
 
 template <class T>
 std::string get_origin()
 {
 	return demangle(typeid(T).name());
+}
+
+template <class... Args>
+std::string str(Args... args)
+{
+	std::stringstream ss;
+	int unused[] = { (ss << args, 0)... };
+	return ss.str();
+
+}
+
+template <class... Args>
+const char* cstr(Args... args)
+{
+	return str(args...).c_str();
 }
 
 class ConsoleLogger

@@ -95,7 +95,8 @@ void Lemur::ConsoleLogger::Error(const char* origin, const char* message)
 
 #ifdef _WIN32
 #include <windows.h>
-void Lemur::ConsoleLogger::Log(const char* origin, const char* message, const char* type, Color color)
+void Lemur::ConsoleLogger::Log(const char* origin, const char* message, 
+	const char* type, Color color)
 {
 	using namespace std;
 	

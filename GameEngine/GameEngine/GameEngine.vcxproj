@@ -167,6 +167,8 @@
     <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureAtlas.cpp" />
     <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\TextureFont.cpp" />
     <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\utf8Utils.cpp" />
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\VertexAttribute.cpp" />
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\VertexBuffer.cpp" />
     <ClCompile Include="LinearAllocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math.cpp" />
@@ -215,6 +217,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

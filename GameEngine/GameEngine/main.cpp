@@ -44,7 +44,8 @@ int main(int argc, char* args[])
 	Lemur::MyManager manager;
 		
 	init();
-	
+	Lemur::ConsoleLogger::Info(CODE_LOCATION, Lemur::cstr("I have ", 3,
+		" bananas and ", 3.14, " euros left"));
 	Lemur::utils::FPSCounter fps;
 
 	// Enable text input

@@ -59,6 +59,12 @@
     <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\utf8Utils.cpp">
       <Filter>Source Files\Freetype-gl</Filter>
     </ClCompile>
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\VertexAttribute.cpp">
+      <Filter>Source Files\Freetype-gl</Filter>
+    </ClCompile>
+    <ClCompile Include="freetype-gl-cpp\freetype-gl-cpp\VertexBuffer.cpp">
+      <Filter>Source Files\Freetype-gl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -167,6 +173,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SpotLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
