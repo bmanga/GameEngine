@@ -26,10 +26,10 @@ const std::string ShaderProgram::RESERVED[14]= {
 
 
 ShaderProgram::ShaderProgram(const char* vertex_shader_path, 
-	const char* fragment_shader_path) :
-	vertex_source(loadShaderSource(vertex_shader_path)),
-	fragment_source(loadShaderSource(fragment_shader_path))
+	const char* fragment_shader_path) 
 {
+	vertex_source = loadShaderSource(vertex_shader_path);
+	fragment_source = loadShaderSource(fragment_shader_path);
 	vertex_shader_id = glCreateShader(VERTEX);
 	fragment_shader_id = glCreateShader(FRAGMENT);
 	program_id = 0;

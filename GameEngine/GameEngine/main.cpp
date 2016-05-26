@@ -13,6 +13,7 @@
 #include "ECS.h"
 
 #include "SceneManager.h"
+#include "TextEngine.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -39,11 +40,13 @@ void run()
 
 int main(int argc, char* args[])
 {
+	init();
+	
 	Lemur::MeshManager mm;
 	Lemur::TextureManager tm;
 	Lemur::MyManager manager;
 		
-	init();
+	
 	Lemur::ConsoleLogger::Info(CODE_LOCATION, Lemur::cstr("I have ", 3,
 		" bananas and ", 3.14, " euros left"));
 	Lemur::utils::FPSCounter fps;
@@ -150,20 +153,37 @@ int main(int argc, char* args[])
 
 	RenderSystem render_system(manager);
 
+
+
+	fps.start();
+
+	unsigned cnt = 0;
+	
+
 	SDL_Event e;
 	bool quit = false;
-	fps.start();
-	unsigned int count = 0;
+
+	Lemur::TextEngine textEngine;
+
+	if (!textEngine.loadFont("ver", 48, "test.ttf"))
+	{
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, "could not load font");
+	}
+	Lemur::Pen pen{ 0, 0, 1.0f, 0.0f, 0.0f, 1.0f, "ver" };
+	//textEngine.addText("Hello people", pen);
 	while (!quit)
 	{
+
 		fps.tick();
 
-		static int cnt = 0;
+		
 		++cnt;
-
-		if (cnt > 60) {
+		if (cnt == 20)
+		 {
+			 Lemur::Pen pen{ 200, 200, {1.0f, 0.0f, 0.0f, 1.0f}, "ver" };
 			fps.update();
-			printf("%f\n", fps.fps());
+			textEngine.clear();
+			textEngine.addText(Lemur::str("fps: ",fps.fps(), " cunt * ", 3.123), pen);
 			cnt = 0;
 		}
 		while (SDL_PollEvent(&e) != 0)
@@ -194,6 +214,8 @@ int main(int argc, char* args[])
 		}
 
 		render_system.render(g_camera);
+
+		textEngine.display(g_camera.getView(), g_camera.getProjection());
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
