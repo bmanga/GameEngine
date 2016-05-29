@@ -68,9 +68,9 @@ public:
 
 private:
 	mat4 m_perspective;
-	vec3 m_eye {0, 6, 0};
-	vec3 m_direction {0, -1, 0.0};
-	vec3 m_up{ 0.0, 0.0, 1.0 };
+	vec3 m_eye {0, 0, 6};
+	vec3 m_direction {0, 0, -1.0};
+	vec3 m_up{ 0.0, 1.0, 0.0 };
 
 	float m_zNear = 1.f;
 	float m_zFar  = 100.0f;

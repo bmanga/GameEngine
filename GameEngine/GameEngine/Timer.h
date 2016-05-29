@@ -27,7 +27,7 @@ public:
 	{
 		namespace chr = std::chrono;
 		if (running)
-			m_end = m_end = chr::high_resolution_clock::now();
+			m_end = chr::high_resolution_clock::now();
 		return chr::duration_cast<chr::seconds>(m_end - m_start).count();
 	}
 
@@ -68,6 +68,25 @@ public:
 		auto now = std::chrono::high_resolution_clock::now();
 		return chr::duration_cast<chr::microseconds>(now - m_time)
 			.count() / float(1e6);
+	}
+
+	auto elapsed_ms() const noexcept
+	{
+		namespace chr = std::chrono;
+		auto now = std::chrono::high_resolution_clock::now();
+		return chr::duration_cast<chr::milliseconds>(now - m_time).count();
+	}
+
+	auto elapsed_us() const noexcept
+	{
+		namespace chr = std::chrono;
+		auto now = std::chrono::high_resolution_clock::now();
+		return chr::duration_cast<chr::microseconds>(now - m_time).count();
+	}
+
+	void reset() noexcept
+	{
+		m_time = std::chrono::high_resolution_clock::now();
 	}
 private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> m_time;

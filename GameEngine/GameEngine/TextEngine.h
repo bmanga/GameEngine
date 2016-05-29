@@ -47,7 +47,7 @@ public:
 	ftgl::Font* getFont(const std::string& name);
 	void addText(const char* text, Pen& pen);
 	void addText(std::string text, Pen& pen);
-	void display(lm::mat4 view, lm::mat4 proj);
+	void display();
 	void clear()
 	{
 		buffer.clear();

@@ -78,6 +78,7 @@
     <LibraryPath>..\..\SDL\lib\win32;..\..\SOIL\lib;dependencies\freetype-2.6\lib\vs2015;$(LibraryPath)</LibraryPath>
     <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\..\SDL\include;..\..\SOIL\src;dependencies\freetype-2.6\include;$(IncludePath)</IncludePath>
@@ -103,6 +104,7 @@
       <BrowseInformation>true</BrowseInformation>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ENABLE_ASSERT_CL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;Glu32.lib;SOIL.lib;freetype26MT.lib;%(AdditionalDependencies)</AdditionalDependencies>

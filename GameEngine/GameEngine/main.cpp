@@ -42,13 +42,11 @@ int main(int argc, char* args[])
 {
 	init();
 	
+	Lemur::utils::RunningTimer t;
 	Lemur::MeshManager mm;
 	Lemur::TextureManager tm;
 	Lemur::MyManager manager;
 		
-	
-	Lemur::ConsoleLogger::Info(CODE_LOCATION, Lemur::cstr("I have ", 3,
-		" bananas and ", 3.14, " euros left"));
 	Lemur::utils::FPSCounter fps;
 
 	// Enable text input
@@ -71,7 +69,7 @@ int main(int argc, char* args[])
 		auto& model_position(manager.addComponent<CPosition>(model));
 		model_position.x = i * 5.0f;
 		model_position.y = 0.0f;
-		model_position.z = 0.0f;
+		model_position.z = -6.0f;
 
 		auto& renderable(manager.addComponent<CRenderable>(model));
 		renderable.mesh = mm.load("cube.lbm");
@@ -159,35 +157,42 @@ int main(int argc, char* args[])
 
 	unsigned cnt = 0;
 	
+	t.start();
 
 	SDL_Event e;
 	bool quit = false;
 
 	Lemur::TextEngine textEngine;
 
-	if (!textEngine.loadFont("ver", 48, "test.ttf"))
+	if (!textEngine.loadFont("xan22", 12, "Consolas.ttf"))
 	{
 		Lemur::ConsoleLogger::Error(CODE_LOCATION, "could not load font");
 	}
-	Lemur::Pen pen{ 0, 0, 1.0f, 0.0f, 0.0f, 1.0f, "ver" };
-	//textEngine.addText("Hello people", pen);
+
 	while (!quit)
 	{
 
 		fps.tick();
 
 		
-		++cnt;
-		if (cnt == 20)
+	
+		
+		if (t.elapsed_ms() > 300)
 		 {
-			 Lemur::Pen pen{ 200, 200, {1.0f, 0.0f, 0.0f, 1.0f}, "ver" };
+			 static bool maybe = true;
+			 Lemur::Pen pen{ 00, 00, {0.0f, 1.0f, 0.0f, 1.0f}, "xan22" };
 			fps.update();
 			textEngine.clear();
-			textEngine.addText(Lemur::str("fps: ",fps.fps(), " cunt * ", 3.123), pen);
-			cnt = 0;
+
+			textEngine.addText(Lemur::str("fps: ",fps.fps()), pen);
+			t.reset();
 		}
 		while (SDL_PollEvent(&e) != 0)
 		{
+			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
+				quit = true;
+			}
+
 			// User request quit
 			if (e.type == SDL_QUIT)
 			{
@@ -196,6 +201,11 @@ int main(int argc, char* args[])
 			// Handle keypress with current mouse position
 			else if (e.type == SDL_TEXTINPUT)
 			{
+				if(e.text.text == "Escape")
+				{
+					quit = true;
+					break;
+				}
 				int x = 0;
 				int y = 0;
 				SDL_GetMouseState(&x, &y);
@@ -215,7 +225,8 @@ int main(int argc, char* args[])
 
 		render_system.render(g_camera);
 
-		textEngine.display(g_camera.getView(), g_camera.getProjection());
+		//textEngine.display(glm::mat4(), glm::mat4());
+		textEngine.display();
 
 		// Update screen
 		SDL_GL_SwapWindow(global_window);
@@ -275,7 +286,7 @@ bool init()
 				}
 
 				// Use VSync
-				if (SDL_GL_SetSwapInterval(1) < 0)
+				if (SDL_GL_SetSwapInterval(0) < 0)
 				{
 					printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 				}

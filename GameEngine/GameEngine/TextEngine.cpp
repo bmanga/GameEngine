@@ -4,6 +4,9 @@
 #include "FilePaths.h"
 #include <cassert>
 #include <iterator>
+#include "Math.h"
+#include "ConsoleLogger.h"
+#include "Lemur.h"
 
 
 bool Lemur::TextEngine::loadFont(std::string name, float size, fs::path path)
@@ -33,6 +36,13 @@ void Lemur::TextEngine::addText(const char* text, Pen& pen)
 {
 	activeFont = getFont(pen.font);
 
+	if(!activeFont)
+	{
+		Lemur::ConsoleLogger::Error(CODE_LOCATION, "attempting to use a font"
+		" which has not been loaded");
+		return;
+	}
+
 	const ftgl::Glyph* previous = nullptr;
 
 	for (auto* glyph : ftgl::glyph_range(activeFont, text))
@@ -45,10 +55,14 @@ void Lemur::TextEngine::addText(const char* text, Pen& pen)
 
 		pen.x += kerning;
 
-		int x0 = int(pen.x + glyph->offset_x);
-		int y0 = int(pen.y + glyph->offset_y);
-		int x1 = int(x0 + glyph->width);
-		int y1 = int(y0 - glyph->height);
+		//TODO(bmanga): get rid of the hardcoded screen size
+		float x0 = (pen.x + glyph->offset_x) / 400 - 1.f;
+		float y0 = (pen.y + glyph->offset_y - activeFont->height()) / 300 + 1.f;
+		float w = glyph->width / 400.f;
+		float h = glyph->height / 300.f;
+		float x1 = x0 + w;
+		float y1 = y0 - h;
+
 		float s0 = glyph->s0;
 		float t0 = glyph->t0;
 		float s1 = glyph->s1;
@@ -57,17 +71,16 @@ void Lemur::TextEngine::addText(const char* text, Pen& pen)
 
 		GLuint indices[6] = { 0, 1, 2, 0, 2, 3 };
 		Color col = pen.color;
-		Vertex vertices[4] = {
-			{float(x0)/100, float(y0) / 100, 0,  s0, t0, col.r, col.g, col.b, col.a },
-			{float(x0) / 100, float(y1) / 100, 0,  s0, t1, col.r, col.g, col.b, col.a },
-			{float(x1) / 100, float(y1) / 100, 0,  s1, t1, col.r, col.g, col.b, col.a },
-			{float(x1) / 100, float(y0) / 100, 0,  s1, t0, col.r, col.g, col.b, col.a }
+		Vertex vertices[4] {
+			{x0, y0, 0,  s0, t0, col.r, col.g, col.b, col.a },
+			{x0, y1, 0,  s0, t1, col.r, col.g, col.b, col.a },
+			{x1, y1, 0,  s1, t1, col.r, col.g, col.b, col.a },
+			{x1, y0, 0,  s1, t0, col.r, col.g, col.b, col.a }
 		};
+		pen.x += glyph->advance_x;
 
 		buffer.push_back((const char*)vertices, 4, indices, 6);
-		pen.x += glyph->advance_x;
 		previous = glyph;
-
 	}
 	activeFont->atlas()->upload();
 
@@ -78,14 +91,16 @@ void Lemur::TextEngine::addText(std::string text, Pen& pen)
 	addText(text.c_str(), pen);
 }
 
-void Lemur::TextEngine::display(lm::mat4 view, lm::mat4 proj)
+void Lemur::TextEngine::display()
 {
 	if (!activeFont) return;
+
+	//glm::lookAt(glm::vec3{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 1, 0 });
 
 	glBindTexture(GL_TEXTURE_2D, activeFont->atlas()->id());
 
 	//glClearColor(1, 1, 1, 1);
-
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -93,6 +108,9 @@ void Lemur::TextEngine::display(lm::mat4 view, lm::mat4 proj)
 	program.use();
 
 	auto model = glm::mat4();
+	auto view  = glm::mat4();
+	auto proj  = glm::mat4();
+	//model = glm::rotate(model, 90.0f, glm::vec3{ 1, 0, 0 });
 
 	auto model_uniform = program.getUniformLocation("model");
 	glUniformMatrix4fv(model_uniform, 1, 0, glm::value_ptr(model));
@@ -106,4 +124,5 @@ void Lemur::TextEngine::display(lm::mat4 view, lm::mat4 proj)
 	buffer.render(GL_TRIANGLES);
 
 	glDisable(GL_BLEND);
+	
 }

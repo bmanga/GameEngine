@@ -62,7 +62,7 @@ void Camera::rotateLocalZ(float degrees)
 
 void Camera::rotateRelativeX(float degrees)
 {
-	auto x_vect = glm::cross(m_direction, {0.0, 0.0, 1.0});
+	auto x_vect = glm::cross(m_direction, m_up);
 
 	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
 	glm::quat B = { 0, x_vect.x, x_vect.y, x_vect.z };
@@ -81,7 +81,7 @@ void Camera::rotateRelativeX(float degrees)
 void Camera::rotateRelativeY(float degrees)
 {
 	glm::quat A = { 0, m_direction.x, m_direction.y, m_direction.z };
-	glm::quat B = { 0, 0.0, 0.0, 1.0 };
+	glm::quat B (0, m_up);
 	auto u = glm::normalize(B) * sin(degrees * 3.14f / 360);
 
 	glm::quat q = { cos(degrees* 3.14f / 360), u.x, u.y, u.z };

@@ -24,6 +24,8 @@ template <class... Args>
 std::string str(Args... args)
 {
 	std::stringstream ss;
+	ss.precision(4);
+	ss << std::fixed;
 	int unused[] = { (ss << args, 0)... };
 	return ss.str();
 
