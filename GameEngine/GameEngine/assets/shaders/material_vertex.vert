@@ -1,7 +1,7 @@
 #version 140
 
 in vec3 position;
-in vec3 color;
+
 in vec2 in_texcoord;
 in vec3 in_normal;
 

@@ -5,8 +5,11 @@
 #include <string>
 #include "VertexBuffer.h"
 #include "Mesh.h"
+#include "ShaderProgram.h"
 GLuint VertexBufferObject::bound_id = 0;
 GLuint IndexBufferObject::bound_id = 0;
+
+
 
 // TODO: This could be a vector of struct instances instead...
 std::vector<Lemur::VertexBuffer> vbs;
@@ -71,6 +74,8 @@ void RenderSystem::render(Lemur::Camera camera)
 
 	for (unsigned int i = 0; i < vbs.size(); i++)
 	{
+		using namespace Lemur;
+
 		auto& vb = vbs[i];
 		CRenderable renderable = renderables.at(i);
 		ShaderProgram prog = *renderable.material->shader.get();
@@ -78,23 +83,21 @@ void RenderSystem::render(Lemur::Camera camera)
 
 		prog.use();
 
-		int view_pos_uniform = prog.getUniformLocation("view_pos");
-		glUniform3f(view_pos_uniform, camera.getCenter().x, camera.getCenter().y, camera.getCenter().z);
+		glUniform3f("view_pos"_uniform, 
+			camera.getCenter().x, 
+			camera.getCenter().y, 
+			camera.getCenter().z);
 
-		lm::mat4 view = camera.getView();
-		GLint view_uniform = prog.getUniformLocation("view");
-		glUniformMatrix4fv(view_uniform, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv("view"_uniform, 1, GL_FALSE,
+			glm::value_ptr(camera.getView()));
 
 		// Create the perspective projection matrix
 		lm::mat4 proj = camera.getProjection();
-		GLint proj_uniform = prog.getUniformLocation("proj");
-		glUniformMatrix4fv(proj_uniform, 1, GL_FALSE, glm::value_ptr(proj));
+		glUniformMatrix4fv("proj"_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 
-		int mat_shininess_uniform = prog.getUniformLocation("material.shininess");
-		glUniform1f(mat_shininess_uniform, renderable.material->shininess);
+		glUniform1f("material.shininess"_uniform, renderable.material->shininess);
 
-		int mat_transparency_uniform = prog.getUniformLocation("material.transparency");
-		glUniform1f(mat_transparency_uniform, renderable.material->transparency);
+		glUniform1f("material.transparency"_uniform, renderable.material->transparency);
 
 		if (renderable.material->use_texturing)
 		{ 
@@ -105,46 +108,35 @@ void RenderSystem::render(Lemur::Camera camera)
 				glActiveTexture(GL_TEXTURE0);
 				renderable.material->texture->bind();
 			}
-
 			if (mat->bump_map)
 			{
 				glActiveTexture(GL_TEXTURE1);
 				renderable.material->bump_map->bind();
 			}
-
 			if (mat->normal_map)
 			{
 				glActiveTexture(GL_TEXTURE2);
 				renderable.material->normal_map->bind();
 			}
-
-			
 			if (mat->specular_map)
 			{
 				glActiveTexture(GL_TEXTURE3);
 				renderable.material->specular_map->bind();
 			}
-
 			if (mat->mask_map)
 			{
-
 				glActiveTexture(GL_TEXTURE4);
 				renderable.material->mask_map->bind();
-
 			}
 			glActiveTexture(GL_TEXTURE0);
 
-			int mat_texture_uniform = prog.getUniformLocation("material.texture");
-			int mat_diffuse_map_uniform = prog.getUniformLocation("material.diffuse_map");
-			int mat_normal_map_uniform = prog.getUniformLocation("material.normal_map");
-			int mat_specular_map_uniform = prog.getUniformLocation("material.specular_map");
-			int mat_mask_map_uniform = prog.getUniformLocation("material.mask_map");
+			glUniform1i("material.texture"_uniform, 0);
+			glUniform1i("material.diffuse_map"_uniform, 1);
+			glUniform1i("material.normal_map"_uniform, 2);
+			glUniform1i("material.specular_map"_uniform, 3);
+			glUniform1i("material.mask_map"_uniform, 4);
+			glUniform1i("sampler"_uniform, 0);
 
-			glUniform1i(mat_texture_uniform, 0);
-			glUniform1i(mat_diffuse_map_uniform, 1);
-			glUniform1i(mat_normal_map_uniform, 2);
-			glUniform1i(mat_specular_map_uniform, 3);
-			glUniform1i(mat_mask_map_uniform, 4);
 		}
 		else
 		{
