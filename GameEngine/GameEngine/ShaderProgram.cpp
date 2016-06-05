@@ -176,7 +176,7 @@ int ShaderProgram::getAttribLocation(const char* name) const
 	if (!isUsing())
 	{
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, CSTR2("Attempted to get attribute location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get attribute location from non-bound shader program. Program ", program_id, " was bound."));
 	}
 
 	int location = glGetAttribLocation(program_id, name);
@@ -193,7 +193,7 @@ int ShaderProgram::getUniformLocation(const char* name) const
 	if (!isUsing())
 	{
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, CSTR2("Attempted to get uniform location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get uniform location from non-bound shader program. Program ", program_id, " was bound."));
 	}
 
 	int location = glGetUniformLocation(program_id, name);

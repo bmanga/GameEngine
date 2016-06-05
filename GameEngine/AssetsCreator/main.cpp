@@ -22,10 +22,24 @@ struct MeshBufferHeader
 struct Mesh
 {
 	MeshBufferHeader info;
-	std::unique_ptr<char[]> buffer;
-	u32 buffer_size;
+	std::unique_ptr<char[]> vertex_buffer;
+	std::unique_ptr<unsigned int[]> index_buffer;
+	u32 vertex_buffer_size;
+	u32 index_buffer_size;
 };
 
+std::ostream& operator<< (std::ostream& out, const Mesh& mesh)
+{
+	out << "\nMeshBufferHeader:";
+	out << "\n\t vertex count: " << mesh.info.vertex_count;
+	out << "\n\t index count: " << mesh.info.index_count;
+	out << "\n\t has normals: " << mesh.info.has_normals;
+	out << "\n\t has texture coords: " << mesh.info.has_texture_coords;
+	out << "\nvertex buffer size: " << mesh.vertex_buffer_size;
+	out << "\nindex buffer size: " << mesh.index_buffer_size;
+
+	return out << "\n";
+}
 
 Mesh AssimpLoadMesh(const char* filename)
 {
@@ -54,21 +68,23 @@ Mesh AssimpLoadMesh(const char* filename)
 
 	info.index_underlying_type = 2; //underlying type is GL_UNSIGNED_INT
 
-	//create the buffers
-	std::unique_ptr<char[]> buffer;
 
+
+	//vertex coords
 	size_t vertexBufferSize = info.vertex_count * sizeof(aiVector3D);
-	size_t normalBufferSize = info.has_normals
+	//+ normals
+	vertexBufferSize += info.has_normals
 		? info.vertex_count * sizeof(aiVector3D)
 		: 0;
-
-	size_t textcoordsBufferSize = info.has_texture_coords
+	//+ texture coords
+	vertexBufferSize  += info.has_texture_coords
 		? info.vertex_count * sizeof(aiVector2D)
 		: 0;
 
-	u32 bufferSize = vertexBufferSize + normalBufferSize
-		+ textcoordsBufferSize + indexBufferSize;
-	buffer = std::unique_ptr<char[]>(new char[bufferSize]);
+
+	std::unique_ptr<char[]> vertex_buffer(new char[vertexBufferSize]);
+	std::unique_ptr<unsigned int[]> index_buffer(new unsigned int[info.index_count]);
+
 
 	//fill in the buffer
 
@@ -78,44 +94,43 @@ Mesh AssimpLoadMesh(const char* filename)
 		aiFace face = mesh->mFaces[j];
 		//force size to 4 bytes per index
 		uint32_t indices[3] = { face.mIndices[0], face.mIndices[1], face.mIndices[2] };
-		
-		memcpy(&(buffer[12 * j]), indices, 12);
+		index_buffer[3 * j];
+		memcpy((char*)&(index_buffer[3 * j]), indices, 12);
 
 	}
 
 	//vertices
+	size_t index = 0u;
 	for (unsigned j = 0; j < info.vertex_count; ++j)
 	{
-		size_t index = sizeof(aiVector3D) * j + indexBufferSize;
-		memcpy(&buffer[index], &mesh->mVertices[j], sizeof(aiVector3D));
-	}
-	
-	//normals
-	for (unsigned j = 0; j < info.vertex_count; ++j)
-	{
-		if (!info.has_normals) break;
+		//vertex position data
+		memcpy(&vertex_buffer[index], &mesh->mVertices[j], sizeof(aiVector3D));
+		index += sizeof(aiVector3D);
 
-		size_t index = sizeof(aiVector3D) * j + indexBufferSize + vertexBufferSize;
-		memcpy(&buffer[index],
-			&mesh->mNormals[j],
-			sizeof(aiVector3D));
-	}
+		if(info.has_normals)
+		{
+			memcpy(&vertex_buffer[index],&mesh->mNormals[j],sizeof(aiVector3D));
+			
+			index += sizeof(aiVector3D);
+		}
 
-	//textcoords
-	for (unsigned j = 0; j < info.vertex_count; ++j)
-	{
-		if (!info.has_texture_coords) break;
-
-		size_t index = sizeof(aiVector2D) * j + indexBufferSize + vertexBufferSize 
-			+ normalBufferSize;
-		auto texture = mesh->mTextureCoords[0][j];
-		aiVector2D texture2d(texture.x, texture.y);
-		memcpy(&buffer[index],
-			&texture2d,
-			sizeof(aiVector2D));
+		if(info.has_texture_coords)
+		{
+			auto texture = mesh->mTextureCoords[0][j];
+			aiVector2D texture2d(texture.x, texture.y);
+			memcpy(&vertex_buffer[index],
+				&texture2d,
+				sizeof(aiVector2D));
+			
+			index += sizeof(aiVector2D);
+		}
 	}
 
-	return{ info, std::move(buffer), bufferSize };
+	return
+	{ 
+		info, std::move(vertex_buffer), std::move(index_buffer),
+		vertexBufferSize, indexBufferSize 
+	};
 }
 
 
@@ -126,10 +141,11 @@ void DumpMeshToFile(const Mesh& mesh, const char* filename)
 	std::cout << p.root_name();
 	std::fstream binOut(p/filename, std::ios::out | std::ios::binary);
 
+	binOut.write((char*)&mesh.vertex_buffer_size, sizeof(u32));
+	binOut.write((char*)&mesh.index_buffer_size, sizeof(u32));
+	binOut.write(mesh.vertex_buffer.get(), mesh.vertex_buffer_size);
+	binOut.write((const char*)mesh.index_buffer.get(), mesh.index_buffer_size);
 	binOut.write((char*)&mesh.info, sizeof(MeshBufferHeader));
-	binOut.write((char*)&mesh.buffer_size, sizeof(u32));
-
-	binOut.write(mesh.buffer.get(), mesh.buffer_size);
 }
 int main()
 {
@@ -140,7 +156,7 @@ int main()
 	std::cin >> model >> result;
 	auto mesh = AssimpLoadMesh(model.c_str());
 	DumpMeshToFile(mesh, result.c_str());
-	
+	std::cout << mesh;
 	std::cout << "press q to quit: ";
 	do
 	{

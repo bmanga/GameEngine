@@ -3,14 +3,14 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
-
+#include "VertexBuffer.h"
+#include "Mesh.h"
 GLuint VertexBufferObject::bound_id = 0;
 GLuint IndexBufferObject::bound_id = 0;
 
 // TODO: This could be a vector of struct instances instead...
-std::vector<VertexBufferObject> vbos;
-std::vector<IndexBufferObject> indices;
-std::vector<VertexBufferObject> normals;
+std::vector<Lemur::VertexBuffer> vbs;
+
 std::vector<CPosition> positions;
 std::vector<CRenderable> renderables;
 
@@ -26,24 +26,31 @@ void RenderSystem::render(Lemur::Camera camera)
 		std::unordered_map<std::size_t, bool>::const_iterator got = creation_map.find(entity_index);
 		if (got == creation_map.end())
 		{
-			VertexBufferObject vbo;
-			vbo.bind();
-			vbo.bufferData((int)renderable.mesh->vertexBufferSize(), (float*)renderable.mesh->vertexBuffer(), STATIC_DRAW);
+			auto& mesh = renderable.mesh;
+			std::string vertex = "position:3f";
+			std::string texture = "in_textcoord:2f";
+			std::string normal = "in_normal:3f";
+			const Lemur::Mesh::MeshBufferHeader& header = mesh->bufferHeader();
 
-			IndexBufferObject ibo;
-			ibo.bind();
-			ibo.bufferData((int)renderable.mesh->vertexIndexBufferSize(), (unsigned int*)renderable.mesh->vertexIndexBuffer(), STATIC_DRAW);
+			if (header.has_normals)
+			{
+				vertex += "," + normal;
+			}
 
-			VertexBufferObject nbo;
-			nbo.bind();
-			nbo.bufferData((int)renderable.mesh->normalBufferSize(), (float*)renderable.mesh->normalBuffer(), STATIC_DRAW);
+			if (header.has_texture_coords)
+			{
+				vertex += "," + texture;
+			}
 
-			vbos.push_back(vbo);
-			indices.push_back(ibo);
-			normals.push_back(nbo);
+			Lemur::VertexBuffer vb(vertex.c_str());
+
+			vb.push_back((const char*)mesh->vertexBuffer(), mesh->vertexCount(),
+				mesh->indexBuffer(), mesh->indexCount());
 
 			renderables.push_back(renderable);
 			positions.push_back(position);
+
+			vbs.push_back(std::move(vb));
 
 			creation_map.insert(std::make_pair(entity_index, true));
 		}
@@ -62,12 +69,9 @@ void RenderSystem::render(Lemur::Camera camera)
 	// Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (unsigned int i = 0; i < vbos.size(); i++)
+	for (unsigned int i = 0; i < vbs.size(); i++)
 	{
-		VertexBufferObject vbo = vbos.at(i);
-		IndexBufferObject ibo = indices.at(i);
-		VertexBufferObject nbo = normals.at(i);
-
+		auto& vb = vbs[i];
 		CRenderable renderable = renderables.at(i);
 		ShaderProgram prog = *renderable.material->shader.get();
 		CPosition pos = positions.at(i);
@@ -93,22 +97,41 @@ void RenderSystem::render(Lemur::Camera camera)
 		glUniform1f(mat_transparency_uniform, renderable.material->transparency);
 
 		if (renderable.material->use_texturing)
-		{
-			glActiveTexture(GL_TEXTURE0);
-			renderable.material->texture->bind();
+		{ 
+			auto& mat = renderable.material;
 
-			glActiveTexture(GL_TEXTURE1);
-			renderable.material->bump_map->bind();
+			if (mat->texture)
+			{
+				glActiveTexture(GL_TEXTURE0);
+				renderable.material->texture->bind();
+			}
 
-			glActiveTexture(GL_TEXTURE2);
-			renderable.material->normal_map->bind();
+			if (mat->bump_map)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				renderable.material->bump_map->bind();
+			}
 
-			glActiveTexture(GL_TEXTURE3);
-			renderable.material->specular_map->bind();
+			if (mat->normal_map)
+			{
+				glActiveTexture(GL_TEXTURE2);
+				renderable.material->normal_map->bind();
+			}
 
-			glActiveTexture(GL_TEXTURE4);
-			renderable.material->mask_map->bind();
+			
+			if (mat->specular_map)
+			{
+				glActiveTexture(GL_TEXTURE3);
+				renderable.material->specular_map->bind();
+			}
 
+			if (mat->mask_map)
+			{
+
+				glActiveTexture(GL_TEXTURE4);
+				renderable.material->mask_map->bind();
+
+			}
 			glActiveTexture(GL_TEXTURE0);
 
 			int mat_texture_uniform = prog.getUniformLocation("material.texture");
@@ -206,25 +229,7 @@ void RenderSystem::render(Lemur::Camera camera)
 		int model_uniform = prog.getUniformLocation("model");
 		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
-		vbo.bind();
-
-		// Enable vertex position
-		int pos_attrib = prog.getAttribLocation("position");
-		glEnableVertexAttribArray(pos_attrib);
-		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		nbo.bind();
-
-		int norm_attrib = prog.getAttribLocation("in_normal");
-		glEnableVertexAttribArray(norm_attrib);
-		glVertexAttribPointer(norm_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		ibo.bind();
-		glDrawElements(GL_TRIANGLES, renderable.mesh->vertexIndexBufferSize(), GL_UNSIGNED_INT, NULL);
-
-		// Disable vertex position
-		glDisableVertexAttribArray(pos_attrib);
-		glDisableVertexAttribArray(norm_attrib);
+		vb.render(GL_TRIANGLES);
 
 		// Unbind program
 		glUseProgram(NULL);

@@ -23,6 +23,7 @@ bool g_run = true;
 bool init();
 void handleKeys(unsigned char key, int x, int y);
 void update();
+void handleMouse(int x, int y);
 
 SDL_Window* global_window = nullptr;
 SDL_GLContext global_context;
@@ -30,13 +31,7 @@ SDL_GLContext global_context;
 Lemur::Camera g_camera;
 
 namespace lm = Lemur::math;
-void handleMouse(int x, int y);
 
-void run()
-{
-	while (g_run)
-		printf("hello!\n");
-}
 
 int main(int argc, char* args[])
 {
@@ -51,18 +46,33 @@ int main(int argc, char* args[])
 
 	// Enable text input
 	SDL_StartTextInput();
-
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	ShaderProgram program("new_shader_vert.vert", "new_shader_frag.frag");
+	ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
+	ShaderProgram light_program("new_shader_vert.vert", "new_shader_frag.frag");
+	house_program.compile();
 	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
-	program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
-	program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
-	program.compile();
+	light_program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
+	light_program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
+	light_program.compile();
 
-	///////////////////////////////// ROW OF 10 MODELS /////////////////////////////////
-	for (unsigned int i = 0; i < 10; i++)
+
+	Lemur::ecs::EntityIndex house(manager.createIndex());
+
+	auto& house_position = manager.addComponent<CPosition>(house);
+	house_position = { 0, 0, 0 };
+
+	auto& house_renderable = manager.addComponent<CRenderable>(house);
+	house_renderable.mesh = mm.load("Farmhouse.lbm");
+	auto& mat = house_renderable.material = std::make_shared<Lemur::Material>();
+	mat->texture = tm.load("Farmhouse.jpg");
+	house_renderable.material->shader = std::make_shared<ShaderProgram>(house_program);
+
+	mat->use_texturing = true;
+
+	/////////////////////////////////// ROW OF 10 MODELS /////////////////////////////////
+	for (unsigned int i = 1; i < 10; i++)
 	{
 		Lemur::ecs::EntityIndex model(manager.createIndex());
 
@@ -74,7 +84,7 @@ int main(int argc, char* args[])
 		auto& renderable(manager.addComponent<CRenderable>(model));
 		renderable.mesh = mm.load("cube.lbm");
 		renderable.material = std::make_shared<Lemur::Material>();
-		renderable.material->shader = std::make_shared<ShaderProgram>(program);
+		renderable.material->shader = std::make_shared<ShaderProgram>(light_program);
 		renderable.material->texture = tm.load("crate.png");
 		renderable.material->ambient[0] = 0.24725f;
 		renderable.material->ambient[1] = 0.1995f;
@@ -91,10 +101,10 @@ int main(int argc, char* args[])
 	///////////////////////////////// POINT LIGHT /////////////////////////////////
 	Lemur::ecs::EntityIndex point_light(manager.createIndex());
 
-	auto& light_position(manager.addComponent<CPosition>(point_light));
-	light_position.x = -3.0f;
-	light_position.y = -3.0f;
-	light_position.z = 3.0f;
+	auto& plight_position(manager.addComponent<CPosition>(point_light));
+	plight_position.x = -3.0f;
+	plight_position.y = -3.0f;
+	plight_position.z = 3.0f;
 
 	auto& light(manager.addComponent<CPointLight>(point_light));
 	light.ambient.r = 1.0f;
@@ -113,13 +123,13 @@ int main(int argc, char* args[])
 	///////////////////////////////// POINT LIGHT RENDERABLE /////////////////////////////////
 	Lemur::ecs::EntityIndex light_renderable(manager.createIndex());
 
-	auto& lr_position(manager.addComponent<CPosition>(light_renderable));
-	lr_position = light_position;
+	auto& lr_position = manager.addComponent<CPosition>(light_renderable);
+	lr_position = { -3, -3, 3 };
 
 	auto& lr_renderable(manager.addComponent<CRenderable>(light_renderable));
 	lr_renderable.mesh = mm.load("cube.lbm");
 	lr_renderable.material = std::make_shared<Lemur::Material>();
-	lr_renderable.material->shader = std::make_shared<ShaderProgram>(program);
+	lr_renderable.material->shader = std::make_shared<ShaderProgram>(light_program);
 	lr_renderable.material->emissive[0] = 1.0f;
 	lr_renderable.material->emissive[1] = 1.0f;
 	lr_renderable.material->emissive[2] = 1.0f;
@@ -304,22 +314,22 @@ void handleKeys(unsigned char key, int x, int y)
 	{
 	case 'w':
 	{
-		g_camera.translateLocalZ(0.1f);
+		g_camera.translateLocalZ(0.3f);
 		break;
 	}
 	case 's':
 	{
-		g_camera.translateLocalZ(-0.1f);
+		g_camera.translateLocalZ(-0.3f);
 		break;
 	}
 	case 'a':
 	{
-		g_camera.translateLocalX(-0.1f);
+		g_camera.translateLocalX(-0.3f);
 		break;
 	}
 	case 'd':
 	{
-		g_camera.translateLocalX(0.1f);
+		g_camera.translateLocalX(0.3f);
 		break;
 	}
 

@@ -15,7 +15,7 @@ Texture::Texture(const char* path)
 	unsigned char* pixels = loadPixels((TEXTURE_PATH/path).string().c_str());
 	if (!pixels)
 	{
-		ConsoleLogger::Error(CODE_LOCATION, CSTR2("texture ", path, " not found"));
+		ConsoleLogger::Error(CODE_LOCATION, cstr("texture ", path, " not found"));
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);

@@ -79,10 +79,3 @@ void execute_lambda(Fn&& fn)
 
 #define DEB_ONLY_BEGIN Lemur::impl::execute_lambda([&]{
 #define DEB_ONLY_END });
-
-
-#define CSTR(a, b) \
-(std::string(a) + Lemur::to_string_resolver(b)).c_str()
-
-#define CSTR2(a, b, c) \
-(std::string(a) + Lemur::to_string_resolver(b) + std::string(c)).c_str()

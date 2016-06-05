@@ -103,7 +103,7 @@ float measure_time(Fn&& fn)
 
 inline void LogMeasuredTime(const char* codeloc, float seconds) noexcept 
 {
-	Lemur::ConsoleLogger::Info(codeloc, CSTR2("elapsed time: ", seconds, " s"));
+	Lemur::ConsoleLogger::Info(codeloc, cstr("elapsed time: ", seconds, " s"));
 }
 
 class ScopeTimeLogger
