@@ -100,6 +100,13 @@ void ShaderProgram::addDefine(const char* name, ShaderType type)
 
 bool ShaderProgram::compile()
 {
+	program_id = glCreateProgram();
+
+
+	glAttachShader(program_id, vertex_shader_id);
+	glAttachShader(program_id, fragment_shader_id);
+
+
 	const char* vertex_ptr = vertex_source.c_str();
 	const char* fragment_ptr = fragment_source.c_str();
 
@@ -108,6 +115,7 @@ bool ShaderProgram::compile()
 
 	if (!compileShader(vertex_shader_id))
 	{
+		printLog();
 		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
 			Lemur::cstr("Unable to compile vertex shader",
 				" [ID: ", vertex_shader_id, "]"));
@@ -121,10 +129,7 @@ bool ShaderProgram::compile()
 		return false;
 	}
 
-	program_id = glCreateProgram();
 
-	glAttachShader(program_id, vertex_shader_id);
-	glAttachShader(program_id, fragment_shader_id);
 
 	if (!linkProgram())
 	{
@@ -176,7 +181,7 @@ int ShaderProgram::getAttribLocation(const char* name) const
 	if (!isUsing())
 	{
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, CSTR2("Attempted to get attribute location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get attribute location from non-bound shader program. Program ", program_id, " was bound."));
 	}
 
 	int location = glGetAttribLocation(program_id, name);
@@ -193,7 +198,7 @@ int ShaderProgram::getUniformLocation(const char* name) const
 	if (!isUsing())
 	{
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, CSTR2("Attempted to get uniform location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get uniform location from non-bound shader program. Program ", program_id, " was bound."));
 	}
 
 	int location = glGetUniformLocation(program_id, name);
@@ -252,5 +257,14 @@ const std::string* ShaderProgram::getParameters()
 {
 	return RESERVED;
 }
+
+int Lemur::operator ""_uniform(const char* name, std::size_t)
+{
+	GLint program;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+
+	return glGetUniformLocation(program, name);
+}
+
 
 unsigned int ShaderProgram::using_id = 0;

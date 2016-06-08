@@ -15,25 +15,29 @@ void Mesh::loadFromFile(const char* filename)
 	fstream BinaryFile(MESH_PATH/filename, ios::in | ios::binary);
 	if (!BinaryFile)
 	{
-		ConsoleLogger::Error(CODE_LOCATION, CSTR(filename, " not found"));
+		ConsoleLogger::Error(CODE_LOCATION, cstr(filename, " not found"));
 		return;
 	}
-	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info), sizeof(MeshBufferHeader));
+
 	
 	//Now that we know the sizes, create the buffer
-	u32 BufferSize;
-	BinaryFile.read(reinterpret_cast<char*>(&BufferSize), sizeof(u32));
-
+	BinaryFile.read(reinterpret_cast<char*>(&m_vertex_buffer_size), sizeof(u32));
+	BinaryFile.read(reinterpret_cast<char*>(&m_index_buffer_size), sizeof(u32));
 	
-	m_buffer = std::unique_ptr<char[]>(new char[BufferSize]);
+	m_vertex_buffer = std::unique_ptr<char[]>(new char[m_vertex_buffer_size]);
+	m_index_buffer = std::unique_ptr<unsigned int[]>(new unsigned int[m_index_buffer_size/4]);
 
-	BinaryFile.read(m_buffer.get(), BufferSize);
+	BinaryFile.read(m_vertex_buffer.get(), m_vertex_buffer_size);
+	BinaryFile.read((char*)m_index_buffer.get(), m_index_buffer_size);
+	std::cout << m_index_buffer[33];
+	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info),
+		sizeof(MeshBufferHeader));
 	BinaryFile.close();
 }
 
 void* Mesh::vertexBuffer() const
 {
-	return m_buffer.get() + vertexIndexBufferSize();
+	return m_vertex_buffer.get();
 }
 
 u32 Mesh::vertexCount() const
@@ -43,22 +47,17 @@ u32 Mesh::vertexCount() const
 
 size_t Mesh::vertexBufferSize() const
 {
-	return m_buffers_info.vertex_count * sizeof(Lemur::vec3);
+	return m_vertex_buffer_size;
 }
 
-size_t Mesh::textcoordsBufferSize() const
+
+
+unsigned int* Mesh::indexBuffer() const
 {
-	return m_buffers_info.has_normals
-		? vertexCount() * sizeof(Lemur::vec2)
-		: 0;
+	return m_index_buffer.get();
 }
 
-	void* Mesh::vertexIndexBuffer() const
-{
-	return m_buffer.get();
-}
-
-u32 Mesh::vertexIndexBufferUnderlyingType() const
+u32 Mesh::indexBufferUnderlyingType() const
 {
 	static constexpr u32 underlying_types[] = {
 		GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, GL_UNSIGNED_INT };
@@ -67,35 +66,16 @@ u32 Mesh::vertexIndexBufferUnderlyingType() const
 
 }
 
-u32 Mesh::vertexIndexCount() const
+u32 Mesh::indexCount() const
 {
 	return m_buffers_info.index_count;
 }
 
-size_t Mesh::vertexIndexBufferSize() const
+size_t Mesh::indexBufferSize() const
 {
-	static constexpr u8 underlying_sizes[] = { 1, 2, 4 };
-
-	return m_buffers_info.index_count * 
-		underlying_sizes[m_buffers_info.index_underlying_type];
+	return m_index_buffer_size;
 }
 
-void* Mesh::normalBuffer() const
-{
-	return m_buffer.get() + vertexIndexBufferSize() + vertexBufferSize();
-}
-
-u32 Mesh::normalCount() const
-{
-	return m_buffers_info.has_normals
-		? vertexCount() 
-		: 0;
-}
-
-size_t Mesh::normalBufferSize() const
-{
-	return normalCount() * sizeof(vec3);
-}
 
 Mesh::Mesh(const char* filename)
 {

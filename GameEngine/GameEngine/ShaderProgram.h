@@ -43,5 +43,27 @@ public:
 	bool isUsing() const;
 	void use() const;
 
+	void setUniform1i(const char* name, int v0) const
+	{
+		auto location = getUniformLocation(name);
+		glUniform1i(location, v0);
+	}
+
+	void setUniform3f(const char* name, float v0, float v1, float v2) const
+	{
+		auto location = getUniformLocation(name);
+		glUniform3f(location, v0, v1, v2);
+	}
+
+	void setUniformMatrix4fv(const char* name, int n,  GLboolean transpose, 
+		const float* ptr) const
+	{
+		auto location = getUniformLocation(name);
+		glUniformMatrix4fv(location, n, transpose, ptr);
+	}
 	static const std::string* getParameters();
 };
+
+namespace Lemur {
+	int operator ""_uniform(const char* name, std::size_t);
+}
