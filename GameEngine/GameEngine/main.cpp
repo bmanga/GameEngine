@@ -51,6 +51,9 @@ int main(int argc, char* args[])
 
 	ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
 	ShaderProgram light_program("new_shader_vert.vert", "new_shader_frag.frag");
+	//ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
+	//house_program.addDefine("USE_TEXTURES", FRAGMENT);
+
 	house_program.compile();
 	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
 	light_program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);

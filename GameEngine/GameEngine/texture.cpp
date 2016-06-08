@@ -12,12 +12,15 @@ Texture::Texture(const char* path)
 	glGenTextures(1, &id);
 	bind();
 
+	setWrapType(CLAMP_TO_EDGE, CLAMP_TO_EDGE);
+	setInterpolation(LINEAR, LINEAR);
+
 	unsigned char* pixels = loadPixels((TEXTURE_PATH/path).string().c_str());
 	if (!pixels)
 	{
 		ConsoleLogger::Error(CODE_LOCATION, cstr("texture ", path, " not found"));
 	}
-
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);
 	freePixels(pixels);
 }
@@ -30,7 +33,8 @@ Texture::Texture(unsigned char* pixels, unsigned int width, unsigned int height)
 	this->width = width;
 	this->height = height;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, RGB, width, height, 0, RGB, GL_UNSIGNED_BYTE, pixels);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 	freePixels(pixels);
 }
 
@@ -84,7 +88,7 @@ bool Texture::isBound()
 
 void Texture::bind()
 {
-	if (!isBound())
+	if (true)//(!isBound())
 	{
 		glBindTexture(GL_TEXTURE_2D, id);
 		bound_id = id;
@@ -93,7 +97,7 @@ void Texture::bind()
 
 unsigned char* Texture::loadPixels(const char* path)
 {
-	return SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGBA);
+	return SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
 }
 
 void Texture::freePixels(unsigned char* pixels)

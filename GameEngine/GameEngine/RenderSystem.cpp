@@ -31,7 +31,7 @@ void RenderSystem::render(Lemur::Camera camera)
 		{
 			auto& mesh = renderable.mesh;
 			std::string vertex = "position:3f";
-			std::string texture = "in_textcoord:2f";
+			std::string texture = "in_texcoord:2f";
 			std::string normal = "in_normal:3f";
 			const Lemur::Mesh::MeshBufferHeader& header = mesh->bufferHeader();
 
@@ -102,7 +102,7 @@ void RenderSystem::render(Lemur::Camera camera)
 		if (renderable.material->use_texturing)
 		{ 
 			auto& mat = renderable.material;
-
+#if 1
 			if (mat->texture)
 			{
 				glActiveTexture(GL_TEXTURE0);
@@ -129,13 +129,13 @@ void RenderSystem::render(Lemur::Camera camera)
 				renderable.material->mask_map->bind();
 			}
 			glActiveTexture(GL_TEXTURE0);
-
+#endif
 			glUniform1i("material.texture"_uniform, 0);
 			glUniform1i("material.diffuse_map"_uniform, 1);
 			glUniform1i("material.normal_map"_uniform, 2);
 			glUniform1i("material.specular_map"_uniform, 3);
 			glUniform1i("material.mask_map"_uniform, 4);
-			glUniform1i("sampler"_uniform, 0);
+			glUniform1i("mysampler"_uniform, 0);
 
 		}
 		else
@@ -218,8 +218,7 @@ void RenderSystem::render(Lemur::Camera camera)
 		model = glm::mat4(1.0f);
 
 		model = lm::translate(model, lm::vec3(pos.x, pos.y, pos.z));
-		int model_uniform = prog.getUniformLocation("model");
-		glUniformMatrix4fv(model_uniform, 1, GL_FALSE, lm::value_ptr(model));
+		glUniformMatrix4fv("model"_uniform, 1, GL_FALSE, lm::value_ptr(model));
 
 		vb.render(GL_TRIANGLES);
 

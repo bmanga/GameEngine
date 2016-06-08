@@ -23,7 +23,8 @@ public:
 		}
 	}
 
-	std::shared_ptr<Ty> load(const char* filename)
+	template <class... Args>
+	std::shared_ptr<Ty> load(const char* filename, Args&&... args)
 	{
 		auto ElemIt = m_instances.find(filename);
 		if (ElemIt != m_instances.end())
@@ -31,7 +32,8 @@ public:
 			return ElemIt->second;
 		}
 
-		auto ElemPtr = std::make_shared<Ty>(filename);
+		auto ElemPtr = 
+			std::make_shared<Ty>(filename, std::forward<Args>(args)...);
 		m_instances.insert(std::pair<std::string, std::shared_ptr<Ty>>(filename, ElemPtr));
 		return std::move(ElemPtr);
 	}

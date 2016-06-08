@@ -1,15 +1,11 @@
-#version 140
-
+uniform sampler2D mysampler;
 in vec2 texcoord;
 
-// Ouput data
-out vec4 color;
-
-// Values that stay constant for the whole mesh.
-uniform sampler2D sampler;
-
-void main(){
-
-    // Output color = color of the texture at the specified UV
-    color = texture( sampler, texcoord ) * vec4(1, 1, 1, 1);
-}
+void main (void)  
+{  vec4 color = texture2D(mysampler, texcoord);       
+   
+   if (color.rgb == vec3(1.0,0.0,0.0))
+      discard; 
+   
+   gl_FragColor = color;
+}    
