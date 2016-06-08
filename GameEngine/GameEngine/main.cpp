@@ -210,8 +210,8 @@ int main(int argc, char* args[])
 	sl_light.linear = 0.09f;
 	sl_light.quadratic = 0.032f;
 	sl_light.ambient = glm::vec3(0.0f);
-	sl_light.diffuse = glm::vec3(1.0f, 0.0f, 1.0f);
-	sl_light.specular = glm::vec3(1.0f, 0.0f, 1.0f);
+	sl_light.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	sl_light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	manager.refresh();
 

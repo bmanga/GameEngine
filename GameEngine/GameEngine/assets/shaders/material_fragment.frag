@@ -71,10 +71,12 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 frag_pos, vec3 view_dir)
 
 void main (void)  
 {  
-	vec4 texture_color = texture2D(mysampler, texcoord);   
+	vec4 texture_color = texture2D(mysampler, texcoord);  
+	vec3 view_dir = normalize(view_pos - frag_pos);
+	vec3 norm = vec3(1.0, 1.0, 1.0);
 	
-	//vec3 result = calcSpotLight()
+	vec3 result = calcSpotLight(spot_light, norm, frag_pos, view_dir);
 
 	
-	gl_FragColor = texture_color;
+	gl_FragColor = texture_color * vec4(result, 1);
 }    
