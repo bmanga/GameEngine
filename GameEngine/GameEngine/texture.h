@@ -50,6 +50,7 @@ public:
 	void generateMipmap();
 
 	bool isBound();
+	void bind(unsigned textureSlot);
 	void bind();
 
 	unsigned int getId()
