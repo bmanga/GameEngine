@@ -86,13 +86,17 @@ bool Texture::isBound()
 	return id == bound_id;
 }
 
+void Texture::bind(unsigned textureSlot)
+{
+
+	glActiveTexture(GL_TEXTURE0 + textureSlot);
+	glBindTexture(GL_TEXTURE_2D, id);
+	bound_id = id;
+}
+
 void Texture::bind()
 {
-	if (true)//(!isBound())
-	{
-		glBindTexture(GL_TEXTURE_2D, id);
-		bound_id = id;
-	}
+	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 unsigned char* Texture::loadPixels(const char* path)

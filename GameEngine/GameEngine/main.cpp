@@ -56,11 +56,12 @@ int main(int argc, char* args[])
 
 	house_program.compile();
 	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
+	//light_program.addDefine("USE_TEXTURES", FRAGMENT);
 	light_program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
 	light_program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
 	light_program.compile();
 
-
+	/////////////////////////////// OLD FARMHOUSE //////////////////////////////
 	Lemur::ecs::EntityIndex house(manager.createIndex());
 
 	auto& house_position = manager.addComponent<CPosition>(house);
@@ -70,11 +71,12 @@ int main(int argc, char* args[])
 	house_renderable.mesh = mm.load("Farmhouse.lbm");
 	auto& mat = house_renderable.material = std::make_shared<Lemur::Material>();
 	mat->texture = tm.load("Farmhouse.jpg");
-	house_renderable.material->shader = std::make_shared<ShaderProgram>(house_program);
+	mat->bump_map = tm.load("Farmhouse_bump.jpg");
+	mat->shader = std::make_shared<ShaderProgram>(house_program);
 
 	mat->use_texturing = true;
 
-	/////////////////////////////////// ROW OF 10 MODELS /////////////////////////////////
+	///////////////////////////// ROW OF 10 MODELS /////////////////////////////
 	for (unsigned int i = 1; i < 10; i++)
 	{
 		Lemur::ecs::EntityIndex model(manager.createIndex());
@@ -89,6 +91,7 @@ int main(int argc, char* args[])
 		renderable.material = std::make_shared<Lemur::Material>();
 		renderable.material->shader = std::make_shared<ShaderProgram>(light_program);
 		renderable.material->texture = tm.load("crate.png");
+		renderable.material->use_texturing = false;
 		renderable.material->ambient[0] = 0.24725f;
 		renderable.material->ambient[1] = 0.1995f;
 		renderable.material->ambient[2] = 0.0745f;
@@ -101,7 +104,7 @@ int main(int argc, char* args[])
 		renderable.material->shininess = 0.4f;
 	}
 
-	///////////////////////////////// POINT LIGHT /////////////////////////////////
+	/////////////////////////////// POINT LIGHT ////////////////////////////////
 	Lemur::ecs::EntityIndex point_light(manager.createIndex());
 
 	auto& plight_position(manager.addComponent<CPosition>(point_light));
@@ -123,7 +126,7 @@ int main(int argc, char* args[])
 	light.linear = 0.09f;
 	light.quadratic = 0.032f;
 
-	///////////////////////////////// POINT LIGHT RENDERABLE /////////////////////////////////
+	////////////////////////// POINT LIGHT RENDERABLE //////////////////////////
 	Lemur::ecs::EntityIndex light_renderable(manager.createIndex());
 
 	auto& lr_position = manager.addComponent<CPosition>(light_renderable);
@@ -138,7 +141,7 @@ int main(int argc, char* args[])
 	lr_renderable.material->emissive[2] = 1.0f;
 	lr_renderable.material->shininess = 64.0f;
 
-	///////////////////////////////// SPOT LIGHT /////////////////////////////////
+	//////////////////////////////// SPOT LIGHT ////////////////////////////////
 	Lemur::ecs::EntityIndex spot_light(manager.createIndex());
 
 	auto& sl_position(manager.addComponent<CPosition>(spot_light));

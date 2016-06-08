@@ -105,28 +105,23 @@ void RenderSystem::render(Lemur::Camera camera)
 #if 1
 			if (mat->texture)
 			{
-				glActiveTexture(GL_TEXTURE0);
-				renderable.material->texture->bind();
+				renderable.material->texture->bind(0);
 			}
 			if (mat->bump_map)
 			{
-				glActiveTexture(GL_TEXTURE1);
-				renderable.material->bump_map->bind();
+				renderable.material->bump_map->bind(1);
 			}
 			if (mat->normal_map)
 			{
-				glActiveTexture(GL_TEXTURE2);
-				renderable.material->normal_map->bind();
+				renderable.material->normal_map->bind(2);
 			}
 			if (mat->specular_map)
 			{
-				glActiveTexture(GL_TEXTURE3);
-				renderable.material->specular_map->bind();
+				renderable.material->specular_map->bind(3);
 			}
 			if (mat->mask_map)
 			{
-				glActiveTexture(GL_TEXTURE4);
-				renderable.material->mask_map->bind();
+				renderable.material->mask_map->bind(4);
 			}
 			glActiveTexture(GL_TEXTURE0);
 #endif
