@@ -78,10 +78,12 @@ void RenderSystem::render(Lemur::Camera camera)
 
 		auto& vb = vbs[i];
 		CRenderable renderable = renderables.at(i);
-		ShaderProgram prog = *renderable.material->shader.get();
+		auto prog = renderable.material->shader;
 		CPosition pos = positions.at(i);
 
-		prog.use();
+		assert(prog);
+
+		prog->use();
 
 		glUniform3f("view_pos"_uniform, 
 			camera.getCenter().x, 
@@ -135,15 +137,10 @@ void RenderSystem::render(Lemur::Camera camera)
 		}
 		else
 		{
-			int mat_ambient_uniform = prog.getUniformLocation("material.ambient");
-			int mat_diffuse_uniform = prog.getUniformLocation("material.diffuse");
-			int mat_emissive_uniform = prog.getUniformLocation("material.emissive");
-			int mat_specular_uniform = prog.getUniformLocation("material.specular");
-
-			glUniform3f(mat_ambient_uniform, renderable.material->ambient[0], renderable.material->ambient[1], renderable.material->ambient[2]);
-			glUniform3f(mat_diffuse_uniform, renderable.material->diffuse[0], renderable.material->diffuse[1], renderable.material->diffuse[2]);
-			glUniform3f(mat_emissive_uniform, renderable.material->emissive[0], renderable.material->emissive[1], renderable.material->emissive[2]);
-			glUniform3f(mat_specular_uniform, renderable.material->specular[0], renderable.material->specular[1], renderable.material->specular[2]);
+			glUniform3f("material.ambient"_uniform, renderable.material->ambient[0], renderable.material->ambient[1], renderable.material->ambient[2]);
+			glUniform3f("material.diffuse"_uniform, renderable.material->diffuse[0], renderable.material->diffuse[1], renderable.material->diffuse[2]);
+			glUniform3f("material.emissive"_uniform, renderable.material->emissive[0], renderable.material->emissive[1], renderable.material->emissive[2]);
+			glUniform3f("material.specular"_uniform, renderable.material->specular[0], renderable.material->specular[1], renderable.material->specular[2]);
 		}
 
 		// Point lights
@@ -152,13 +149,13 @@ void RenderSystem::render(Lemur::Camera camera)
 		{
 			std::string i = std::to_string(count++);
 
-			int point_light_position_uniform = prog.getUniformLocation(("point_lights[" + i + "].position").c_str());
-			int point_light_constant_uniform = prog.getUniformLocation(("point_lights[" + i + "].constant").c_str());
-			int point_light_linear_uniform = prog.getUniformLocation(("point_lights[" + i + "].linear").c_str());
-			int point_light_quadratic_uniform = prog.getUniformLocation(("point_lights[" + i + "].quadratic").c_str());
-			int point_light_ambient_uniform = prog.getUniformLocation(("point_lights[" + i + "].ambient").c_str());
-			int point_light_diffuse_uniform = prog.getUniformLocation(("point_lights[" + i + "].diffuse").c_str());
-			int point_light_specular_uniform = prog.getUniformLocation(("point_lights[" + i + "].specular").c_str());
+			int point_light_position_uniform = prog->getUniformLocation(("point_lights[" + i + "].position").c_str());
+			int point_light_constant_uniform = prog->getUniformLocation(("point_lights[" + i + "].constant").c_str());
+			int point_light_linear_uniform = prog->getUniformLocation(("point_lights[" + i + "].linear").c_str());
+			int point_light_quadratic_uniform = prog->getUniformLocation(("point_lights[" + i + "].quadratic").c_str());
+			int point_light_ambient_uniform = prog->getUniformLocation(("point_lights[" + i + "].ambient").c_str());
+			int point_light_diffuse_uniform = prog->getUniformLocation(("point_lights[" + i + "].diffuse").c_str());
+			int point_light_specular_uniform = prog->getUniformLocation(("point_lights[" + i + "].specular").c_str());
 
 			glUniform3f(point_light_position_uniform, position.x, position.y, position.z);
 			glUniform3f(point_light_ambient_uniform, light.ambient.r, light.ambient.g, light.ambient.b);
@@ -172,10 +169,10 @@ void RenderSystem::render(Lemur::Camera camera)
 		// Directional lights
 		manager.forEntitiesMatching<Lemur::SDirLight>([&](auto entity_index, auto& position, auto& dir_light)
 		{
-			int dir_light_direction_uniform = prog.getUniformLocation("dir_light.direction");
-			int dir_light_ambient_uniform = prog.getUniformLocation("dir_light.ambient");
-			int dir_light_diffuse_uniform = prog.getUniformLocation("dir_light.diffuse");
-			int dir_light_specular_uniform = prog.getUniformLocation("dir_light.specular");
+			int dir_light_direction_uniform = prog->getUniformLocation("dir_light.direction");
+			int dir_light_ambient_uniform = prog->getUniformLocation("dir_light.ambient");
+			int dir_light_diffuse_uniform = prog->getUniformLocation("dir_light.diffuse");
+			int dir_light_specular_uniform = prog->getUniformLocation("dir_light.specular");
 
 			glUniform3f(dir_light_direction_uniform, dir_light.direction.x, dir_light.direction.y, dir_light.direction.z);
 			glUniform3f(dir_light_ambient_uniform, dir_light.ambient.r, dir_light.ambient.g, dir_light.ambient.b);
@@ -186,16 +183,16 @@ void RenderSystem::render(Lemur::Camera camera)
 		// Spot lights
 		manager.forEntitiesMatching<Lemur::SSpotLight>([&](auto entity_index, auto& position, auto& spot_light)
 		{
-			int spot_light_position_uniform = prog.getUniformLocation("spot_light.position");
-			int spot_light_direction_uniform = prog.getUniformLocation("spot_light.direction");
-			int spot_light_cut_off_uniform = prog.getUniformLocation("spot_light.cut_off");
-			int spot_light_outer_cut_off_uniform = prog.getUniformLocation("spot_light.outer_cut_off");
-			int spot_light_constant_uniform = prog.getUniformLocation("spot_light.constant");
-			int spot_light_linear_uniform = prog.getUniformLocation("spot_light.linear");
-			int spot_light_quadratic_uniform = prog.getUniformLocation("spot_light.quadratic");
-			int spot_light_ambient_uniform = prog.getUniformLocation("spot_light.ambient");
-			int spot_light_diffuse_uniform = prog.getUniformLocation("spot_light.diffuse");
-			int spot_light_specular_uniform = prog.getUniformLocation("spot_light.specular");
+			int spot_light_position_uniform = prog->getUniformLocation("spot_light.position");
+			int spot_light_direction_uniform = prog->getUniformLocation("spot_light.direction");
+			int spot_light_cut_off_uniform = prog->getUniformLocation("spot_light.cut_off");
+			int spot_light_outer_cut_off_uniform = prog->getUniformLocation("spot_light.outer_cut_off");
+			int spot_light_constant_uniform = prog->getUniformLocation("spot_light.constant");
+			int spot_light_linear_uniform = prog->getUniformLocation("spot_light.linear");
+			int spot_light_quadratic_uniform = prog->getUniformLocation("spot_light.quadratic");
+			int spot_light_ambient_uniform = prog->getUniformLocation("spot_light.ambient");
+			int spot_light_diffuse_uniform = prog->getUniformLocation("spot_light.diffuse");
+			int spot_light_specular_uniform = prog->getUniformLocation("spot_light.specular");
 
 			glUniform3f(spot_light_position_uniform, camera.getCenter().x, camera.getCenter().y, camera.getCenter().z);
 			glUniform3f(spot_light_direction_uniform, camera.getDirection().x, camera.getDirection().y, camera.getDirection().z);

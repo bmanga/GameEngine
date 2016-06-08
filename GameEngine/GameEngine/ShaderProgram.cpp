@@ -35,11 +35,16 @@ ShaderProgram::ShaderProgram(const char* vertex_shader_path,
 	program_id = 0;
 }
 
-std::string ShaderProgram::loadShaderSource(const char* name) const
+std::string ShaderProgram::loadShaderSource (const char* name) const
+{
+	return loadShaderSource(Lemur::SHADER_PATH / name);
+}
+
+std::string ShaderProgram::loadShaderSource(Lemur::fs::path name) const
 {
 	using namespace std;
 
-	ifstream shader_code(Lemur::SHADER_PATH / name, ios::in | ios::binary);
+	ifstream shader_code( name, ios::in | ios::binary);
 
 	if (!shader_code)
 	{
@@ -115,7 +120,6 @@ bool ShaderProgram::compile()
 
 	if (!compileShader(vertex_shader_id))
 	{
-		printLog();
 		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
 			Lemur::cstr("Unable to compile vertex shader",
 				" [ID: ", vertex_shader_id, "]"));
@@ -152,7 +156,7 @@ bool ShaderProgram::compileShader(unsigned int shader_id) const
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compiled);
 	if (!compiled)
 	{
-		printLog();
+		printLog(shader_id);
 		success = false;
 	}
 
@@ -169,7 +173,7 @@ bool ShaderProgram::linkProgram() const
 	if (success != GL_TRUE)
 	{
 		//printf("Error linking shader program with \'%s\' and \'%s\' [ID: %d]:\n", vertex_shader->getPath(), fragment_shader->getPath(), id);
-		printLog();
+		//printLog();
 		return false;
 	}
 
@@ -221,7 +225,7 @@ void ShaderProgram::use() const
 	using_id = program_id;
 }
 
-void ShaderProgram::printLog() const
+void ShaderProgram::printLog(int shader_id) const
 {
 	//Make sure name is shader
 	if (glIsProgram(program_id))
@@ -231,13 +235,13 @@ void ShaderProgram::printLog() const
 		int max_length = info_log_length;
 
 		//Get info string length
-		glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &max_length);
+		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &max_length);
 
 		//Allocate string
 		char* info_log = new char[max_length];
 
 		//Get info log
-		glGetProgramInfoLog(program_id, max_length, &info_log_length, info_log);
+		glGetShaderInfoLog(shader_id, max_length, &info_log_length, info_log);
 		if (info_log_length > 0)
 		{
 			//Print Log

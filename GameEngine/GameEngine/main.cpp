@@ -32,6 +32,42 @@ Lemur::Camera g_camera;
 
 namespace lm = Lemur::math;
 
+class ShaderReloader
+{
+public:
+	ShaderReloader(ShaderProgram* prog, Lemur::fs::path vert, Lemur::fs::path frag):
+		prog(prog), vert(Lemur::SHADER_PATH/vert), frag(Lemur::SHADER_PATH/frag)
+	{
+		vert_time = Lemur::fs::last_write_time(this->vert);
+		frag_time = Lemur::fs::last_write_time(this->frag);
+	}
+
+	void check()
+	{
+		auto new_vert_time = Lemur::fs::last_write_time(vert);
+		auto new_frag_time = Lemur::fs::last_write_time(frag);
+
+		bool update = false;
+		if (new_vert_time != vert_time)
+		{
+			vert_time = new_vert_time;
+			update = true;
+		}
+		if (new_frag_time != frag_time)
+		{
+			frag_time = new_frag_time;
+			update = true;
+		}
+		if (update)
+		{
+			prog->recompile(vert, frag);
+		}
+	}
+private:
+	ShaderProgram* prog;
+	Lemur::fs::path vert, frag;
+	Lemur::fs::file_time_type vert_time, frag_time;
+};
 
 int main(int argc, char* args[])
 {
@@ -51,6 +87,9 @@ int main(int argc, char* args[])
 
 	ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
 	ShaderProgram light_program("new_shader_vert.vert", "new_shader_frag.frag");
+	ShaderReloader shaderReloader(&house_program, 
+		"material_vertex.vert", 
+		"material_fragment.frag");
 	//ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
 	//house_program.addDefine("USE_TEXTURES", FRAGMENT);
 
@@ -71,10 +110,22 @@ int main(int argc, char* args[])
 	house_renderable.mesh = mm.load("Farmhouse.lbm");
 	auto& mat = house_renderable.material = std::make_shared<Lemur::Material>();
 	mat->texture = tm.load("Farmhouse.jpg");
-	mat->bump_map = tm.load("Farmhouse_bump.jpg");
+	//mat->bump_map = tm.load("Farmhouse_bump.jpg");
 	mat->shader = std::make_shared<ShaderProgram>(house_program);
-
 	mat->use_texturing = true;
+
+	//////////////////////////// SNOW COTTAGE //////////////////////////////////
+	Lemur::ecs::EntityIndex cottage(manager.createIndex());
+
+	auto& cottage_position = manager.addComponent<CPosition>(cottage);
+	cottage_position = { 30, 0, 0 };
+
+	auto& cottage_renderable = manager.addComponent<CRenderable>(cottage);
+	cottage_renderable.mesh = mm.load("SnowCottage.lbm");
+	auto& cmat = cottage_renderable.material = std::make_shared<Lemur::Material>();
+	cmat->texture = tm.load("SnowCottage.jpg");
+	cmat->shader = mat->shader;
+	cmat->use_texturing = true;
 
 	///////////////////////////// ROW OF 10 MODELS /////////////////////////////
 	for (unsigned int i = 1; i < 10; i++)
@@ -202,6 +253,7 @@ int main(int argc, char* args[])
 
 			textEngine.addText(Lemur::str("fps: ",fps.fps()), pen);
 			t.reset();
+			shaderReloader.check();
 		}
 		while (SDL_PollEvent(&e) != 0)
 		{
@@ -302,7 +354,7 @@ bool init()
 				}
 
 				// Use VSync
-				if (SDL_GL_SetSwapInterval(1) < 0)
+				if (SDL_GL_SetSwapInterval(0) < 0)
 				{
 					printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 				}

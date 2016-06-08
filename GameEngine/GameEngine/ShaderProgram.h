@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "FilePaths.h"
 
 enum ShaderType
 {
@@ -24,11 +25,12 @@ private:
 	std::string fragment_source;
 
 	std::string loadShaderSource(const char* name) const;
+	std::string loadShaderSource(Lemur::fs::path name) const;
 	bool compileShader(unsigned int shader_id) const;
 
 	bool linkProgram() const;
 
-	void printLog() const;
+	void printLog(int shader_id) const;
 
 public:
 	ShaderProgram(const char* vertex_shader_path, const char* fragment_shader_path);
@@ -42,6 +44,23 @@ public:
 
 	bool isUsing() const;
 	void use() const;
+
+	bool recompile(Lemur::fs::path vert, Lemur::fs::path frag)
+	{
+		if (!vertex_shader_id || !fragment_shader_id)
+			return false;
+
+		glDeleteShader(vertex_shader_id);
+		glDeleteShader(fragment_shader_id);
+		glDeleteProgram(program_id);
+
+		vertex_shader_id = glCreateShader(VERTEX);
+		fragment_shader_id = glCreateShader(FRAGMENT);
+
+		vertex_source = loadShaderSource(vert);
+		fragment_source = loadShaderSource(frag);
+		return compile();
+	}
 
 	void setUniform1i(const char* name, int v0) const
 	{
