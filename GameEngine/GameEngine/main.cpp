@@ -49,12 +49,14 @@ int main(int argc, char* args[])
 	// Hides the cursor
 	SDL_ShowCursor(SDL_FALSE);
 
-	ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
+	//ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
 	ShaderProgram light_program("new_shader_vert.vert", "new_shader_frag.frag");
-	//ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
-	//house_program.addDefine("USE_TEXTURES", FRAGMENT);
-
+	ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
+	house_program.addDefine("USE_TEXTURES", FRAGMENT);
+	house_program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
+	house_program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
 	house_program.compile();
+
 	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
 	light_program.addDefine("NUM_POINT_LIGHTS", "1", FRAGMENT);
 	light_program.addDefine("NUM_SPOT_LIGHTS", "1", FRAGMENT);
@@ -70,6 +72,7 @@ int main(int argc, char* args[])
 	house_renderable.mesh = mm.load("Farmhouse.lbm");
 	auto& mat = house_renderable.material = std::make_shared<Lemur::Material>();
 	mat->texture = tm.load("Farmhouse.jpg");
+	mat->use_texturing = true;
 	house_renderable.material->shader = std::make_shared<ShaderProgram>(house_program);
 
 	mat->use_texturing = true;
