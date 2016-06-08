@@ -69,6 +69,8 @@ private:
 	Lemur::fs::file_time_type vert_time, frag_time;
 };
 
+bool active_mouse = true;
+
 int main(int argc, char* args[])
 {
 	init();
@@ -269,18 +271,13 @@ int main(int argc, char* args[])
 			// Handle keypress with current mouse position
 			else if (e.type == SDL_TEXTINPUT)
 			{
-				if(e.text.text == "Escape")
-				{
-					quit = true;
-					break;
-				}
 				int x = 0;
 				int y = 0;
 				SDL_GetMouseState(&x, &y);
 				handleKeys(e.text.text[0], x, y);
 			}
 
-			else if (e.type == SDL_MOUSEMOTION)
+			else if (e.type == SDL_MOUSEMOTION && active_mouse)
 			{
 				int x, y;
 				SDL_GetMouseState(&x, &y);
@@ -371,31 +368,32 @@ void handleKeys(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-	{
 		g_camera.translateLocalZ(0.3f);
 		break;
-	}
+
 	case 's':
-	{
 		g_camera.translateLocalZ(-0.3f);
 		break;
-	}
+
 	case 'a':
-	{
 		g_camera.translateLocalX(-0.3f);
 		break;
-	}
+
 	case 'd':
-	{
 		g_camera.translateLocalX(0.3f);
 		break;
-	}
 
 	case 'r':
 		g_camera.rotateLocalZ(3.14f);
 		break;
+
 	case 'f':
 		g_camera.rotateLocalZ(-3.14f);
+		break;
+
+	case 'l':
+		SDL_ShowCursor(active_mouse);
+		active_mouse = !active_mouse;
 	}
 }
 
