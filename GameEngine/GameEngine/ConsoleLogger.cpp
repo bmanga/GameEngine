@@ -74,7 +74,9 @@ std::string Lemur::filter_filename_location(std::string file)
 
 void Lemur::ConsoleLogger::Debug(const char* origin, const char* message)
 {
+#ifndef NDEBUG
 	Log(origin, message, "DEBUG", Color::CYAN);
+#endif
 }
 
 void Lemur::ConsoleLogger::Info(const char* origin, const char* message)
@@ -111,7 +113,7 @@ void Lemur::ConsoleLogger::Log(const char* origin, const char* message,
 	cout << std::left
 		<< setw(8) << type
 		<< setw(22) << return_current_time_and_date()
-		<< setw(20) << origin
+		<< setw(25) << origin
 		<< setw(30) << message
 		<< std::endl << std::right;
 

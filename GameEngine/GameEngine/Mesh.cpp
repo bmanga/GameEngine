@@ -29,7 +29,6 @@ void Mesh::loadFromFile(const char* filename)
 
 	BinaryFile.read(m_vertex_buffer.get(), m_vertex_buffer_size);
 	BinaryFile.read((char*)m_index_buffer.get(), m_index_buffer_size);
-	std::cout << m_index_buffer[33];
 	BinaryFile.read(reinterpret_cast<char*>(&m_buffers_info),
 		sizeof(MeshBufferHeader));
 	BinaryFile.close();

@@ -15,6 +15,8 @@
 #include "SceneManager.h"
 #include "TextEngine.h"
 
+using namespace Lemur;
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -51,16 +53,20 @@ public:
 		if (new_vert_time != vert_time)
 		{
 			vert_time = new_vert_time;
-			update = true;
+			auto* shader = prog->getShader(VERTEX);
+			shader->upload();
+			update = shader->compile();
 		}
 		if (new_frag_time != frag_time)
 		{
 			frag_time = new_frag_time;
-			update = true;
+			auto* shader = prog->getShader(FRAGMENT);
+			shader->upload();
+			update = shader->compile();
 		}
 		if (update)
 		{
-			prog->recompile(vert, frag);
+			prog->linkProgram();
 		}
 	}
 private:
@@ -94,7 +100,6 @@ int main(int argc, char* args[])
 		"material_fragment.frag");
 	//ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
 	//house_program.addDefine("USE_TEXTURES", FRAGMENT);
-
 	house_program.compile();
 	//program.addDefine("NUM_DIR_LIGHTS", "1", FRAGMENT);
 	//light_program.addDefine("USE_TEXTURES", FRAGMENT);
@@ -205,7 +210,7 @@ int main(int argc, char* args[])
 	auto& sl_light(manager.addComponent<CSpotLight>(spot_light));
 	sl_light.direction = g_camera.getDirection();
 	sl_light.cut_off = glm::cos(glm::radians(12.5f)); // Must be cosine value - prevents expensive arccos calculation in fragment shader.
-	sl_light.outer_cut_off = lm::cos(lm::radians(15.0f)); // Must be cosine value - prevents expensive arccos calculation in fragment shader.
+	sl_light.outer_cut_off = glm::cos(glm::radians(15.0f)); // Must be cosine value - prevents expensive arccos calculation in fragment shader.
 	sl_light.constant = 1.0f;
 	sl_light.linear = 0.09f;
 	sl_light.quadratic = 0.032f;
@@ -215,8 +220,8 @@ int main(int argc, char* args[])
 
 	manager.refresh();
 
-	SceneManager scene_manager;
-	scene_manager.root.updateAll();
+	//SceneManager scene_manager;
+	//scene_manager.root.updateAll();
 
 	RenderSystem render_system(manager);
 

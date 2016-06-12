@@ -65,7 +65,7 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 frag_pos, vec3 view_dir)
 	diffuse *= attenuation * intensity;
 	specular *= attenuation * intensity;
 
-	return (ambient + diffuse + specular);
+	return (ambient + diffuse + specular); 
 }
 
 
@@ -78,5 +78,5 @@ void main (void)
 	vec3 result = calcSpotLight(spot_light, norm, frag_pos, view_dir);
 
 	
-	gl_FragColor = texture_color * vec4(result, 1);
+	gl_FragColor = texture_color.rgba * vec4(result, 1); 
 }    

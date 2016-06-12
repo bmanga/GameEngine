@@ -7,7 +7,7 @@
 
 #include "ShaderProgram.h"
 
-const std::string ShaderProgram::RESERVED[14]= {
+const std::string Lemur::ShaderProgram::RESERVED[14]= {
 	"ModelView",
 	"ModelViewI",
 	"ModelViewT",
@@ -24,171 +24,218 @@ const std::string ShaderProgram::RESERVED[14]= {
 	"TimeInMilliseconds"
 };
 
-
-ShaderProgram::ShaderProgram(const char* vertex_shader_path, 
-	const char* fragment_shader_path) 
+void Lemur::ShaderPreprocessor::addDefine(const char* name, const char* value)
 {
-	vertex_source = loadShaderSource(vertex_shader_path);
-	fragment_source = loadShaderSource(fragment_shader_path);
-	vertex_shader_id = glCreateShader(VERTEX);
-	fragment_shader_id = glCreateShader(FRAGMENT);
-	program_id = 0;
+	auto define = str("#define ", name, " ", value, "\n");
+	defines += define;
 }
 
-std::string ShaderProgram::loadShaderSource (const char* name) const
+void Lemur::ShaderPreprocessor::process(std::string& source) const
 {
-	return loadShaderSource(Lemur::SHADER_PATH / name);
+	//Add defines
+	if (defines.size())
+	{
+		auto definePos = source.find("#version");
+		if (definePos == source.npos)
+		{
+			definePos = 0;
+		}
+		else
+		{
+			definePos = source.find_first_of('\n', definePos) + 1;
+		}
+
+		source.insert(definePos, defines);
+	}
 }
 
-std::string ShaderProgram::loadShaderSource(Lemur::fs::path name) const
+Lemur::Shader::Shader(ShaderType type, fs::path shader): type(type), path(shader)
+{
+	id = glCreateShader(type);
+}
+
+Lemur::Shader::Shader(ShaderType type, const char* name):
+	Shader(type, SHADER_PATH / name)
+{
+}
+
+Lemur::Shader::~Shader()
+{
+	glDeleteShader(id);
+}
+
+GLuint Lemur::Shader::getId() const
+{
+	return id;
+}
+
+Lemur::ShaderPreprocessor* Lemur::Shader::getPreprocessor()
+{
+	return &preprocessor;
+}
+
+void Lemur::Shader::upload(bool preprocess)
+{
+	loadSource();
+
+	if (preprocess)
+		preprocessor.process(source);
+
+	const char* sourcePtr = source.c_str();
+	glShaderSource(id, 1, &sourcePtr, nullptr);
+}
+
+bool Lemur::Shader::compile() const
+{
+	glCompileShader(id);
+
+	int compiled = false;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
+	if (!compiled)
+	{
+		ConsoleLogger::Error(CODE_LOCATION,
+		                                  cstr("Unable to compile shader ", path.filename()));
+
+		printInfoLog();
+		return false;
+	}
+
+	ConsoleLogger::Debug(CODE_LOCATION, cstr("Shader ", path.filename(),
+	                                         " successfully compiled"));
+	return true;
+}
+
+void Lemur::Shader::printInfoLog() const
+{
+	int length = 0;
+	int maxLength = length;
+
+	//get info string length
+	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &maxLength);
+
+	//Create a string
+	char* log = new char[maxLength];
+
+	//Get info log
+	glGetShaderInfoLog(id, maxLength, &length, log);
+
+	if (length)
+	{
+		ConsoleLogger::Error("GPU Compiler", log);
+	}
+
+	delete[] log;
+}
+
+bool Lemur::Shader::loadSource()
 {
 	using namespace std;
 
-	ifstream shader_code( name, ios::in | ios::binary);
+	ifstream shader(path, ios::in, ios::binary);
 
-	if (!shader_code)
+	if (!shader)
 	{
-		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
-			Lemur::cstr("Shader ", name, " not found"));
-		return "";
+		ConsoleLogger::Error(CODE_LOCATION, cstr("Shader ", path.filename(),
+		                                         " not found"));
+		return false;
 	}
 
 	// Get file size
-	shader_code.seekg(0, ios::end);
-	int32_t length = static_cast<uint32_t>(shader_code.tellg());
-	shader_code.seekg(0, ios::beg);
+	shader.seekg(0, ios::end);
+	int32_t length = static_cast<uint32_t>(shader.tellg());
+	shader.seekg(0, ios::beg);
 
-	char* buffer = new char[length + 1];
-	buffer[length] = '\0';
-	shader_code.read(buffer, length);
-	shader_code.close();
+	//read in the source into the string
+	source.clear();
+	source.resize(length + 1);
+	shader.read(&source[0], length);
+	shader.close();
 
-	std::string source(buffer);
-	delete[] buffer;
-
-	return source;
+	return true;
 }
 
-void ShaderProgram::addDefine(const char* name, 
+Lemur::ShaderProgram::ShaderProgram(const char* vertexShader, 
+	const char* fragmentShader) : 
+	vertexShader(VERTEX, vertexShader),
+	fragmentShader(FRAGMENT, fragmentShader)
+
+{
+	id = glCreateProgram();
+	glAttachShader(id, this->vertexShader.getId());
+	glAttachShader(id, this->fragmentShader.getId());
+}
+
+Lemur::ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(id);
+}
+
+Lemur::Shader* Lemur::ShaderProgram::getShader(ShaderType type)
+{
+	return type == VERTEX ? &vertexShader : &fragmentShader;
+}
+
+void Lemur::ShaderProgram::addDefine(const char* name, 
 	const char* value, 
 	ShaderType type)
 {
-	auto statement = Lemur::str("#define ", name, " ", value, "\r\n");
+	ShaderPreprocessor* prep = (type == VERTEX)
+		? vertexShader.getPreprocessor()
+		: fragmentShader.getPreprocessor();
 
-	switch (type)
-	{
-	case VERTEX:
-	{
-		std::size_t pos = vertex_source.find("#ifdef");
-		if (pos != std::string::npos)
-		{
-			vertex_source.insert(pos, statement);
-		}
-	}
-	break;
-	case FRAGMENT:
-	{
-		std::size_t pos = fragment_source.find("#ifdef");
-		if (pos != std::string::npos)
-		{
-			fragment_source.insert(pos, statement);
-		}
-	}
-	break;
-	}
+	prep->addDefine(name, value);
 }
 
-void ShaderProgram::addDefine(const char* name, ShaderType type)
+void Lemur::ShaderProgram::addDefine(const char* name, ShaderType type)
 {
 	addDefine(name, "", type);
 }
 
-bool ShaderProgram::compile()
+bool Lemur::ShaderProgram::compile()
 {
-	program_id = glCreateProgram();
+	vertexShader.upload();
+	fragmentShader.upload();
 
+	bool shadersCompiled = true;
+	
+	shadersCompiled &= vertexShader.compile();
+	shadersCompiled &= fragmentShader.compile();
 
-	glAttachShader(program_id, vertex_shader_id);
-	glAttachShader(program_id, fragment_shader_id);
+	if (shadersCompiled && linkProgram())
+		return true;
 
-
-	const char* vertex_ptr = vertex_source.c_str();
-	const char* fragment_ptr = fragment_source.c_str();
-
-	glShaderSource(vertex_shader_id, 1, &vertex_ptr, NULL);
-	glShaderSource(fragment_shader_id, 1, &fragment_ptr, NULL);
-
-	if (!compileShader(vertex_shader_id))
-	{
-		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
-			Lemur::cstr("Unable to compile vertex shader",
-				" [ID: ", vertex_shader_id, "]"));
-		return false;
-	}
-	if (!compileShader(fragment_shader_id))
-	{
-		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
-			Lemur::cstr("Unable to compile fragment shader", 
-				" [ID: ", fragment_shader_id, "]"));
-		return false;
-	}
-
-
-
-	if (!linkProgram())
-	{
-		Lemur::ConsoleLogger::Error(CODE_LOCATION, 
-			Lemur::cstr("Error linking shader program with [ID: ",
-				program_id, "]"));
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
-bool ShaderProgram::compileShader(unsigned int shader_id) const
+
+bool Lemur::ShaderProgram::linkProgram() const
 {
-	bool success = true;
-
-	glCompileShader(shader_id);
-
-	int compiled = false;
-	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compiled);
-	if (!compiled)
-	{
-		printLog(shader_id);
-		success = false;
-	}
-
-	return success;
-}
-
-bool ShaderProgram::linkProgram() const
-{
-	glLinkProgram(program_id);
+	glLinkProgram(id);
 
 	//Check for errors
 	int success;
-	glGetProgramiv(program_id, GL_LINK_STATUS, &success);
+	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE)
 	{
-		//printf("Error linking shader program with \'%s\' and \'%s\' [ID: %d]:\n", vertex_shader->getPath(), fragment_shader->getPath(), id);
-		//printLog();
+		ConsoleLogger::Error(CODE_LOCATION, cstr("Failed to link program with id ",
+			id));
 		return false;
 	}
 
+	ConsoleLogger::Debug(CODE_LOCATION, cstr("Successfully linked program with "
+		"id ", id));
 	return true;
 }
 
-int ShaderProgram::getAttribLocation(const char* name) const
+int Lemur::ShaderProgram::getAttribLocation(const char* name) const
 {
 	if (!isUsing())
 	{
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get attribute location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get attribute location from non-bound shader program. Program ", id, " was bound."));
 	}
 
-	int location = glGetAttribLocation(program_id, name);
+	int location = glGetAttribLocation(id, name);
 	if (location == -1)
 	{
 		//Lemur::ConsoleLogger::Debug(CODE_LOCATION, CSTR2(name, " is not a valid GLSL program attribute!"));
@@ -197,67 +244,37 @@ int ShaderProgram::getAttribLocation(const char* name) const
 	return location;
 }
 
-int ShaderProgram::getUniformLocation(const char* name) const
+int Lemur::ShaderProgram::getUniformLocation(const char* name) const
 {
 	if (!isUsing())
 	{
+		//TODO(bmanga): revert to previously active program afterwards
 		use();
-		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get uniform location from non-bound shader program. Program ", program_id, " was bound."));
+		Lemur::ConsoleLogger::Warning(CODE_LOCATION, Lemur::cstr("Attempted to get uniform location from non-bound shader program. Program ", id, " was bound."));
 	}
 
-	int location = glGetUniformLocation(program_id, name);
+	int location = glGetUniformLocation(id, name);
+	
 	if (location == -1)
 	{
-		//Lemur::ConsoleLogger::Debug(CODE_LOCATION, CSTR2(name, " is not a valid GLSL program uniform!"));
+		//Lemur::ConsoleLogger::Debug(CODE_LOCATION, cstr(name, " is not a valid GLSL program uniform!"));
 	}
 
 	return location;
 }
 
-bool ShaderProgram::isUsing() const
+bool Lemur::ShaderProgram::isUsing() const
 {
-	return program_id == using_id;
+	return id == activeId;
 }
 
-void ShaderProgram::use() const
+void Lemur::ShaderProgram::use() const
 {
-	glUseProgram(program_id);
-	using_id = program_id;
+	glUseProgram(id);
+	activeId = id;
 }
 
-void ShaderProgram::printLog(int shader_id) const
-{
-	//Make sure name is shader
-	if (glIsProgram(program_id))
-	{
-		//Program log length
-		int info_log_length = 0;
-		int max_length = info_log_length;
-
-		//Get info string length
-		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &max_length);
-
-		//Allocate string
-		char* info_log = new char[max_length];
-
-		//Get info log
-		glGetShaderInfoLog(shader_id, max_length, &info_log_length, info_log);
-		if (info_log_length > 0)
-		{
-			//Print Log
-			printf("%s\n", info_log);
-		}
-
-		//Deallocate string
-		delete[] info_log;
-	}
-	else
-	{
-		printf("Name %d is not a program\n", program_id);
-	}
-}
-
-const std::string* ShaderProgram::getParameters()
+const std::string* Lemur::ShaderProgram::getParameters()
 {
 	return RESERVED;
 }
@@ -271,4 +288,4 @@ int Lemur::operator ""_uniform(const char* name, std::size_t)
 }
 
 
-unsigned int ShaderProgram::using_id = 0;
+unsigned int Lemur::ShaderProgram::activeId = 0;
