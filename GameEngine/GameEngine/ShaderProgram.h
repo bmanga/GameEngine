@@ -1,10 +1,9 @@
 #pragma once
 
 #include <string>
-#include "FilePaths.h"
-#include "ConsoleLogger.h"
 #include <fstream>
-#include "Lemur.h"
+#include "FilePaths.h"
+#include <unordered_map>
 
 namespace Lemur {
 
@@ -18,10 +17,17 @@ class ShaderPreprocessor
 {
 private:
 	std::string defines;
+	Lemur::fs::path filePath;
 
+	static bool processNextInclude(std::string& source);
+	void processDefines(std::string& source) const;
 public:
+	explicit ShaderPreprocessor(Lemur::fs::path filePath);
 	void addDefine(const char* name, const char* value);
-	void process(std::string& source) const;
+	fs::path sourceFilename() const;
+	const fs::path& sourceFilepath() const { return filePath;  }
+	
+	std::string process() const;
 };
 
 class Shader
@@ -34,16 +40,14 @@ public:
 	GLuint getId() const;
 	ShaderPreprocessor* getPreprocessor();
 
-	void upload(bool preprocess = true);
+	void upload() const;
 	bool compile() const;
 	void printInfoLog() const;
-	bool loadSource();
+
 
 private:
 	GLuint id = 0;
 	ShaderType type;
-	fs::path path;
-	std::string source;
 	ShaderPreprocessor preprocessor;
 };
 

@@ -18,6 +18,9 @@
     <Filter Include="Source Files\Freetype-gl">
       <UniqueIdentifier>{7a01044a-1a6b-40fd-ad37-007d9f7d4bd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{d6ed5c55-f0e2-4486-bc92-4564eb469973}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -68,6 +71,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="ShaderInclude.inc">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">

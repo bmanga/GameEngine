@@ -4,7 +4,6 @@
 #include "FilePaths.h"
 #include "ConsoleLogger.h"
 #include "Lemur.h"
-
 #include "ShaderProgram.h"
 
 const std::string Lemur::ShaderProgram::RESERVED[14]= {
@@ -24,32 +23,117 @@ const std::string Lemur::ShaderProgram::RESERVED[14]= {
 	"TimeInMilliseconds"
 };
 
+namespace {
+Lemur::fs::path ParseShaderIncludeFile(
+	std::string::const_iterator begin,
+	std::string::const_iterator end)
+{
+	Lemur::fs::path file;
+
+	if (*begin == '<' && *end == '>')
+		file /= Lemur::SHADER_INCLUDE_PATH;
+	else if (*begin == '"' && *end == '"')
+		file /= Lemur::SHADER_PATH;
+	else
+		return file;
+
+	return file / std::string(begin + 1, end);
+}
+} //namespace
+
+//Returns true until there are no more includes to parse. If an include is not
+//valid, it is removed (but still returns true)
+bool Lemur::ShaderPreprocessor::processNextInclude(std::string& source)
+{
+	auto includePos = source.find("#include");
+
+	if (includePos == source.npos)
+		return false;
+
+	auto endIncludePos = source.find('\n', includePos);
+
+	auto includeItr = source.begin() + includePos + 8;
+	//remove whitespaces to make parsing easier
+	auto endIncludeItr = std::remove(source.begin() + includePos,
+		source.begin() + endIncludePos, ' ') - 1;
+
+	auto filePath = ParseShaderIncludeFile(includeItr, endIncludeItr);
+	
+	std::ifstream includeSource(filePath, std::ios::in | std::ios::binary);
+
+	if (!includeSource)
+	{
+		auto line = std::count(source.begin(), includeItr, '\n') + 1;
+
+		//if filepath is empty, it is a parse error
+		if (filePath.empty())
+			Lemur::ConsoleLogger::Error(CODE_LOCATION, Lemur::cstr(
+				"In file ", filePath.filename(), 
+				": \n\tParse error for shader include on line ", line));
+		//Otherwise, the file is missing
+		else
+			Lemur::ConsoleLogger::Error(CODE_LOCATION, Lemur::cstr(
+				"In file ", filePath.filename(), ": \n\tShader include file ", 
+				filePath.filename(), " on line ", line, " not found"));
+		
+		source.replace(includePos, endIncludePos - includePos, "");
+		return true;
+	}
+
+	source.replace(includePos, endIncludePos - includePos,
+		std::string(std::istreambuf_iterator<char>(includeSource), {}));
+
+	return true;
+}
+
 void Lemur::ShaderPreprocessor::addDefine(const char* name, const char* value)
 {
 	auto define = str("#define ", name, " ", value, "\n");
 	defines += define;
 }
 
-void Lemur::ShaderPreprocessor::process(std::string& source) const
+void Lemur::ShaderPreprocessor::processDefines(std::string& source) const
 {
-	//Add defines
 	if (defines.size())
 	{
 		auto definePos = source.find("#version");
-		if (definePos == source.npos)
-		{
-			definePos = 0;
-		}
-		else
-		{
-			definePos = source.find_first_of('\n', definePos) + 1;
-		}
 
+		if (definePos == source.npos)
+			definePos = 0;
+		else
+			definePos = source.find_first_of('\n', definePos) + 1;
+		
 		source.insert(definePos, defines);
 	}
 }
 
-Lemur::Shader::Shader(ShaderType type, fs::path shader): type(type), path(shader)
+Lemur::ShaderPreprocessor::ShaderPreprocessor(Lemur::fs::path filePath): 
+	filePath(std::move(filePath))
+{
+}
+
+Lemur::fs::path Lemur::ShaderPreprocessor::sourceFilename() const
+{
+	return filePath.filename();
+}
+
+std::string Lemur::ShaderPreprocessor::process() const
+{
+	//load shader source
+	std::ifstream sourceFile(filePath);
+	std::string source(std::istreambuf_iterator<char>(sourceFile), {});
+	
+	//Add defines
+	processDefines(source);
+
+	//Replace Includes
+	while (processNextInclude(source));
+
+	return source;
+}
+
+Lemur::Shader::Shader(ShaderType type, fs::path shader): type(type), 
+	preprocessor(shader)
 {
 	id = glCreateShader(type);
 }
@@ -74,13 +158,9 @@ Lemur::ShaderPreprocessor* Lemur::Shader::getPreprocessor()
 	return &preprocessor;
 }
 
-void Lemur::Shader::upload(bool preprocess)
+void Lemur::Shader::upload() const
 {
-	loadSource();
-
-	if (preprocess)
-		preprocessor.process(source);
-
+	std::string source = preprocessor.process();
 	const char* sourcePtr = source.c_str();
 	glShaderSource(id, 1, &sourcePtr, nullptr);
 }
@@ -94,14 +174,14 @@ bool Lemur::Shader::compile() const
 	if (!compiled)
 	{
 		ConsoleLogger::Error(CODE_LOCATION,
-		                                  cstr("Unable to compile shader ", path.filename()));
+			cstr("Unable to compile shader ", preprocessor.sourceFilename()));
 
 		printInfoLog();
 		return false;
 	}
 
-	ConsoleLogger::Debug(CODE_LOCATION, cstr("Shader ", path.filename(),
-	                                         " successfully compiled"));
+	ConsoleLogger::Debug(CODE_LOCATION, cstr("Shader ", preprocessor.sourceFilename(),
+		" successfully compiled"));
 	return true;
 }
 
@@ -127,32 +207,6 @@ void Lemur::Shader::printInfoLog() const
 	delete[] log;
 }
 
-bool Lemur::Shader::loadSource()
-{
-	using namespace std;
-
-	ifstream shader(path, ios::in, ios::binary);
-
-	if (!shader)
-	{
-		ConsoleLogger::Error(CODE_LOCATION, cstr("Shader ", path.filename(),
-		                                         " not found"));
-		return false;
-	}
-
-	// Get file size
-	shader.seekg(0, ios::end);
-	int32_t length = static_cast<uint32_t>(shader.tellg());
-	shader.seekg(0, ios::beg);
-
-	//read in the source into the string
-	source.clear();
-	source.resize(length + 1);
-	shader.read(&source[0], length);
-	shader.close();
-
-	return true;
-}
 
 Lemur::ShaderProgram::ShaderProgram(const char* vertexShader, 
 	const char* fragmentShader) : 

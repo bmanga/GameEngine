@@ -37,17 +37,22 @@ namespace lm = Lemur::math;
 class ShaderReloader
 {
 public:
-	ShaderReloader(ShaderProgram* prog, Lemur::fs::path vert, Lemur::fs::path frag):
-		prog(prog), vert(Lemur::SHADER_PATH/vert), frag(Lemur::SHADER_PATH/frag)
+	ShaderReloader(ShaderProgram* prog):
+		prog(prog)
 	{
-		vert_time = Lemur::fs::last_write_time(this->vert);
-		frag_time = Lemur::fs::last_write_time(this->frag);
+		vert = 
+			&(prog->getShader(VERTEX)->getPreprocessor()->sourceFilepath());
+		frag =
+			&(prog->getShader(FRAGMENT)->getPreprocessor()->sourceFilepath());
+
+		vert_time = Lemur::fs::last_write_time(*vert);
+		frag_time = Lemur::fs::last_write_time(*frag);
 	}
 
 	void check()
 	{
-		auto new_vert_time = Lemur::fs::last_write_time(vert);
-		auto new_frag_time = Lemur::fs::last_write_time(frag);
+		auto new_vert_time = Lemur::fs::last_write_time(*vert);
+		auto new_frag_time = Lemur::fs::last_write_time(*frag);
 
 		bool update = false;
 		if (new_vert_time != vert_time)
@@ -71,7 +76,7 @@ public:
 	}
 private:
 	ShaderProgram* prog;
-	Lemur::fs::path vert, frag;
+	const Lemur::fs::path *vert, *frag;
 	Lemur::fs::file_time_type vert_time, frag_time;
 };
 
@@ -95,9 +100,7 @@ int main(int argc, char* args[])
 
 	ShaderProgram house_program("material_vertex.vert", "material_fragment.frag");
 	ShaderProgram light_program("new_shader_vert.vert", "new_shader_frag.frag");
-	ShaderReloader shaderReloader(&house_program, 
-		"material_vertex.vert", 
-		"material_fragment.frag");
+	ShaderReloader shaderReloader(&house_program);
 	//ShaderProgram house_program("new_shader_vert.vert", "new_shader_frag.frag");
 	//house_program.addDefine("USE_TEXTURES", FRAGMENT);
 	house_program.compile();
